@@ -30,20 +30,23 @@ import torch.nn.functional as F
 import collections
 import copy
 from torch_geometric.nn import SGConv
-import os 
+import os
 import torch_geometric.transforms as T
 import os
 import re
 from torch_geometric.data import Data
 from torch_geometric.datasets import Amazon
 import warnings
+
 warnings.simplefilter(action='ignore', category=Warning)
 import itertools
+
 
 class SGCNet(nn.Module):
     """
     Simple Graph Convolutional Network model
     """
+
     def __init__(self, num_features, num_classes, seed=0):
         super(SGCNet, self).__init__()
         torch.manual_seed(seed)  # Set the seed for CPU
@@ -76,7 +79,7 @@ class SGCNet(nn.Module):
         input_data = dataset.to(self.device)
         model.eval()
         _, pred = model(input_data).max(dim=1)
-        correct = float (pred[input_data.test_mask].eq(input_data.y[input_data.test_mask]).sum().item())
+        correct = float(pred[input_data.test_mask].eq(input_data.y[input_data.test_mask]).sum().item())
         acc = correct / input_data.test_mask.sum().item()
         print('Test Accuracy: {:.4f}'.format(acc))
         return acc
@@ -87,16 +90,16 @@ class SGCNet(nn.Module):
         input_data = dataset.to(self.device)
         model.eval()
         _, pred = model(input_data).max(dim=1)
-        correct = float (pred[input_data.val_mask].eq(input_data.y[input_data.val_mask]).sum().item())
+        correct = float(pred[input_data.val_mask].eq(input_data.y[input_data.val_mask]).sum().item())
         acc = correct / input_data.val_mask.sum().item()
         print('Validation Accuracy: {:.6f}'.format(acc))
         return acc
 
-    
+
 def set_masks_from_indices(data, indices_dict, device):
     """Set train, validation, and test masks for the data"""
     num_nodes = data.num_nodes
-    
+
     train_mask = torch.zeros(num_nodes, dtype=bool).to(device)
     train_mask[indices_dict["train"]] = 1
 
@@ -127,6 +130,7 @@ def get_subgraph_data(data, mask):
     sub_data = Data(x=data.x, edge_index=sub_edge_index, y=data.y, test_mask=test_mask, val_mask=val_mask)
     return sub_data
 
+
 # Experimental parameters
 group_trunc_ratio_hop_1 = 0.5
 group_trunc_ratio_hop_2 = 0.7
@@ -140,10 +144,10 @@ for filename in os.listdir(directory):
     if pattern.match(filename):
         matching_files.append(filename)
 filenames = matching_files[:ratio]
-
+print(f"processing the files: {filenames}")
 # Extract and aggregate PC-Winter values
 results = collections.defaultdict(list)
-counter = 0 
+counter = 0
 for filename in filenames:
     with open('value/' + filename, 'rb') as f:
         data = pickle.load(f)
@@ -155,26 +159,26 @@ for filename in filenames:
 
 # Average the values
 for key, values in results.items():
-    results[key] = sum(values) / (len(values)*10)
+    results[key] = sum(values) / (len(values) * 10)
 
 # Convert to DataFrame
 data = [{'key1': k1, 'key2': k2, 'key3': k3, 'value': v} for (k1, k2, k3), v in results.items()]
 win_df = pd.DataFrame(data)
 
 # Aggregate values for different hop levels
-win_df_11 = pd.DataFrame(win_df [win_df['key2'].isin(win_df['key1']) == False] .groupby('key2').value.sum().sort_values()).reset_index()
-win_df_11.columns= ['key', 'value']
-hop_1_list = win_df [win_df['key2'].isin(win_df['key1']) == False]['key2'].unique()
-win_df_12 = pd.DataFrame(win_df [(win_df['key3'] != win_df['key2'])&(win_df['key3'].isin(hop_1_list) )].groupby('key3').value.sum().sort_values()).reset_index()
-win_df_12.columns= ['key', 'value']
+win_df_11 = pd.DataFrame(win_df[win_df['key2'].isin(win_df['key1']) == False].groupby('key2').value.sum().sort_values()).reset_index()
+win_df_11.columns = ['key', 'value']
+hop_1_list = win_df[win_df['key2'].isin(win_df['key1']) == False]['key2'].unique()
+win_df_12 = pd.DataFrame(win_df[(win_df['key3'] != win_df['key2']) & (win_df['key3'].isin(hop_1_list))].groupby('key3').value.sum().sort_values()).reset_index()
+win_df_12.columns = ['key', 'value']
 
-win_df_1 =  pd.DataFrame(pd.concat([win_df_11, win_df_12]).groupby('key').value.sum().sort_values()).reset_index()
-win_df_2 = pd.DataFrame(win_df [(win_df['key3'].isin(win_df['key2']) == False)&(win_df['key3'].isin(win_df['key1']) == False)] .groupby('key3').value.sum().sort_values()).reset_index()
-win_df_2.columns= ['key', 'value']
+win_df_1 = pd.DataFrame(pd.concat([win_df_11, win_df_12]).groupby('key').value.sum().sort_values()).reset_index()
+win_df_2 = pd.DataFrame(win_df[(win_df['key3'].isin(win_df['key2']) == False) & (win_df['key3'].isin(win_df['key1']) == False)].groupby('key3').value.sum().sort_values()).reset_index()
+win_df_2.columns = ['key', 'value']
 
 # Combine and sort unlabeled nodes
-unlabled_win_df = pd.concat([win_df_1,win_df_2])
-unlabled_win_df = unlabled_win_df.sort_values('value',ascending= False)
+unlabled_win_df = pd.concat([win_df_1, win_df_2])
+unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
 unlabeled_win = torch.tensor(unlabled_win_df['key'].values)
 unlabeled_win_value = unlabled_win_df['value'].values
 
@@ -185,8 +189,8 @@ print(device)
 data = dataset[0].to(device)
 
 train_mask = data.train_mask
-val_mask = data.val_mask 
-test_mask = data.test_mask 
+val_mask = data.val_mask
+test_mask = data.test_mask
 
 # Print dataset sizes
 print(f"Training size: {train_mask.sum().item()}")
@@ -204,7 +208,7 @@ indu_mask = torch.ones(data.edge_index.shape[1], dtype=torch.bool)
 for i, (src, tgt) in enumerate(data.edge_index.t().tolist()):
     if val_mask[src] or test_mask[src] or val_mask[tgt] or test_mask[tgt]:
         indu_mask[i] = False
-indu_mask  = indu_mask.to(device)
+indu_mask = indu_mask.to(device)
 
 # Prepare test and validation data
 test_data = get_subgraph_data(data, data.test_mask)
@@ -214,24 +218,24 @@ val_data = get_subgraph_data(data, data.val_mask)
 win_acc = []
 val_acc_list = []
 node_list = unlabeled_win.cpu().numpy()
-drop_num = len(node_list)+1
+drop_num = len(node_list) + 1
 
 # Initial model training and evaluation
 data_copy = data.clone()
 data_copy = data_copy.to(device)
-data_copy.edge_index = data_copy.edge_index[:,  indu_mask]
+data_copy.edge_index = data_copy.edge_index[:, indu_mask]
 
 model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes).to(device)
 model.fit(data_copy)
 test_acc = model.predict(test_data)
-val_acc = model.predict_valid(val_data )
-win_acc  +=[test_acc]
+val_acc = model.predict_valid(val_data)
+win_acc += [test_acc]
 val_acc_list += [val_acc]
 
 # Iteratively drop nodes and evaluate
-for j in range(1,drop_num):
-    cur_player = node_list[j-1]
-    print('cur_player: ',cur_player)
+for j in range(1, drop_num):
+    cur_player = node_list[j - 1]
+    print('cur_player: ', cur_player)
     cur_node_list = node_list[:j]
 
     edge_mask = torch.ones(data.edge_index.shape[1], dtype=torch.bool, device=device)
@@ -247,10 +251,10 @@ for j in range(1,drop_num):
     model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes).to(device)
     model.fit(data_copy)
     test_acc = model.predict(test_data)
-    val_acc = model.predict_valid(val_data )
-    win_acc  +=[test_acc]
+    val_acc = model.predict_valid(val_data)
+    win_acc += [test_acc]
     val_acc_list += [val_acc]
-        
+
 # Save results
 path = 'res/'
 os.makedirs(path, exist_ok=True)

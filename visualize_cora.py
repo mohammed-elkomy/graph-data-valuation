@@ -1,11 +1,10 @@
 import pickle
-import collections
 import matplotlib.pyplot as plt
+
 
 file_path = './res/node_drop_large_winter_value_0.5_0.7_2_cora_test.pkl'
 with open(file_path, 'rb') as file:
     data = pickle.load(file)
-import matplotlib.pyplot as plt
 
 plt.figure(figsize=(8, 6))
 

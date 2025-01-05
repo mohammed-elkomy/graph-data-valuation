@@ -24,6 +24,8 @@ Key features of the implementation include:
 The script uses command-line arguments to control algorithm behavior, including dataset selection,
 number of hops, random seed, number of permutations, and truncation ratios.
 """
+import sys
+from logging import Logger
 
 import torch
 import torch.nn as nn
@@ -339,6 +341,7 @@ def parse_args():
 
 
 if __name__ == "__main__":
+    sys.stdout = Logger('pc_winter_run.log')
     # Parse command line arguments
     args = parse_args()
     print(args)
