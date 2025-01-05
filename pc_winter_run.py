@@ -56,6 +56,7 @@ from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.conv.gcn_conv import gcn_norm
 from torch_geometric.typing import Adj, OptTensor, SparseTensor
 from torch_geometric.utils import spmm
+from tqdm import tqdm
 
 dataset_params = {
     'Computers': {
@@ -443,7 +444,7 @@ if __name__ == "__main__":
         cur_labeled_node_list = []
         pre_performance = 0
 
-        for labeled_node in labeled_node_list:
+        for labeled_node in tqdm(labeled_node_list):
             sample_value_dict_copy = copy.deepcopy(sample_value_dict)
 
             # Process 1-hop neighbors
@@ -489,6 +490,7 @@ if __name__ == "__main__":
                     # calculate marginal contribution 
                     sample_value_dict[labeled_node][player_hop_1][player_hop_2] += (val_acc - pre_performance)
                     sample_counter_dict[labeled_node][player_hop_1][player_hop_2] += 1
+                    print('pre_performance ', pre_performance, 'val_acc', val_acc)
                     pre_performance = val_acc
 
                     # Record performance data
@@ -499,8 +501,6 @@ if __name__ == "__main__":
                     perf_dict['first_hop'] += [player_hop_1]
                     perf_dict['second_hop'] += [player_hop_2]
                     perf_dict['accu'] += [val_acc]
-
-                    print('pre_performance ', pre_performance, 'val_acc', val_acc)
 
             # Update labeled node list and compute full group accuracy
             cur_labeled_node_list += [labeled_node]
