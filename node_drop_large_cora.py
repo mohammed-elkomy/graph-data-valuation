@@ -181,6 +181,7 @@ unlabeled_win_value = unlabled_win_df['value'].values
 # Load and preprocess the Cora dataset
 dataset = Planetoid(root='dataset/', name='Cora', transform=T.NormalizeFeatures())
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(device)
 data = dataset[0].to(device)
 
 train_mask = data.train_mask
