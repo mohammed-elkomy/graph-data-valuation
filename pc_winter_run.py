@@ -75,12 +75,11 @@ dataset_params = {
 
 
 class SGConvNoWeight(MessagePassing):
-    
     """
     The modified SGConv operator without the trainable linear layer.
     This class implements the feature propagation mechanism used in the local propagation strategy.
     """
-    
+
     def __init__(self, K: int = 2,
                  cached: bool = False, add_self_loops: bool = True,
                  **kwargs):
@@ -151,7 +150,7 @@ class MLP(nn.Module):
             loss.backward()
             optimizer.step()
 
-            
+
 def adjacency_to_edge_list(adj_matrix):
     """
     Convert an adjacency matrix to an edge list representation.
@@ -164,12 +163,11 @@ def adjacency_to_edge_list(adj_matrix):
 
 
 def stack_torch_tensors(input_tensors):
-    unrolled = [input_tensors[k].view(-1,1) for k in range(len(input_tensors))]
+    unrolled = [input_tensors[k].view(-1, 1) for k in range(len(input_tensors))]
     return torch.cat(unrolled)
 
 
 def generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled_list, target_node, node_map, ind_edge_index, data, device):
-
     """
     This function implements the local propagation strategy for the PC-Winter algorithm.
     It generates features and labels for the inductive setting, considering the current state
@@ -182,10 +180,10 @@ def generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled
 
     This approach allows for efficient computation of node contributions in the PC-Winter algorithm.
     """
-    
+
     A_temp = torch.zeros((data.x.size(0), data.x.size(0)), device=device)
     A_temp[ind_edge_index[0], ind_edge_index[1]] = 1
-    
+
     mask = torch.zeros_like(A_temp)
     cur_hop_1_list_torch = torch.tensor(cur_hop_1_list)
     mask[target_node, cur_hop_1_list] = 1
@@ -200,26 +198,24 @@ def generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled
     else:
         mask[cur_hop_1_list[-1], cur_hop_2_list] = 1
         mask[cur_hop_2_list, cur_hop_1_list[-1]] = 1
-    
+
     conv = SGConvNoWeight(K=2)
     cur_edge_index = adjacency_to_edge_list(mask)
     X_ind_propogated_temp_ = conv(data.x, cur_edge_index)
-        
+
     train_features = torch.cat((X_ind_propogated[cur_labeled_list], X_ind_propogated_temp_[target_node].unsqueeze(0)), dim=0)
     train_labels = torch.cat((data.y[cur_labeled_list], data.y[target_node].unsqueeze(0)), dim=0)
 
     return train_features, train_labels
 
 
-
 def evaluate_retrain_model(model_class, num_features, num_classes, train_features, train_labels, val_features, val_labels, device, num_iter=200, lr=0.01, weight_decay=5e-4):
-    
     """
     This function creates, trains, and evaluates a model on the given data.
     It's used to compute the utility function in the PC-Winter algorithm.
     The utility is measured as the validation accuracy of the trained model.
     """
-    
+
     # Create and train the model
     model = model_class(num_features, num_classes).to(device)
     model.fit(train_features, train_labels, val_features, val_labels, num_iter=num_iter, lr=lr, weight_decay=weight_decay)
@@ -231,7 +227,6 @@ def evaluate_retrain_model(model_class, num_features, num_classes, train_feature
 
 
 def generate_maps(train_idx_list, num_hops, edge_index):
-
     """
     This function generates the necessary data structures for efficient computation
     of the PC-Winter algorithm, including the labeled_to_player_map which represents
@@ -244,29 +239,28 @@ def generate_maps(train_idx_list, num_hops, edge_index):
     Here the key index is the node index in the graph. 
     """
 
-
     labeled_to_player_map = {}
     sample_value_dict = {}
     sample_counter_dict = {}
     for labeled in train_idx_list:
-        hop_1_nodes, _,_,_ = k_hop_subgraph(int(labeled), num_hops=1, edge_index=edge_index, relabel_nodes=False)
+        hop_1_nodes, _, _, _ = k_hop_subgraph(int(labeled), num_hops=1, edge_index=edge_index, relabel_nodes=False)
         hop_1_nodes_list = list(hop_1_nodes.cpu().numpy())
-        hop_1_nodes_list.remove(labeled) 
+        hop_1_nodes_list.remove(labeled)
         labeled_to_player_map[labeled] = {}
         sample_value_dict[labeled] = {}
         sample_counter_dict[labeled] = {}
         labeled_to_player_map[labeled][labeled] = {}
         sample_value_dict[labeled][labeled] = {}
         sample_counter_dict[labeled][labeled] = {}
-        
+
         for hop_1_node in hop_1_nodes_list:
-            sub_nodes_2, _,_,_ = k_hop_subgraph(int(hop_1_node), num_hops=1, edge_index=edge_index, relabel_nodes=False)
+            sub_nodes_2, _, _, _ = k_hop_subgraph(int(hop_1_node), num_hops=1, edge_index=edge_index, relabel_nodes=False)
             sub_nodes_2_list = list(sub_nodes_2.cpu().numpy())
-            sub_nodes_2_list.remove(hop_1_node) 
+            sub_nodes_2_list.remove(hop_1_node)
             labeled_to_player_map[labeled][hop_1_node] = {}
             sample_value_dict[labeled][hop_1_node] = {}
             sample_counter_dict[labeled][hop_1_node] = {}
-                
+
             for hop_2_node in sub_nodes_2_list:
                 labeled_to_player_map[labeled][hop_1_node][hop_2_node] = [hop_2_node]
                 sample_value_dict[labeled][hop_1_node][hop_2_node] = 0
@@ -274,7 +268,7 @@ def generate_maps(train_idx_list, num_hops, edge_index):
             labeled_to_player_map[labeled][hop_1_node][hop_1_node] = [hop_1_node]
             sample_value_dict[labeled][hop_1_node][hop_1_node] = 0
             sample_counter_dict[labeled][hop_1_node][hop_1_node] = 0
-            
+
         labeled_to_player_map[labeled][labeled][labeled] = [labeled]
         sample_value_dict[labeled][labeled][labeled] = 0
         sample_counter_dict[labeled][labeled][labeled] = 0
@@ -283,12 +277,11 @@ def generate_maps(train_idx_list, num_hops, edge_index):
 
 
 def get_subgraph_data(data_edge_index, mask):
-    
     """
     This function extracts a subgraph from the given graph based on a mask.
     The resulting subgraph only contains edges between nodes in the mask.
     """
-    
+
     # Nodes to be considered
     edge_index = data_edge_index.clone()
     nodes = mask.nonzero().view(-1)
@@ -300,25 +293,24 @@ def get_subgraph_data(data_edge_index, mask):
 
     sub_edge_index = edge_index[:, edge_mask]
     return sub_edge_index
-    
-    
+
+
 def propagate_features(edge_index, node_features):
     """SGC propagation of node features using the given edge_index."""
-    A = torch.zeros((node_features.size(0), node_features.size(0)), device=device)
+    A = torch.zeros((node_features.size(0), node_features.size(0)), device=device)  # adj mat
     A[edge_index[0], edge_index[1]] = 1
-    A_hat = A + torch.eye(A.size(0), device=device)
+    A_hat = A + torch.eye(A.size(0), device=device)  # self loops
     D_hat_diag = A_hat.sum(dim=1).pow(-0.5)
-    D_hat = torch.diag(D_hat_diag)
-    L_norm = D_hat.mm(A_hat).mm(D_hat)
-    return L_norm.mm(L_norm.mm(node_features))
+    D_hat = torch.diag(D_hat_diag)  # degree inverse in diag
+    L_norm = D_hat.mm(A_hat).mm(D_hat)  # normalized graph Laplacian
+    return L_norm.mm(L_norm.mm(node_features))  # no non-linearities ; number of layers is limited
 
-    
+
 def set_masks_from_indices(data, indices_dict, device):
-
     """
     Set train, validation, and test masks for the graph data based on provided indices.
     """
-    
+
     num_nodes = data.num_nodes
     train_mask = torch.zeros(num_nodes, dtype=bool).to(device)
     train_mask[indices_dict["train"]] = 1
@@ -332,6 +324,7 @@ def set_masks_from_indices(data, indices_dict, device):
     data.val_mask = val_mask
     return data
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Network")
     parser.add_argument('--dataset', default='Cora', help='Input dataset.')
@@ -341,11 +334,11 @@ def parse_args():
     parser.add_argument('--label_trunc_ratio', type=float, default=0, help='Label trunc ratio')
     parser.add_argument('--group_trunc_ratio_hop_1', type=float, default=0.5, help='Hop 1 Group trunc ratio')
     parser.add_argument('--group_trunc_ratio_hop_2', type=float, default=0.7, help='Hop 2 Group trunc ratio.')
-    parser.add_argument( '--verbose', type = bool, default = True)
+    parser.add_argument('--verbose', type=bool, default=True)
     return parser.parse_args()
 
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     # Parse command line arguments
     args = parse_args()
     print(args)
@@ -369,29 +362,28 @@ if __name__ == "__main__":
         num_epochs = 200
         lr = 0.01
         weight_decay = 5e-4
-    
-    
+
     np.random.seed(seed)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # Load dataset
     if args.dataset in ['Computers', 'Photo']:
-            dataset = Amazon(root='dataset/Amazon', name=args.dataset, transform=T.NormalizeFeatures())
-            config_path = f'./config/Amazon-{args.dataset}.pkl'
+        dataset = Amazon(root='dataset/Amazon', name=args.dataset, transform=T.NormalizeFeatures())
+        config_path = f'./config/Amazon-{args.dataset}.pkl'
     elif args.dataset == 'Physics':
         dataset = Coauthor(root='dataset/Coauthor', name=args.dataset, transform=T.NormalizeFeatures())
         config_path = f'./config/Coauthor-{args.dataset}.pkl'
     else:
         dataset = Planetoid(root='dataset/' + dataset_name, name=dataset_name, transform=T.NormalizeFeatures())
-    
+
     data = dataset[0].to(device)
     num_classes = dataset.num_classes
-    
+
     # Load train/valid/test split for non-Citation datas
-    if args.dataset in ['Computers', 'Photo','Physics']:
+    if args.dataset in ['Computers', 'Photo', 'Physics']:
         with open(config_path, 'rb') as f:
             loaded_indices_dict = pickle.load(f)
             data = set_masks_from_indices(data, loaded_indices_dict, device)
-            
+
     train_mask = data.train_mask
     val_mask = data.val_mask
     test_mask = data.test_mask
@@ -404,11 +396,11 @@ if __name__ == "__main__":
         print(f"Test Size: {test_size}")
 
     # Prepare validation and test data
-    val_edge_index =  get_subgraph_data(data.edge_index, val_mask)
-    X_val_propogated = propagate_features(val_edge_index , data.x)
-    test_edge_index =  get_subgraph_data(data.edge_index, test_mask)
+    val_edge_index = get_subgraph_data(data.edge_index, val_mask)
+    X_val_propogated = propagate_features(val_edge_index, data.x)
+    test_edge_index = get_subgraph_data(data.edge_index, test_mask)
     X_test_propogated = propagate_features(test_edge_index, data.x)
-    
+
     val_features = X_val_propogated[val_mask]
     val_labels = data.y[val_mask]
     test_features = X_test_propogated[test_mask]
@@ -421,79 +413,79 @@ if __name__ == "__main__":
             inductive_edge_index.append([src, tgt])
     inductive_edge_index = torch.tensor(inductive_edge_index).t().contiguous()
     X_ind_propogated = propagate_features(inductive_edge_index, data.x)
-    
+
     if verbose:
-        original_edge_count = data.edge_index.size(1)  
-        inductive_edge_count = inductive_edge_index.size(1)  
+        original_edge_count = data.edge_index.size(1)
+        inductive_edge_count = inductive_edge_index.size(1)
         print(f"Original Edge Count: {original_edge_count}")
         print(f"Inductive Edge Count: {inductive_edge_count}")
-    
+
     # Prepare storage data structures for PC-Winter algorithm
     train_idx = torch.nonzero(train_mask).cpu().numpy().flatten()
     labeled_node_list = list(train_idx)
     labeled_to_player_map, sample_value_dict, sample_counter_dict = \
-            generate_maps( list(train_idx), num_hops, inductive_edge_index)
-    
-    #Store the performance of different seed, permutation index, added new contribution path and accrued performace
+        generate_maps(list(train_idx), num_hops, inductive_edge_index)
+
+    # Store the performance of different seed, permutation index, added new contribution path and accrued performace
     perf_dict = {
         'dataset': [], 'seed': [], 'perm': [], 'label': [],
         'first_hop': [], 'second_hop': [], 'accu': []
     }
-    
+
     total_time = 0
     # Main loop for PC-Winter algorithm with online Pre-order traversal
     for i in range(num_perm):
         iteration_start_time = time.time()
-        np.random.shuffle(labeled_node_list) # Randomize order of labeled nodes
-        cur_labeled_node_list = [] 
+        np.random.shuffle(labeled_node_list)  # Randomize order of labeled nodes
+        cur_labeled_node_list = []
         pre_performance = 0
-        
+
         for labeled_node in labeled_node_list:
             sample_value_dict_copy = copy.deepcopy(sample_value_dict)
 
             # Process 1-hop neighbors
             cur_hop_1_list = []
-            hop_1_list = list(labeled_to_player_map [labeled_node].keys())
-            np.random.shuffle(hop_1_list) # Randomize order
+            hop_1_list = list(labeled_to_player_map[labeled_node].keys())
+            np.random.shuffle(hop_1_list)  # Randomize order
             # Keep the precedence constraint between labeled and 1-hop neighbor by putting labeled node front
             hop_1_list.remove(labeled_node)
             hop_1_list.insert(0, labeled_node)
-            print ('hop_1_list before truncation', len(hop_1_list), 'group_trunc_ratio_hop_1:', group_trunc_ratio_hop_1)
-            truncate_length = int(np.ceil((len(hop_1_list) - 1) * (1- group_trunc_ratio_hop_1))) + 1
+            print('hop_1_list before truncation', len(hop_1_list), 'group_trunc_ratio_hop_1:', group_trunc_ratio_hop_1)
+            truncate_length = int(np.ceil((len(hop_1_list) - 1) * (1 - group_trunc_ratio_hop_1))) + 1
             truncate_length = min(truncate_length, len(hop_1_list))
             hop_1_list = hop_1_list[:truncate_length]
-            print ('hop_1_list after truncation', len(hop_1_list) )
-            
-            print ('labeled_node iteration:', i)
-            print ('current target labeled_node:',  cur_labeled_node_list, '=>', labeled_node)
-            print ('hop_1_list ', hop_1_list )
-            
+            print('hop_1_list after truncation', len(hop_1_list))
+
+            print('labeled_node iteration:', i)
+            print('current target labeled_node:', cur_labeled_node_list, '=>', labeled_node)
+            print('hop_1_list ', hop_1_list)
+
             for player_hop_1 in hop_1_list:
                 # Process 2-hop neighbors
                 cur_hop_2_list = []
                 cur_hop_1_list += [player_hop_1]
-                hop_2_list = list(labeled_to_player_map [labeled_node][player_hop_1].keys())
-                np.random.shuffle(hop_2_list) # Randomize order
+                hop_2_list = list(labeled_to_player_map[labeled_node][player_hop_1].keys())
+                np.random.shuffle(hop_2_list)  # Randomize order
                 # keep the precedence constraint between 1-hop neighbor and 2-hop neighbor 
                 hop_2_list.remove(player_hop_1)
                 hop_2_list.insert(0, player_hop_1)
-                print ('hop_2_list before truncation', len(hop_2_list), 'group_trunc_ratio_hop_2:', group_trunc_ratio_hop_2)
-                truncate_length = int(np.ceil((len(hop_2_list) - 1) * (1-group_trunc_ratio_hop_2))) + 1
+                print('hop_2_list before truncation', len(hop_2_list), 'group_trunc_ratio_hop_2:', group_trunc_ratio_hop_2)
+                truncate_length = int(np.ceil((len(hop_2_list) - 1) * (1 - group_trunc_ratio_hop_2))) + 1
                 truncate_length = min(truncate_length, len(hop_2_list))
                 hop_2_list = hop_2_list[:truncate_length]
-                print ('hop_2_list after truncation', len(hop_2_list) )
-                
+                print('hop_2_list after truncation', len(hop_2_list))
+
                 for player_hop_2 in hop_2_list:
                     cur_hop_2_list += [player_hop_2]
                     # Local propagation and performance computation
                     ind_train_features, ind_train_labels = generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled_node_list,
-                                                labeled_node, labeled_to_player_map, inductive_edge_index, data, device)
-                    val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes, 
-                                                     ind_train_features, ind_train_labels, val_features, val_labels, 
+                                                                                            labeled_node, labeled_to_player_map, inductive_edge_index, data, device)
+                    val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes,
+                                                     ind_train_features, ind_train_labels, val_features, val_labels,
                                                      device, num_iter=num_epochs, lr=lr, weight_decay=weight_decay)
                     # calculate marginal contribution 
-                    sample_value_dict[labeled_node][player_hop_1][player_hop_2] += ( val_acc - pre_performance)
-                    sample_counter_dict [labeled_node][player_hop_1][player_hop_2] += 1
+                    sample_value_dict[labeled_node][player_hop_1][player_hop_2] += (val_acc - pre_performance)
+                    sample_counter_dict[labeled_node][player_hop_1][player_hop_2] += 1
                     pre_performance = val_acc
 
                     # Record performance data
@@ -503,24 +495,23 @@ if __name__ == "__main__":
                     perf_dict['label'] += [labeled_node]
                     perf_dict['first_hop'] += [player_hop_1]
                     perf_dict['second_hop'] += [player_hop_2]
-                    perf_dict['accu'] += [val_acc]         
-                    
-                    print('pre_performance ',pre_performance  ,'val_acc', val_acc)
+                    perf_dict['accu'] += [val_acc]
+
+                    print('pre_performance ', pre_performance, 'val_acc', val_acc)
 
             # Update labeled node list and compute full group accuracy
             cur_labeled_node_list += [labeled_node]
-            ind_train_features = X_ind_propogated[ cur_labeled_node_list]
+            ind_train_features = X_ind_propogated[cur_labeled_node_list]
             ind_train_labels = data.y[cur_labeled_node_list]
             val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes, \
-                                        ind_train_features, ind_train_labels, val_features, val_labels, device)
+                                             ind_train_features, ind_train_labels, val_features, val_labels, device)
             pre_performance = val_acc
             print('full group acc:', val_acc)
-        
+
     # Save results
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
-        pickle.dump(sample_value_dict, f) 
+        pickle.dump(sample_value_dict, f)
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value_count.pkl", "wb") as f:
-        pickle.dump( sample_counter_dict, f)
+        pickle.dump(sample_counter_dict, f)
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
         pickle.dump(perf_dict, f)
-        
