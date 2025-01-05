@@ -341,7 +341,7 @@ def parse_args():
 
 
 if __name__ == "__main__":
-    sys.stdout = Logger('pc_winter_run.log')
+    sys.stdout = open("./log.txt", "w")
     # Parse command line arguments
     args = parse_args()
     print(args)
