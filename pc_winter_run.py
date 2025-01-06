@@ -383,20 +383,17 @@ def get_first_split_wikics(data, seed=42):
     data.val_mask = new_val_mask
     data.test_mask = new_test_mask
 
-    # Print statements for validation
-    print(f"Training samples: {new_train_mask.sum().item()}")
-    print(f"Validation samples: {new_val_mask.sum().item()}")
-    print(f"Test samples: {new_test_mask.sum().item()}")
-
-    print(f"Train mask shape: {new_train_mask.shape}")
-    print(f"Val mask shape: {new_val_mask.shape}")
-    print(f"Test mask shape: {new_test_mask.shape}")
-
     # Assertions to ensure no overlap between masks
     assert (new_train_mask & new_val_mask).sum().item() == 0, "Train and Validation masks overlap!"
     assert (new_val_mask & new_test_mask).sum().item() == 0, "Validation and Test masks overlap!"
     assert (new_train_mask & new_test_mask).sum().item() == 0, "Train and Test masks overlap!"
-
+    # Class distribution counters
+    print("\nClass distribution per split:")
+    for c in range(num_classes):
+        train_count = (new_train_mask & (data.y == c)).sum().item()
+        val_count = (new_val_mask & (data.y == c)).sum().item()
+        test_count = (new_test_mask & (data.y == c)).sum().item()
+        print(f"Class {c}: Train: {train_count}, Val: {val_count}, Test: {test_count}")
 
     return data
 
