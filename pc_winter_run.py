@@ -362,6 +362,7 @@ def get_first_split_wikics(data, seed=42):
         class_indices = (data.y == c).nonzero(as_tuple=True)[0]
         class_train_indices = class_indices[train_mask[class_indices]]
         selected_train_indices = class_train_indices[torch.randperm(class_train_indices.size(0))[:20]]
+        print("class",c,selected_train_indices.shape)
         new_train_mask[selected_train_indices] = True
     #
     # # Combine remaining data for validation and testing
