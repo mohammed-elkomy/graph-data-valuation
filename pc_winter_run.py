@@ -341,6 +341,13 @@ def parse_args():
     return parser.parse_args()
 
 
+def get_first_split_wikics(data):
+    data.train_mask = data.train_mask[:, 0]
+    data.val_mask = data.train_mask[:, 0]
+    data.test_mask = data.train_mask[:, 0]
+    return data
+
+
 if __name__ == "__main__":
     # sys.stdout = open("./log.txt", "w")
     # Parse command line arguments
@@ -390,6 +397,8 @@ if __name__ == "__main__":
         with open(config_path, 'rb') as f:
             loaded_indices_dict = pickle.load(f)
             data = set_masks_from_indices(data, loaded_indices_dict, device)
+    elif args.dataset == 'WikiCS':
+        data = get_first_split_wikics(data)
 
     train_mask = data.train_mask
     val_mask = data.val_mask
