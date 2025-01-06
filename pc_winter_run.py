@@ -406,7 +406,7 @@ def get_first_split_wikics(data, seed=42):
 
 
 if __name__ == "__main__":
-    # sys.stdout = open("./log.txt", "w")
+
     # Parse command line arguments
     args = parse_args()
     print(args)
@@ -420,7 +420,8 @@ if __name__ == "__main__":
     group_trunc_ratio_hop_1 = args.group_trunc_ratio_hop_1
     group_trunc_ratio_hop_2 = args.group_trunc_ratio_hop_2
     verbose = args.verbose
-
+    print(f"logs_{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}.txt")
+    sys.stdout = open(f"logs_{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}.txt", "w")
     if dataset_name in dataset_params:
         params = dataset_params[dataset_name]
         num_epochs = params['num_epochs']
