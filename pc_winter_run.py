@@ -390,7 +390,7 @@ if __name__ == "__main__":
         with open(config_path, 'rb') as f:
             loaded_indices_dict = pickle.load(f)
             data = set_masks_from_indices(data, loaded_indices_dict, device)
-    exit()
+
     train_mask = data.train_mask
     val_mask = data.val_mask
     test_mask = data.test_mask
