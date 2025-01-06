@@ -453,7 +453,6 @@ if __name__ == "__main__":
     train_mask = data.train_mask
     val_mask = data.val_mask
     test_mask = data.test_mask
-    print(verbose)
     if verbose:
         train_size = train_mask.sum().item()
         val_size = val_mask.sum().item()
@@ -498,7 +497,7 @@ if __name__ == "__main__":
         'dataset': [], 'seed': [], 'perm': [], 'label': [],
         'first_hop': [], 'second_hop': [], 'accu': []
     }
-    exit()
+
     total_time = 0
     # Main loop for PC-Winter algorithm with online Pre-order traversal
     for i in range(num_perm):
