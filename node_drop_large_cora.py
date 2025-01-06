@@ -144,7 +144,7 @@ for filename in os.listdir(directory):
     if pattern.match(filename):
         matching_files.append(filename)
 filenames = matching_files[:ratio]
-print(f"processing the files: {filenames}")
+print(f"processing the files: {filenames}\n")
 # Extract and aggregate PC-Winter values
 results = collections.defaultdict(list)
 counter = 0
