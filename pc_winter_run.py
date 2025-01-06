@@ -402,7 +402,7 @@ if __name__ == "__main__":
         print(f"Train Size: {train_size}")
         print(f"Validation Size: {val_size}")
         print(f"Test Size: {test_size}")
-    exit()
+
     # Prepare validation and test data
     val_edge_index = get_subgraph_data(data.edge_index, val_mask)
     X_val_propogated = propagate_features(val_edge_index, data.x)
