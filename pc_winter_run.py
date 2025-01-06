@@ -287,7 +287,7 @@ def get_subgraph_data(data_edge_index, mask):
 
     # Nodes to be considered
     edge_index = data_edge_index.clone()
-    print(mask.shape, mask.nonzero().shape)
+    print(mask.shape, mask[:, 0].nonzero().shape)
     nodes = mask.nonzero().view(-1)
 
     # Extract the edges for these nodes
