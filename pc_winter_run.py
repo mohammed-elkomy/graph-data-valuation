@@ -400,9 +400,9 @@ if __name__ == "__main__":
         train_size = train_mask.sum().item()
         val_size = val_mask.sum().item()
         test_size = test_mask.sum().item()
-        print(f"Train Size: {train_size}")
-        print(f"Validation Size: {val_size}")
-        print(f"Test Size: {test_size}")
+        print(f"Train Mask:{train_mask.shape} Size: {train_size}")
+        print(f"Validation Mask:{val_mask.shape} Size: {val_size}")
+        print(f"Test Mask:{test_mask.shape} Size: {test_size}")
 
     # Prepare validation and test data
     val_edge_index = get_subgraph_data(data.edge_index, val_mask)
