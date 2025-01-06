@@ -341,12 +341,62 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_first_split_wikics(data):
-    # get first split from the 20 splits
-    data.train_mask = data.train_mask[:, 0]
-    data.val_mask = data.val_mask[:, 0]
-    return data
+def get_first_split_wikics(data, seed=42):
+    # Set random seed for reproducibility
+    torch.manual_seed(seed)
+    np.random.seed(seed)
 
+    # Get the first split masks
+    train_mask = data.train_mask[:, 0].clone()
+    val_mask = data.val_mask[:, 0].clone()
+    test_mask = data.test_mask.clone()  # Full test mask with no split
+
+    # Initialize new masks
+    num_classes = data.y.max().item() + 1
+    new_train_mask = torch.zeros_like(train_mask, dtype=torch.bool)
+    new_val_mask = torch.zeros_like(val_mask, dtype=torch.bool)
+    new_test_mask = torch.zeros_like(test_mask, dtype=torch.bool)
+
+    # Select 20 samples per class for training
+    for c in range(num_classes):
+        class_indices = (data.y == c).nonzero(as_tuple=True)[0]
+        class_train_indices = class_indices[train_mask[class_indices]]
+        selected_train_indices = class_train_indices[torch.randperm(class_train_indices.size(0))[:20]]
+        new_train_mask[selected_train_indices] = True
+    #
+    # # Combine remaining data for validation and testing
+    # remaining_indices = (~new_train_mask & (train_mask | val_mask | test_mask)).nonzero(as_tuple=True)[0]
+    # num_remaining = remaining_indices.size(0)
+    #
+    # # Split remaining data into 20% validation and 20% testing
+    # num_val = int(0.2 * num_remaining)
+    # num_test = int(0.2 * num_remaining)
+    #
+    # shuffled_indices = remaining_indices[torch.randperm(num_remaining)]
+    # val_indices = shuffled_indices[:num_val]
+    # test_indices = shuffled_indices[num_val:num_val + num_test]
+    #
+    # new_val_mask[val_indices] = True
+    # new_test_mask[test_indices] = True
+    #
+    # # Include all initially marked test nodes in the new test mask
+    # new_test_mask[test_mask] = True
+
+    # Update data masks
+    data.train_mask = new_train_mask
+    data.val_mask = new_val_mask
+    data.test_mask = new_test_mask
+
+    # Print statements for validation
+    print(f"Training samples: {new_train_mask.sum().item()}")
+    print(f"Validation samples: {new_val_mask.sum().item()}")
+    print(f"Test samples: {new_test_mask.sum().item()}")
+
+    print(f"Train mask shape: {new_train_mask.shape}")
+    print(f"Val mask shape: {new_val_mask.shape}")
+    print(f"Test mask shape: {new_test_mask.shape}")
+
+    return data
 
 if __name__ == "__main__":
     # sys.stdout = open("./log.txt", "w")
@@ -375,6 +425,7 @@ if __name__ == "__main__":
         weight_decay = 5e-4
 
     np.random.seed(seed)
+    torch.manual_seed(seed)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # Load dataset
