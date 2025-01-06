@@ -361,28 +361,22 @@ def get_first_split_wikics(data, seed=42):
     for c in range(num_classes):
         class_indices = (data.y == c).nonzero(as_tuple=True)[0]
         class_train_indices = class_indices[train_mask[class_indices]]
-        print("class",c,class_train_indices.shape)
         selected_train_indices = class_train_indices[torch.randperm(class_train_indices.size(0))[:20]]
-
         new_train_mask[selected_train_indices] = True
-    #
-    # # Combine remaining data for validation and testing
-    # remaining_indices = (~new_train_mask & (train_mask | val_mask | test_mask)).nonzero(as_tuple=True)[0]
-    # num_remaining = remaining_indices.size(0)
-    #
-    # # Split remaining data into 20% validation and 20% testing
-    # num_val = int(0.2 * num_remaining)
-    # num_test = int(0.2 * num_remaining)
-    #
-    # shuffled_indices = remaining_indices[torch.randperm(num_remaining)]
-    # val_indices = shuffled_indices[:num_val]
-    # test_indices = shuffled_indices[num_val:num_val + num_test]
-    #
-    # new_val_mask[val_indices] = True
-    # new_test_mask[test_indices] = True
-    #
-    # # Include all initially marked test nodes in the new test mask
-    # new_test_mask[test_mask] = True
+
+    # Combine remaining data for validation and testing
+    remaining_indices = (~new_train_mask & (train_mask | val_mask | test_mask)).nonzero(as_tuple=True)[0]
+    num_remaining = remaining_indices.size(0)
+
+    # Split remaining data into 20% validation and 20% testing
+    num_val = int(0.2 * num_remaining)
+    num_test = int(0.2 * num_remaining)
+
+    val_indices = remaining_indices[:num_val]
+    test_indices = remaining_indices[num_val:num_val + num_test]
+
+    new_val_mask[val_indices] = True
+    new_test_mask[test_indices] = True
 
     # Update data masks
     data.train_mask = new_train_mask
@@ -397,6 +391,12 @@ def get_first_split_wikics(data, seed=42):
     print(f"Train mask shape: {new_train_mask.shape}")
     print(f"Val mask shape: {new_val_mask.shape}")
     print(f"Test mask shape: {new_test_mask.shape}")
+
+    # Assertions to ensure no overlap between masks
+    assert (new_train_mask & new_val_mask).sum().item() == 0, "Train and Validation masks overlap!"
+    assert (new_val_mask & new_test_mask).sum().item() == 0, "Validation and Test masks overlap!"
+    assert (new_train_mask & new_test_mask).sum().item() == 0, "Train and Test masks overlap!"
+
 
     return data
 
