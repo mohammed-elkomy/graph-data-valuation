@@ -342,9 +342,9 @@ def parse_args():
 
 
 def get_first_split_wikics(data):
+    # get first split from the 20 splits
     data.train_mask = data.train_mask[:, 0]
-    data.val_mask = data.train_mask[:, 0]
-    data.test_mask = data.train_mask[:, 0]
+    data.val_mask = data.val_mask[:, 0]
     return data
 
 
