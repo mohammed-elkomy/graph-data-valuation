@@ -30,7 +30,7 @@ from logging import Logger
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch_geometric.datasets import Planetoid
+
 from torch_geometric.utils import add_self_loops, degree
 from sklearn.metrics import accuracy_score
 import random
@@ -48,7 +48,7 @@ import collections
 import copy
 import torch_geometric.transforms as T
 from torch.nn.functional import cosine_similarity
-from torch_geometric.datasets import Amazon
+from torch_geometric.datasets import Amazon, Planetoid, Coauthor, WikiCS
 
 from typing import Optional
 from torch import Tensor
@@ -368,6 +368,7 @@ if __name__ == "__main__":
         weight_decay = 5e-4
 
     np.random.seed(seed)
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     # Load dataset
     if args.dataset in ['Computers', 'Photo']:
@@ -376,6 +377,8 @@ if __name__ == "__main__":
     elif args.dataset == 'Physics':
         dataset = Coauthor(root='dataset/Coauthor', name=args.dataset, transform=T.NormalizeFeatures())
         config_path = f'./config/Coauthor-{args.dataset}.pkl'
+    elif args.dataset == 'WikiCS':
+        dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
     else:
         dataset = Planetoid(root='dataset/' + dataset_name, name=dataset_name, transform=T.NormalizeFeatures())
 
@@ -387,7 +390,7 @@ if __name__ == "__main__":
         with open(config_path, 'rb') as f:
             loaded_indices_dict = pickle.load(f)
             data = set_masks_from_indices(data, loaded_indices_dict, device)
-
+    exit()
     train_mask = data.train_mask
     val_mask = data.val_mask
     test_mask = data.test_mask
@@ -398,7 +401,7 @@ if __name__ == "__main__":
         print(f"Train Size: {train_size}")
         print(f"Validation Size: {val_size}")
         print(f"Test Size: {test_size}")
-
+    exit()
     # Prepare validation and test data
     val_edge_index = get_subgraph_data(data.edge_index, val_mask)
     X_val_propogated = propagate_features(val_edge_index, data.x)
@@ -435,7 +438,7 @@ if __name__ == "__main__":
         'dataset': [], 'seed': [], 'perm': [], 'label': [],
         'first_hop': [], 'second_hop': [], 'accu': []
     }
-
+    exit()
     total_time = 0
     # Main loop for PC-Winter algorithm with online Pre-order traversal
     for i in range(num_perm):
