@@ -155,8 +155,8 @@ class MLP(nn.Module):
             optimizer.zero_grad()
             output = self(X)
             loss = F.nll_loss(output, y)
-            if epoch % 50 == 0:
-                print("loss", loss.item())
+            # if epoch % 50 == 0:
+            #     print("loss", loss.item())
             loss.backward()
             optimizer.step()
 
