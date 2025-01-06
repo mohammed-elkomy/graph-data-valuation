@@ -342,7 +342,7 @@ def parse_args():
 
 
 if __name__ == "__main__":
-    sys.stdout = open("./log.txt", "w")
+    # sys.stdout = open("./log.txt", "w")
     # Parse command line arguments
     args = parse_args()
     print(args)
