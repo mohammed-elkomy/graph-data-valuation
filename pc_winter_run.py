@@ -150,6 +150,7 @@ class MLP(nn.Module):
             optimizer.zero_grad()
             output = self(X)
             loss = F.nll_loss(output, y)
+            print(loss.item())
             loss.backward()
             optimizer.step()
 
@@ -396,6 +397,7 @@ def get_first_split_wikics(data, seed=42):
         print(f"Class {c}: Train: {train_count}, Val: {val_count}, Test: {test_count}")
 
     return data
+
 
 if __name__ == "__main__":
     # sys.stdout = open("./log.txt", "w")
