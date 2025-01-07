@@ -450,7 +450,7 @@ if __name__ == "__main__":
     elif args.dataset == 'WikiCS':
         dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
         config_path = f'./config/wikics.pkl'
-        #  generate_wikics_split(data)
+        # generate_wikics_split(data) # if you want to generate the wikics split and save it into a pickle at config dir
     else:
         dataset = Planetoid(root='dataset/' + dataset_name, name=dataset_name, transform=T.NormalizeFeatures())
 
@@ -483,7 +483,6 @@ if __name__ == "__main__":
         assert (train_mask & val_mask).sum().item() == 0, "Train and Validation masks overlap!"
         assert (val_mask & test_mask).sum().item() == 0, "Validation and Test masks overlap!"
         assert (train_mask & test_mask).sum().item() == 0, "Train and Test masks overlap!"
-    exit()
 
     # Prepare validation and test data
     val_edge_index = get_subgraph_data(data.edge_index, val_mask)
