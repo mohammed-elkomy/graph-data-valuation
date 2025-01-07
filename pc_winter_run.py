@@ -401,10 +401,6 @@ def get_first_split_wiki_cs(data, seed=42):
         test_count = (new_test_mask & (data.y == c)).sum().item()
         print(f"Class {c}: Train: {train_count}, Val: {val_count}, Test: {test_count}")
 
-    print(train_mask.nonzero(as_tuple=True)[0])
-    print(val_indices)
-    print(test_indices)
-
     split_config = {
         "train": train_mask.nonzero(as_tuple=True)[0],
         "val": val_mask.nonzero(as_tuple=True)[0],
