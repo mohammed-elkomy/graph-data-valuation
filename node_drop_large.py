@@ -175,10 +175,18 @@ if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
     dataset = Planetoid(root='dataset/', name=dataset_name, transform=T.NormalizeFeatures())
 elif dataset_name == 'WikiCS':
     dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
+    with open(f'./config/wikics.pkl', 'rb') as f:
+        loaded_indices_dict = pickle.load(f)
+        split_id = loaded_indices_dict["split_id"]
+        dataset.train_mask = dataset.train_mask[:, split_id].clone()
+        dataset.val_mask = dataset.val_mask[:, split_id].clone()
+
 elif dataset_name == 'Amazon':
     dataset = Amazon(root='dataset/Amazon', name='Computers', transform=T.NormalizeFeatures())
+    raise NotImplementedError
 elif dataset_name == 'Coauthor':
     dataset = Coauthor(root='dataset/Coauthor', name='CS', transform=T.NormalizeFeatures())
+    raise NotImplementedError
 else:
     raise ValueError(f"Dataset {dataset_name} is not supported.")
 
