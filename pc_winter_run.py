@@ -348,7 +348,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_first_split_wiki_cs(data, seed=42):
+def generate_wikics_split(data, seed=42):
     """
     function for creating the wiki-cs split (fixed across experiments)
     """
@@ -450,12 +450,13 @@ if __name__ == "__main__":
     elif args.dataset == 'WikiCS':
         dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
         config_path = f'./config/wikics.pkl'
+        #  generate_wikics_split(data)
     else:
         dataset = Planetoid(root='dataset/' + dataset_name, name=dataset_name, transform=T.NormalizeFeatures())
 
     data = dataset[0].to(device)
     num_classes = dataset.num_classes
-    get_first_split_wiki_cs(data)
+
     # Load train/valid/test split for non-Citation datasets
     if args.dataset in ['Computers', 'Photo', 'Physics', 'WikiCS']:
         with open(config_path, 'rb') as f:
