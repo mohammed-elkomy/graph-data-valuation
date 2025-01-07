@@ -388,11 +388,6 @@ def get_first_split_wiki_cs(data, seed=42):
     new_val_mask[selected_val_indices] = True
     new_test_mask[selected_test_indices] = True
 
-    # Update data masks
-    data.train_mask = new_train_mask
-    data.val_mask = new_val_mask
-    data.test_mask = new_test_mask
-
     # Class distribution counters
     print("\nClass distribution per split:")
     for c in range(num_classes):
@@ -458,7 +453,7 @@ if __name__ == "__main__":
 
     data = dataset[0].to(device)
     num_classes = dataset.num_classes
-    # get_first_split_wiki_cs(data)
+    get_first_split_wiki_cs(data)
     # Load train/valid/test split for non-Citation datasets
     if args.dataset in ['Computers', 'Photo', 'Physics', 'WikiCS']:
         with open(config_path, 'rb') as f:
