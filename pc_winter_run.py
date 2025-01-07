@@ -378,8 +378,8 @@ def get_first_split_wiki_cs(data, seed=42):
     val_indices = val_mask.nonzero(as_tuple=True)[0]
     test_indices = test_mask.nonzero(as_tuple=True)[0]
 
-    num_val = int(0.20 * val_indices.size(0))
-    num_test = int(0.20 * test_indices.size(0))
+    num_val = int(0.25 * val_indices.size(0))
+    num_test = int(0.25 * test_indices.size(0))
 
     # Shuffle and select the required number of samples
     selected_val_indices = val_indices[torch.randperm(val_indices.size(0))[:num_val]]
