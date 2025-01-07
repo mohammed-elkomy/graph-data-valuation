@@ -352,10 +352,10 @@ def get_first_split_wikics(data, seed=42):
     # Set random seed for reproducibility
     torch.manual_seed(seed)
     np.random.seed(seed)
-
-    # Get the first split masks
-    train_mask = data.train_mask[:, 0].clone()
-    val_mask = data.val_mask[:, 0].clone()
+    target_split = 1
+    # Get one of the split masks
+    train_mask = data.train_mask[:, target_split].clone()
+    val_mask = data.val_mask[:, target_split].clone()
     test_mask = data.test_mask.clone()  # Full test mask with no split
 
     # Initialize new masks
@@ -371,29 +371,25 @@ def get_first_split_wikics(data, seed=42):
         selected_train_indices = class_train_indices[torch.randperm(class_train_indices.size(0))[:20]]
         new_train_mask[selected_train_indices] = True
 
-    # Combine remaining data for validation and testing
-    remaining_indices = (~new_train_mask & (train_mask | val_mask | test_mask)).nonzero(as_tuple=True)[0]
-    num_remaining = remaining_indices.size(0)
+    # Get only 15% of data from the original val_mask and test_mask
+    val_indices = val_mask.nonzero(as_tuple=True)[0]
+    test_indices = test_mask.nonzero(as_tuple=True)[0]
 
-    # Split remaining data into 20% validation and 20% testing
-    num_val = int(0.2 * num_remaining)
-    num_test = int(0.2 * num_remaining)
+    num_val = int(0.15 * val_indices.size(0))
+    num_test = int(0.15 * test_indices.size(0))
 
-    val_indices = remaining_indices[:num_val]
-    test_indices = remaining_indices[num_val:num_val + num_test]
+    # Shuffle and select the required number of samples
+    selected_val_indices = val_indices[torch.randperm(val_indices.size(0))[:num_val]]
+    selected_test_indices = test_indices[torch.randperm(test_indices.size(0))[:num_test]]
 
-    new_val_mask[val_indices] = True
-    new_test_mask[test_indices] = True
+    new_val_mask[selected_val_indices] = True
+    new_test_mask[selected_test_indices] = True
 
     # Update data masks
     data.train_mask = new_train_mask
     data.val_mask = new_val_mask
     data.test_mask = new_test_mask
 
-    # Assertions to ensure no overlap between masks
-    assert (new_train_mask & new_val_mask).sum().item() == 0, "Train and Validation masks overlap!"
-    assert (new_val_mask & new_test_mask).sum().item() == 0, "Validation and Test masks overlap!"
-    assert (new_train_mask & new_test_mask).sum().item() == 0, "Train and Test masks overlap!"
     # Class distribution counters
     print("\nClass distribution per split:")
     for c in range(num_classes):
@@ -469,6 +465,13 @@ if __name__ == "__main__":
         print(f"Train Mask:{train_mask.shape} Size: {train_size}")
         print(f"Validation Mask:{val_mask.shape} Size: {val_size}")
         print(f"Test Mask:{test_mask.shape} Size: {test_size}")
+
+        # Assertions to ensure no overlap between masks
+        assert (train_mask & val_mask).sum().item() == 0, "Train and Validation masks overlap!"
+        assert (val_mask & test_mask).sum().item() == 0, "Validation and Test masks overlap!"
+        assert (train_mask & test_mask).sum().item() == 0, "Train and Test masks overlap!"
+
+    exit()
 
     # Prepare validation and test data
     val_edge_index = get_subgraph_data(data.edge_index, val_mask)
@@ -581,6 +584,15 @@ if __name__ == "__main__":
                                              ind_train_features, ind_train_labels, val_features, val_labels, device)
             pre_performance = val_acc
             print('full group acc:', val_acc)
+        print("Permutation", i, "finished")
+
+        # Save results
+        with open(f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
+            pickle.dump(sample_value_dict, f)
+        with open(f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value_count.pkl", "wb") as f:
+            pickle.dump(sample_counter_dict, f)
+        with open(f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
+            pickle.dump(perf_dict, f)
 
     # Save results
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:

@@ -135,6 +135,7 @@ def get_subgraph_data(data, mask):
 group_trunc_ratio_hop_1 = 0.5
 group_trunc_ratio_hop_2 = 0.7
 ratio = 3
+num_perms = 10
 directory = 'value/'
 pattern = re.compile(r'^Cora_(\d+)_10_0_0\.5_0\.7_pc_value\.pkl$')
 
@@ -159,7 +160,7 @@ for filename in filenames:
 
 # Average the values
 for key, values in results.items():
-    results[key] = sum(values) / (len(values) * 10)
+    results[key] = sum(values) / (len(values) * num_perms)
 
 # Convert to DataFrame
 data = [{'key1': k1, 'key2': k2, 'key3': k3, 'value': v} for (k1, k2, k3), v in results.items()]
