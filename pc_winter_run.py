@@ -402,6 +402,10 @@ def get_first_split_wiki_cs(data, seed=42):
         "test": test_mask.nonzero(as_tuple=True)[0],
         "split_id": split_id,
     }
+    print(f"Train Mask:{train_mask.shape} Size: {train_size}")
+    print(f"Validation Mask:{val_mask.shape} Size: {val_size}")
+    print(f"Test Mask:{test_mask.shape} Size: {test_size}")
+
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
     return data
