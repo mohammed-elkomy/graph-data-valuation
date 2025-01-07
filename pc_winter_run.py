@@ -352,7 +352,7 @@ def get_first_split_wikics(data, seed=42):
     # Set random seed for reproducibility
     torch.manual_seed(seed)
     np.random.seed(seed)
-    target_split = 1
+    target_split = 2
     # Get one of the split masks
     train_mask = data.train_mask[:, target_split].clone()
     val_mask = data.val_mask[:, target_split].clone()
@@ -470,7 +470,6 @@ if __name__ == "__main__":
         assert (train_mask & val_mask).sum().item() == 0, "Train and Validation masks overlap!"
         assert (val_mask & test_mask).sum().item() == 0, "Validation and Test masks overlap!"
         assert (train_mask & test_mask).sum().item() == 0, "Train and Test masks overlap!"
-        assert False
     exit()
 
     # Prepare validation and test data

@@ -20,11 +20,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch_geometric.transforms as T
 from torch_geometric.data import Data
-from torch_geometric.datasets import Planetoid
+from torch_geometric.datasets import Planetoid, WikiCS, Amazon, Coauthor
 from torch_geometric.nn import SGConv
 
 warnings.simplefilter(action='ignore', category=Warning)
 
+
+# Parameters
+dataset_name = 'Cora'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
+group_trunc_ratio_hop_1 = 0.5
+group_trunc_ratio_hop_2 = 0.7
+ratio = 3
+num_perms = 10
+directory = 'value/'
+pattern = re.compile(rf'^{dataset_name}_(\d+)_10_0_0\.5_0\.7_pc_value\.pkl$')
 
 class SGCNet(nn.Module):
     """
@@ -115,26 +124,19 @@ def get_subgraph_data(data, mask):
     return sub_data
 
 
-# Experimental parameters
-group_trunc_ratio_hop_1 = 0.5
-group_trunc_ratio_hop_2 = 0.7
-ratio = 3
-num_perms = 10
-directory = 'value/'
-pattern = re.compile(r'^Cora_(\d+)_10_0_0\.5_0\.7_pc_value\.pkl$')
-
 # Find matching files for PC-Winter results
 matching_files = []
 for filename in os.listdir(directory):
     if pattern.match(filename):
         matching_files.append(filename)
 filenames = matching_files[:ratio]
-print(f"processing the files: {filenames}\n")
+print(f"Processing the files: {filenames}\n")
+
 # Extract and aggregate PC-Winter values
 results = collections.defaultdict(list)
 counter = 0
 for filename in filenames:
-    with open('value/' + filename, 'rb') as f:
+    with open(os.path.join(directory, filename), 'rb') as f:
         data = pickle.load(f)
     for key, sub_dict in data.items():
         for sub_key, sub_sub_dict in sub_dict.items():
@@ -167,8 +169,18 @@ unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
 unlabeled_win = torch.tensor(unlabled_win_df['key'].values)
 unlabeled_win_value = unlabled_win_df['value'].values
 
-# Load and preprocess the Cora dataset
-dataset = Planetoid(root='dataset/', name='Cora', transform=T.NormalizeFeatures())
+# Load and preprocess the dataset
+if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
+    dataset = Planetoid(root='dataset/', name=dataset_name, transform=T.NormalizeFeatures())
+elif dataset_name == 'WikiCS':
+    dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
+elif dataset_name == 'Amazon':
+    dataset = Amazon(root='dataset/Amazon', name='Computers', transform=T.NormalizeFeatures())
+elif dataset_name == 'Coauthor':
+    dataset = Coauthor(root='dataset/Coauthor', name='CS', transform=T.NormalizeFeatures())
+else:
+    raise ValueError(f"Dataset {dataset_name} is not supported.")
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 data = dataset[0].to(device)
@@ -243,8 +255,8 @@ for j in range(1, drop_num):
 # Save results
 path = 'res/'
 os.makedirs(path, exist_ok=True)
-with open(os.path.join(path, f'node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{counter}_cora_test.pkl'), 'wb') as file:
+with open(os.path.join(path, f'node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{counter}_{dataset_name}_test.pkl'), 'wb') as file:
     pickle.dump(win_acc, file)
 
-with open(os.path.join(path, f'node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{counter}_cora_vali.pkl'), 'wb') as file:
+with open(os.path.join(path, f'node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{counter}_{dataset_name}_vali.pkl'), 'wb') as file:
     pickle.dump(val_acc_list, file)
