@@ -403,6 +403,7 @@ def get_first_split_wiki_cs(data, seed=42):
         "split_id": split_id,
     }
 
+    print(new_train_mask.sum(), new_val_mask.sum(), new_test_mask.sum())
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
     return data
