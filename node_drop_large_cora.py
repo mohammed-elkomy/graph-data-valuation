@@ -8,38 +8,22 @@ It includes the following main components:
 4. Node dropping experiment to evaluate the effectiveness of the valuation
 """
 
-import pickle
 import collections
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from torch_geometric.datasets import Planetoid
-from torch_geometric.utils import add_self_loops, degree
-from sklearn.metrics import accuracy_score
-import random
-from torch_geometric.transforms import RootedEgoNets
-from torch_geometric.utils import k_hop_subgraph
-import torch_geometric
-import time
-from itertools import chain, combinations
-import numpy as np
+import os
 import pickle
-import pandas as pd
-import argparse
-import torch.nn.functional as F
-import collections
-import copy
-from torch_geometric.nn import SGConv
-import os
-import torch_geometric.transforms as T
-import os
 import re
-from torch_geometric.data import Data
-from torch_geometric.datasets import Amazon
 import warnings
 
+import pandas as pd
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch_geometric.transforms as T
+from torch_geometric.data import Data
+from torch_geometric.datasets import Planetoid
+from torch_geometric.nn import SGConv
+
 warnings.simplefilter(action='ignore', category=Warning)
-import itertools
 
 
 class SGCNet(nn.Module):
