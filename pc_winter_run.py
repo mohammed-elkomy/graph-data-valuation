@@ -458,7 +458,7 @@ if __name__ == "__main__":
 
     data = dataset[0].to(device)
     num_classes = dataset.num_classes
-    get_first_split_wiki_cs(data)
+    # get_first_split_wiki_cs(data)
     # Load train/valid/test split for non-Citation datasets
     if args.dataset in ['Computers', 'Photo', 'Physics', 'WikiCS']:
         with open(config_path, 'rb') as f:
