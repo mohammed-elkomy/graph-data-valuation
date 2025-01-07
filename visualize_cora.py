@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 img_dir = "imgs"
 
-dataset = "cora"
+dataset = "Cora"
 group_trunc_ratio_hop_1 = 0.5
 group_trunc_ratio_hop_2 = 0.7
 
