@@ -349,6 +349,9 @@ def parse_args():
 
 
 def get_first_split_wiki_cs(data, seed=42):
+    """
+    function for creating the wiki-cs split (fixed across experiments)
+    """
     # Set random seed for reproducibility
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -408,7 +411,7 @@ def get_first_split_wiki_cs(data, seed=42):
         "test": test_mask.nonzero(as_tuple=True)[0],
         "split_id": split_id,
     }
-    with open(f"/config/wikics.pkl", "wb") as f:
+    with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
     return data
 
