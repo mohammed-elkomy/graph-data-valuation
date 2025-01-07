@@ -397,17 +397,11 @@ def get_first_split_wiki_cs(data, seed=42):
         print(f"Class {c}: Train: {train_count}, Val: {val_count}, Test: {test_count}")
 
     split_config = {
-        "train": train_mask.nonzero(as_tuple=True)[0],
-        "val": val_mask.nonzero(as_tuple=True)[0],
-        "test": test_mask.nonzero(as_tuple=True)[0],
+        "train": new_train_mask.nonzero(as_tuple=True)[0],
+        "val": new_val_mask.nonzero(as_tuple=True)[0],
+        "test": new_test_mask.nonzero(as_tuple=True)[0],
         "split_id": split_id,
     }
-    train_size = train_mask.sum().item()
-    val_size = val_mask.sum().item()
-    test_size = test_mask.sum().item()
-    print(f"Train Mask:{train_mask.shape} Size: {train_size}")
-    print(f"Validation Mask:{val_mask.shape} Size: {val_size}")
-    print(f"Test Mask:{test_mask.shape} Size: {test_size}")
 
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
