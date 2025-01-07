@@ -470,7 +470,7 @@ if __name__ == "__main__":
         assert (train_mask & val_mask).sum().item() == 0, "Train and Validation masks overlap!"
         assert (val_mask & test_mask).sum().item() == 0, "Validation and Test masks overlap!"
         assert (train_mask & test_mask).sum().item() == 0, "Train and Test masks overlap!"
-
+        assert False
     exit()
 
     # Prepare validation and test data
