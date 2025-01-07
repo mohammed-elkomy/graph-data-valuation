@@ -25,15 +25,16 @@ from torch_geometric.nn import SGConv
 
 warnings.simplefilter(action='ignore', category=Warning)
 
-
 # Parameters
 dataset_name = 'Cora'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
 group_trunc_ratio_hop_1 = 0.5
 group_trunc_ratio_hop_2 = 0.7
+label_trunc_ratio = 0
 ratio = 3
 num_perms = 10
 directory = 'value/'
-pattern = re.compile(rf'^{dataset_name}_(\d+)_10_0_0\.5_0\.7_pc_value\.pkl$')
+pattern = re.compile(rf'^{dataset_name}_(\d+)_{num_perms}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value\.pkl$')
+
 
 class SGCNet(nn.Module):
     """
