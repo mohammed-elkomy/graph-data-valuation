@@ -348,14 +348,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_first_split_wikics(data, seed=42):
+def get_first_split_wiki_cs(data, seed=42):
     # Set random seed for reproducibility
     torch.manual_seed(seed)
     np.random.seed(seed)
-    target_split = 2
+    split_id = 0
     # Get one of the split masks
-    train_mask = data.train_mask[:, target_split].clone()
-    val_mask = data.val_mask[:, target_split].clone()
+    train_mask = data.train_mask[:, split_id].clone()
+    val_mask = data.val_mask[:, split_id].clone()
     test_mask = data.test_mask.clone()  # Full test mask with no split
 
     # Initialize new masks
@@ -375,8 +375,8 @@ def get_first_split_wikics(data, seed=42):
     val_indices = val_mask.nonzero(as_tuple=True)[0]
     test_indices = test_mask.nonzero(as_tuple=True)[0]
 
-    num_val = int(0.20 * val_indices.size(0))
-    num_test = int(0.20 * test_indices.size(0))
+    num_val = int(0.25 * val_indices.size(0))
+    num_test = int(0.25 * test_indices.size(0))
 
     # Shuffle and select the required number of samples
     selected_val_indices = val_indices[torch.randperm(val_indices.size(0))[:num_val]]
@@ -401,6 +401,15 @@ def get_first_split_wikics(data, seed=42):
     print(train_mask.nonzero(as_tuple=True)[0])
     print(val_indices)
     print(test_indices)
+
+    split_config = {
+        "train": train_mask.nonzero(as_tuple=True)[0],
+        "val": val_mask.nonzero(as_tuple=True)[0],
+        "test": test_mask.nonzero(as_tuple=True)[0],
+        "split_id": split_id,
+    }
+    with open(f"/config/wikics.pkl", "wb") as f:
+        pickle.dump(split_config, f)
     return data
 
 
@@ -444,19 +453,23 @@ if __name__ == "__main__":
         config_path = f'./config/Coauthor-{args.dataset}.pkl'
     elif args.dataset == 'WikiCS':
         dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
+        config_path = f'./config/wikics.pkl'
     else:
         dataset = Planetoid(root='dataset/' + dataset_name, name=dataset_name, transform=T.NormalizeFeatures())
 
     data = dataset[0].to(device)
     num_classes = dataset.num_classes
-
-    # Load train/valid/test split for non-Citation datas
-    if args.dataset in ['Computers', 'Photo', 'Physics']:
+    get_first_split_wiki_cs(data)
+    # Load train/valid/test split for non-Citation datasets
+    if args.dataset in ['Computers', 'Photo', 'Physics', 'WikiCS']:
         with open(config_path, 'rb') as f:
             loaded_indices_dict = pickle.load(f)
+            if args.dataset == 'WikiCS':
+                split_id = loaded_indices_dict["split_id"]
+                train_mask = data.train_mask[:, split_id].clone()
+                val_mask = data.val_mask[:, split_id].clone()
+
             data = set_masks_from_indices(data, loaded_indices_dict, device)
-    elif args.dataset == 'WikiCS':
-        data = get_first_split_wikics(data)
 
     train_mask = data.train_mask
     val_mask = data.val_mask
