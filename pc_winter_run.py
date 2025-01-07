@@ -465,8 +465,8 @@ if __name__ == "__main__":
             loaded_indices_dict = pickle.load(f)
             if args.dataset == 'WikiCS':
                 split_id = loaded_indices_dict["split_id"]
-                train_mask = data.train_mask[:, split_id].clone()
-                val_mask = data.val_mask[:, split_id].clone()
+                data.train_mask = data.train_mask[:, split_id].clone()
+                data.val_mask = data.val_mask[:, split_id].clone()
 
             data = set_masks_from_indices(data, loaded_indices_dict, device)
 
