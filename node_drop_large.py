@@ -232,7 +232,7 @@ val_data = get_subgraph_data(data, data.val_mask)
 win_acc = []
 val_acc_list = []
 node_list = unlabeled_win.cpu().numpy()
-drop_num = len(node_list) + 1
+drop_num = max(len(node_list) + 1, 1000)  # limit the demo
 
 # Initial model training and evaluation
 data_copy = data.clone()
@@ -248,6 +248,7 @@ val_acc_list += [val_acc]
 
 # Iteratively drop nodes and evaluate
 for j in tqdm(range(1, drop_num)):
+    # nodes are sorted according to their scores in descending order
     cur_player = node_list[j - 1]
     print('cur_player: ', cur_player)
     cur_node_list = node_list[:j]
