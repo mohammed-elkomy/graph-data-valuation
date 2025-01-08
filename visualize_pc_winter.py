@@ -16,13 +16,14 @@ pattern = f'./res/*node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group
 datagroups = defaultdict(list)
 # Get the unique part of the filename based on the wildcard `*`
 for file_path in sorted(glob.glob(pattern)):
-    print(file_path)
+    print("processing subset", file_path)
     # Extract the unique part of the filename based on the wildcard `*`
     base_name = os.path.basename(file_path)
     unique_part = base_name.split('_')[8]  # Assuming the unique part is after the 6th underscore
 
     with open(file_path, 'rb') as file:
         data = pickle.load(file)
+    print(len(data))
     datagroups[unique_part].extend(data)
 
 for identifier, data_group in datagroups.items():
