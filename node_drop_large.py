@@ -27,6 +27,8 @@ from tqdm import tqdm
 
 from pc_winter_run import calculate_md5_of_string, set_masks_from_indices
 
+WORKERS = 6
+
 warnings.simplefilter(action='ignore', category=Warning)
 #########################
 # # Parameters
@@ -46,6 +48,7 @@ num_perms = 10
 # num_perms = 1
 #########################
 parallel_idx = int(sys.argv[1])
+assert parallel_idx < WORKERS
 print(f"worker {parallel_idx} started")
 directory = 'value/'
 pattern = re.compile(rf'^{dataset_name}_(\d+)_{num_perms}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value\.pkl$')
@@ -249,7 +252,7 @@ val_acc = model.predict_valid(val_data)
 win_acc += [test_acc]
 val_acc_list += [val_acc]
 
-parallel_subset = len(node_list) // 6  # 5 parallel runs
+parallel_subset = len(node_list) // WORKERS  # 6
 # for parallel_idx in range(5):
 #     print(1 + (parallel_subset) * parallel_idx)
 #     print((parallel_subset) * (parallel_idx + 1))
