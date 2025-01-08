@@ -431,6 +431,7 @@ def generate_wikics_split(data, seed=42):
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
 
+    print(split_config)
     print("checksum:", calculate_md5(f"config/wikics.pkl"))
     return data
 
