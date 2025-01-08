@@ -232,7 +232,7 @@ val_data = get_subgraph_data(data, data.val_mask)
 win_acc = []
 val_acc_list = []
 node_list = unlabeled_win.cpu().numpy()
-drop_num = max(len(node_list) + 1, 1000)  # limit the demo
+drop_num = min(len(node_list) + 1, 1000)  # limit the demo
 
 # Initial model training and evaluation
 data_copy = data.clone()
