@@ -248,6 +248,7 @@ val_acc = model.predict_valid(val_data)
 win_acc += [test_acc]
 val_acc_list += [val_acc]
 
+print(len(node_list) )
 parallel_subset = len(node_list) // 5
 for parallel_idx in range(5):
     print(1 + (parallel_subset) * parallel_idx)
