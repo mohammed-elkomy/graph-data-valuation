@@ -10,10 +10,10 @@ group_trunc_ratio_hop_1 = 0.5
 group_trunc_ratio_hop_2 = 0.7
 
 pattern = f'./res/*node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_*_{dataset}_test.pkl'
-print(sorted(glob.glob(pattern)))
+
 
 # Get the unique part of the filename based on the wildcard `*`
-for file_path in glob.glob(pattern):
+for file_path in sorted(glob.glob(pattern)):
     print(file_path)
     # Extract the unique part of the filename based on the wildcard `*`
     base_name = os.path.basename(file_path)
