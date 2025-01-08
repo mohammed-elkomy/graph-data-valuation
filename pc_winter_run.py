@@ -482,7 +482,7 @@ if __name__ == "__main__":
         with open(config_path, 'rb') as f:
             loaded_indices_dict = pickle.load(f)
             if args.dataset == 'WikiCS':
-                # assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
+                assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
                 split_id = loaded_indices_dict["split_id"]
                 data.train_mask = data.train_mask[:, split_id].clone()
                 data.val_mask = data.val_mask[:, split_id].clone()
