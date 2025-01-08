@@ -93,7 +93,7 @@ class SGCNet(nn.Module):
         _, pred = model(input_data).max(dim=1)
         correct = float(pred[input_data.test_mask].eq(input_data.y[input_data.test_mask]).sum().item())
         acc = correct / input_data.test_mask.sum().item()
-        print('Test Accuracy: {:.4f}'.format(acc))
+        # print('Test Accuracy: {:.4f}'.format(acc))
         return acc
 
     def predict_valid(self, dataset):
@@ -104,7 +104,7 @@ class SGCNet(nn.Module):
         _, pred = model(input_data).max(dim=1)
         correct = float(pred[input_data.val_mask].eq(input_data.y[input_data.val_mask]).sum().item())
         acc = correct / input_data.val_mask.sum().item()
-        print('Validation Accuracy: {:.6f}'.format(acc))
+        # print('Validation Accuracy: {:.6f}'.format(acc))
         return acc
 
 
@@ -263,7 +263,8 @@ end_sim = drop_num
 
 start_sim = 1 + (parallel_subset) * parallel_idx
 end_sim = (parallel_subset) * (parallel_idx + 1)
-
+print(start_sim, end_sim)
+exit()
 # Iteratively drop nodes and evaluate
 for j in tqdm(range(start_sim, end_sim)):
     # nodes are sorted according to their scores in descending order
