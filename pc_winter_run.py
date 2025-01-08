@@ -24,6 +24,7 @@ Key features of the implementation include:
 The script uses command-line arguments to control algorithm behavior, including dataset selection,
 number of hops, random seed, number of permutations, and truncation ratios.
 """
+import os
 import sys
 from logging import Logger
 
@@ -352,10 +353,18 @@ def generate_wikics_split(data, seed=42):
     """
     function for creating the wiki-cs split (fixed across experiments)
     """
+    num_per_class = 20
+    split_id = 0
+    val_test_perc = 0.25
+
+    num_per_class = 1
+    split_id = 0
+    val_test_perc = 0.01
+
     # Set random seed for reproducibility
     torch.manual_seed(seed)
     np.random.seed(seed)
-    split_id = 0
+
     # Get one of the split masks
     train_mask = data.train_mask[:, split_id].clone()
     val_mask = data.val_mask[:, split_id].clone()
@@ -371,15 +380,15 @@ def generate_wikics_split(data, seed=42):
     for c in range(num_classes):
         class_indices = (data.y == c).nonzero(as_tuple=True)[0]
         class_train_indices = class_indices[train_mask[class_indices]]
-        selected_train_indices = class_train_indices[torch.randperm(class_train_indices.size(0))[:20]]
+        selected_train_indices = class_train_indices[torch.randperm(class_train_indices.size(0))[:num_per_class]]
         new_train_mask[selected_train_indices] = True
 
     # Get only 15% of data from the original val_mask and test_mask
     val_indices = val_mask.nonzero(as_tuple=True)[0]
     test_indices = test_mask.nonzero(as_tuple=True)[0]
 
-    num_val = int(0.25 * val_indices.size(0))
-    num_test = int(0.25 * test_indices.size(0))
+    num_val = int(val_test_perc * val_indices.size(0))
+    num_test = int(val_test_perc * test_indices.size(0))
 
     # Shuffle and select the required number of samples
     selected_val_indices = val_indices[torch.randperm(val_indices.size(0))[:num_val]]
@@ -595,7 +604,7 @@ if __name__ == "__main__":
                                              ind_train_features, ind_train_labels, val_features, val_labels, device)
             pre_performance = val_acc
             print('full group acc:', val_acc)
-        print("Permutation", i, "finished")
+        print(f"Permutation: {i} finished seed {seed}")
 
         # Save results
         with open(f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
@@ -604,6 +613,8 @@ if __name__ == "__main__":
             pickle.dump(sample_counter_dict, f)
         with open(f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
             pickle.dump(perf_dict, f)
+        print("saving", f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl")
+        print(os.listdir("value"))
 
     # Save results
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
@@ -612,3 +623,6 @@ if __name__ == "__main__":
         pickle.dump(sample_counter_dict, f)
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
         pickle.dump(perf_dict, f)
+
+    print("saving", f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl")
+    print(os.listdir("value"))
