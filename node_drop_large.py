@@ -22,6 +22,7 @@ import torch_geometric.transforms as T
 from torch_geometric.data import Data
 from torch_geometric.datasets import Planetoid, WikiCS, Amazon, Coauthor
 from torch_geometric.nn import SGConv
+from tqdm import tqdm
 
 from pc_winter_run import calculate_md5_of_string, set_masks_from_indices
 
@@ -162,7 +163,6 @@ unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
 unlabeled_win = torch.tensor(unlabled_win_df['key'].values)
 unlabeled_win_value = unlabled_win_df['value'].values
 
-
 # Load and preprocess the dataset
 if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
     dataset = Planetoid(root='dataset/', name=dataset_name, transform=T.NormalizeFeatures())
@@ -192,7 +192,6 @@ if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS']:
             data.val_mask = data.val_mask[:, split_id].clone()
 
         data = set_masks_from_indices(data, loaded_indices_dict, device)
-
 
 train_mask = data.train_mask
 val_mask = data.val_mask
@@ -248,7 +247,7 @@ win_acc += [test_acc]
 val_acc_list += [val_acc]
 
 # Iteratively drop nodes and evaluate
-for j in range(1, drop_num):
+for j in tqdm(range(1, drop_num)):
     cur_player = node_list[j - 1]
     print('cur_player: ', cur_player)
     cur_node_list = node_list[:j]
