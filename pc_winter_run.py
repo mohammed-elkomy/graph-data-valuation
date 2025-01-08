@@ -415,9 +415,9 @@ def generate_wikics_split(data, seed=42):
         print(f"Class {c}: Train: {train_count}, Val: {val_count}, Test: {test_count}")
 
     split_config = {
-        "train": list(new_train_mask.nonzero(as_tuple=True)[0]),
-        "val": list(new_val_mask.nonzero(as_tuple=True)[0]),
-        "test": list(new_test_mask.nonzero(as_tuple=True)[0]),
+        "train": (new_train_mask.nonzero(as_tuple=True)[0]).cpu().numpy(),
+        "val": (new_val_mask.nonzero(as_tuple=True)[0]).cpu().numpy(),
+        "test": (new_test_mask.nonzero(as_tuple=True)[0]).cpu().numpy(),
         "split_id": split_id,
     }
 
