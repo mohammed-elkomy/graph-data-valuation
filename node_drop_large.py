@@ -249,7 +249,7 @@ win_acc += [test_acc]
 val_acc_list += [val_acc]
 
 parallel_subset = len(node_list) // 5
-for i in range(5):
+for parallel_idx in range(5):
     print(1 + (parallel_subset) * parallel_idx)
     print((parallel_subset) * (parallel_idx + 1))
     print()
