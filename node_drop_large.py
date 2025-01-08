@@ -248,16 +248,21 @@ val_acc = model.predict_valid(val_data)
 win_acc += [test_acc]
 val_acc_list += [val_acc]
 
-print(len(node_list) )
-parallel_subset = len(node_list) // 5
-for parallel_idx in range(5):
-    print(1 + (parallel_subset) * parallel_idx)
-    print((parallel_subset) * (parallel_idx + 1))
-    print()
-exit()
+
+parallel_subset = len(node_list) // 5  # 5 parallel runs
+# for parallel_idx in range(5):
+#     print(1 + (parallel_subset) * parallel_idx)
+#     print((parallel_subset) * (parallel_idx + 1))
+#     print()
+
+start_sim = 1
+end_sim = drop_num
+
+start_sim = 1 + (parallel_subset) * parallel_idx
+end_sim = (parallel_subset) * (parallel_idx + 1)
 
 # Iteratively drop nodes and evaluate
-for j in tqdm(range(1, drop_num)):
+for j in tqdm(range(start_sim, end_sim)):
     # nodes are sorted according to their scores in descending order
     cur_player = node_list[j - 1]
     print('cur_player: ', cur_player)
