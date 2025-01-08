@@ -372,9 +372,9 @@ def generate_wikics_split(data, seed=42):
     split_id = 0
     val_test_perc = 0.25
 
-    # num_per_class = 1
-    # split_id = 0
-    # val_test_perc = 0.01
+    num_per_class = 1
+    split_id = 0
+    val_test_perc = 0.01
 
     # Set random seed for reproducibility
     torch.manual_seed(seed)
@@ -630,8 +630,7 @@ if __name__ == "__main__":
             pickle.dump(sample_counter_dict, f)
         with open(f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
             pickle.dump(perf_dict, f)
-        print("saving", f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl")
-        print(os.listdir("value"))
+
 
     # Save results
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
@@ -641,5 +640,4 @@ if __name__ == "__main__":
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
         pickle.dump(perf_dict, f)
 
-    print("saving", f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl")
-    print(os.listdir("value"))
+
