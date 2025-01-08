@@ -58,6 +58,7 @@ from torch_geometric.nn.conv.gcn_conv import gcn_norm
 from torch_geometric.typing import Adj, OptTensor, SparseTensor
 from torch_geometric.utils import spmm
 from tqdm import tqdm
+import subprocess
 
 dataset_params = {
     'Computers': {
@@ -349,6 +350,20 @@ def parse_args():
     return parser.parse_args()
 
 
+def calculate_md5(file_path):
+    """Calculate the MD5 checksum of a file using the Linux md5sum command."""
+    try:
+        result = subprocess.run(['md5sum', file_path], capture_output=True, text=True, check=True)
+        md5_checksum = result.stdout.split()[0]  # md5sum output format: <checksum> <filename>
+        return md5_checksum
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred while running md5sum: {e}")
+        return None
+    except FileNotFoundError:
+        print("md5sum command not found. Please ensure it is installed.")
+        return None
+
+
 def generate_wikics_split(data, seed=42):
     """
     function for creating the wiki-cs split (fixed across experiments)
@@ -357,9 +372,9 @@ def generate_wikics_split(data, seed=42):
     split_id = 0
     val_test_perc = 0.25
 
-    num_per_class = 1
-    split_id = 0
-    val_test_perc = 0.01
+    # num_per_class = 1
+    # split_id = 0
+    # val_test_perc = 0.01
 
     # Set random seed for reproducibility
     torch.manual_seed(seed)
@@ -415,6 +430,8 @@ def generate_wikics_split(data, seed=42):
     print(new_train_mask.sum(), new_val_mask.sum(), new_test_mask.sum())
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
+
+    print("checksum:", calculate_md5(f"config/wikics.pkl"))
     return data
 
 
@@ -459,7 +476,7 @@ if __name__ == "__main__":
     elif args.dataset == 'WikiCS':
         dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
         config_path = f'./config/wikics.pkl'
-        generate_wikics_split(dataset) # if you want to generate the wikics split and save it into a pickle at config dir
+        generate_wikics_split(dataset)  # if you want to generate the wikics split and save it into a pickle at config dir
     else:
         dataset = Planetoid(root='dataset/' + dataset_name, name=dataset_name, transform=T.NormalizeFeatures())
 
