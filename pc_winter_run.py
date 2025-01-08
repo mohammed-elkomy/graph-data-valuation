@@ -415,9 +415,9 @@ def generate_wikics_split(data, seed=42):
         print(f"Class {c}: Train: {train_count}, Val: {val_count}, Test: {test_count}")
 
     split_config = {
-        "train": new_train_mask.nonzero(as_tuple=True)[0],
-        "val": new_val_mask.nonzero(as_tuple=True)[0],
-        "test": new_test_mask.nonzero(as_tuple=True)[0],
+        "train": list(new_train_mask.nonzero(as_tuple=True)[0]),
+        "val": list(new_val_mask.nonzero(as_tuple=True)[0]),
+        "test": list(new_test_mask.nonzero(as_tuple=True)[0]),
         "split_id": split_id,
     }
 
@@ -425,6 +425,7 @@ def generate_wikics_split(data, seed=42):
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
 
+    print(split_config)
     print(calculate_md5_of_string(str(split_config)))
     return data
 
