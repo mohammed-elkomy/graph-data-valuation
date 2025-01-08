@@ -36,7 +36,7 @@ dataset_name = 'Cora'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazo
 group_trunc_ratio_hop_1 = 0.5
 group_trunc_ratio_hop_2 = 0.7
 label_trunc_ratio = 0
-ratio = 20
+ratio = 25
 num_perms = 10
 #########################
 # Parameters
@@ -48,7 +48,7 @@ num_perms = 10
 # num_perms = 1
 #########################
 parallel_idx = int(sys.argv[1])
-assert parallel_idx < WORKERS # python node_drop_large.py 3 &
+assert parallel_idx < WORKERS  # python node_drop_large.py 3 &
 print(f"worker {parallel_idx} started")
 directory = 'value/'
 pattern = re.compile(rf'^{dataset_name}_(\d+)_{num_perms}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value\.pkl$')
@@ -261,10 +261,9 @@ parallel_subset = len(node_list) // WORKERS  # 6
 start_sim = 1
 end_sim = drop_num
 
-start_sim = 1 + (parallel_subset) * parallel_idx
+start_sim = max(1, (parallel_subset) * parallel_idx)
 end_sim = (parallel_subset) * (parallel_idx + 1)
-print(start_sim, end_sim)
-exit()
+
 # Iteratively drop nodes and evaluate
 for j in tqdm(range(start_sim, end_sim)):
     # nodes are sorted according to their scores in descending order
