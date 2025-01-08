@@ -425,7 +425,7 @@ def generate_wikics_split(data, seed=42):
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
 
-    print(calculate_md5_of_string(str(loaded_indices_dict)))
+    print(calculate_md5_of_string(str(split_config)))
     return data
 
 
