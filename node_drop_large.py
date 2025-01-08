@@ -261,9 +261,10 @@ parallel_subset = len(node_list) // WORKERS  # 6
 start_sim = 1
 end_sim = drop_num
 
-start_sim = max(1, (parallel_subset) * parallel_idx)
+start_sim = max(1, parallel_subset * parallel_idx)
 end_sim = (parallel_subset) * (parallel_idx + 1)
 
+print(start_sim, end_sim)
 # Iteratively drop nodes and evaluate
 for j in tqdm(range(start_sim, end_sim)):
     # nodes are sorted according to their scores in descending order
