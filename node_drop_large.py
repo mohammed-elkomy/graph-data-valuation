@@ -12,6 +12,7 @@ import collections
 import os
 import pickle
 import re
+import sys
 import warnings
 
 import pandas as pd
@@ -35,7 +36,6 @@ group_trunc_ratio_hop_2 = 0.7
 label_trunc_ratio = 0
 ratio = 20
 num_perms = 10
-parallel_idx = 0
 #########################
 # Parameters
 # dataset_name = 'WikiCS'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
@@ -44,8 +44,9 @@ parallel_idx = 0
 # label_trunc_ratio = 0
 # ratio = 20
 # num_perms = 1
-# parallel_idx = 0
 #########################
+parallel_idx = int(sys.argv[1])
+print(f"worker {parallel_idx} started")
 directory = 'value/'
 pattern = re.compile(rf'^{dataset_name}_(\d+)_{num_perms}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value\.pkl$')
 
@@ -248,8 +249,7 @@ val_acc = model.predict_valid(val_data)
 win_acc += [test_acc]
 val_acc_list += [val_acc]
 
-
-parallel_subset = len(node_list) // 5  # 5 parallel runs
+parallel_subset = len(node_list) // 6  # 5 parallel runs
 # for parallel_idx in range(5):
 #     print(1 + (parallel_subset) * parallel_idx)
 #     print((parallel_subset) * (parallel_idx + 1))
