@@ -48,7 +48,7 @@ num_perms = 10
 # num_perms = 1
 #########################
 parallel_idx = int(sys.argv[1])
-assert parallel_idx < WORKERS
+assert parallel_idx < WORKERS # python node_drop_large.py 3 &
 print(f"worker {parallel_idx} started")
 directory = 'value/'
 pattern = re.compile(rf'^{dataset_name}_(\d+)_{num_perms}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value\.pkl$')
