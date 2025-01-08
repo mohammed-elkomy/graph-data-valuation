@@ -366,9 +366,9 @@ def generate_wikics_split(data, seed=42):
     split_id = 0
     val_test_perc = 0.25
 
-    num_per_class = 1
-    split_id = 0
-    val_test_perc = 0.001
+    # num_per_class = 1
+    # split_id = 0
+    # val_test_perc = 0.001
 
     # Set random seed for reproducibility
     torch.manual_seed(seed)
@@ -425,7 +425,7 @@ def generate_wikics_split(data, seed=42):
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
 
-    print("hash for configs",calculate_md5_of_string(str(split_config)))
+    print("hash for configs", calculate_md5_of_string(str(split_config)))
     return data
 
 
@@ -444,7 +444,7 @@ if __name__ == "__main__":
     group_trunc_ratio_hop_1 = args.group_trunc_ratio_hop_1
     group_trunc_ratio_hop_2 = args.group_trunc_ratio_hop_2
     verbose = args.verbose
-    print(f"logs_{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}.txt")
+    # print(f"logs_{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}.txt")
     # sys.stdout = open(f"logs_{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}.txt", "w")
     if dataset_name in dataset_params:
         params = dataset_params[dataset_name]
@@ -617,14 +617,6 @@ if __name__ == "__main__":
             pre_performance = val_acc
             print('full group acc:', val_acc)
         print(f"Permutation: {i} finished seed {seed}")
-
-        # Save results
-        with open(f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
-            pickle.dump(sample_value_dict, f)
-        with open(f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value_count.pkl", "wb") as f:
-            pickle.dump(sample_counter_dict, f)
-        with open(f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
-            pickle.dump(perf_dict, f)
 
     # Save results
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
