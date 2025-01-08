@@ -162,24 +162,13 @@ unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
 unlabeled_win = torch.tensor(unlabled_win_df['key'].values)
 unlabeled_win_value = unlabled_win_df['value'].values
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(device)
 
 # Load and preprocess the dataset
 if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
     dataset = Planetoid(root='dataset/', name=dataset_name, transform=T.NormalizeFeatures())
 elif dataset_name == 'WikiCS':
     dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
-    with open(f'./config/wikics.pkl', 'rb') as f:
-
-        loaded_indices_dict = pickle.load(f)
-        assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
-        split_id = loaded_indices_dict["split_id"]
-        dataset.train_mask = dataset.train_mask[:, split_id].clone()
-        dataset.val_mask = dataset.val_mask[:, split_id].clone()
-
-    dataset = set_masks_from_indices(dataset, loaded_indices_dict, device)
-
+    config_path = f'./config/wikics.pkl'
 elif dataset_name == 'Amazon':
     dataset = Amazon(root='dataset/Amazon', name='Computers', transform=T.NormalizeFeatures())
     raise NotImplementedError
@@ -188,8 +177,22 @@ elif dataset_name == 'Coauthor':
     raise NotImplementedError
 else:
     raise ValueError(f"Dataset {dataset_name} is not supported.")
-
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(device)
 data = dataset[0].to(device)
+
+# Load train/valid/test split for non-Citation datasets
+if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS']:
+    with open(config_path, 'rb') as f:
+        loaded_indices_dict = pickle.load(f)
+        if dataset_name == 'WikiCS':
+            assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
+            split_id = loaded_indices_dict["split_id"]
+            data.train_mask = data.train_mask[:, split_id].clone()
+            data.val_mask = data.val_mask[:, split_id].clone()
+
+        data = set_masks_from_indices(data, loaded_indices_dict, device)
+
 
 train_mask = data.train_mask
 val_mask = data.val_mask
