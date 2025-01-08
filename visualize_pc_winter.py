@@ -27,7 +27,7 @@ for file_path in sorted(glob.glob(pattern)):
     datagroups[unique_part].extend(data)
 
 for identifier, data_group in datagroups.items():
-    print(len(data_group))
+    print(identifier, len(data_group))
     plt.figure(figsize=(8, 6))
 
     plt.plot(data_group, label='Our method')
