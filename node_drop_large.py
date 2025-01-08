@@ -238,34 +238,27 @@ val_data = get_subgraph_data(data, data.val_mask)
 win_acc = []
 val_acc_list = []
 node_list = unlabeled_win.cpu().numpy()
-drop_num = min(len(node_list) + 1, 1000)  # limit the demo
+drop_num = len(node_list)
+parallel_subset = len(node_list) // WORKERS
 
-# Initial model training and evaluation
-data_copy = data.clone()
-data_copy = data_copy.to(device)
-data_copy.edge_index = data_copy.edge_index[:, indu_mask]
-
-model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes).to(device)
-model.fit(data_copy)
-test_acc = model.predict(test_data)
-val_acc = model.predict_valid(val_data)
-win_acc += [test_acc]
-val_acc_list += [val_acc]
-
-parallel_subset = len(node_list) // WORKERS  # 6
-# for parallel_idx in range(5):
-#     print(1 + (parallel_subset) * parallel_idx)
-#     print((parallel_subset) * (parallel_idx + 1))
-#     print()
-
-start_sim = 1
-end_sim = drop_num
-
-start_sim = max(1, parallel_subset * parallel_idx)
+start_sim = parallel_subset * parallel_idx
 end_sim = (parallel_subset) * (parallel_idx + 1)
 
-print(start_sim, end_sim)
-exit()
+if start_sim == 0:
+    # Initial model training and evaluation
+    data_copy = data.clone()
+    data_copy = data_copy.to(device)
+    data_copy.edge_index = data_copy.edge_index[:, indu_mask]
+
+    model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes).to(device)
+    model.fit(data_copy)
+    test_acc = model.predict(test_data)
+    val_acc = model.predict_valid(val_data)
+    win_acc += [test_acc]
+    val_acc_list += [val_acc]
+    start_sim = 1
+
+
 # Iteratively drop nodes and evaluate
 for j in tqdm(range(start_sim, end_sim)):
     # nodes are sorted according to their scores in descending order
