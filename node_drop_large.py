@@ -258,7 +258,13 @@ if start_sim == 0:
     val_acc_list += [val_acc]
     start_sim = 1
 
-
+"""
+python node_drop_large.py 0 & 
+python node_drop_large.py 1 & 
+python node_drop_large.py 2 & 
+python node_drop_large.py 3 & 
+python node_drop_large.py 4 & 
+"""
 # Iteratively drop nodes and evaluate
 for j in tqdm(range(start_sim, end_sim)):
     # nodes are sorted according to their scores in descending order
