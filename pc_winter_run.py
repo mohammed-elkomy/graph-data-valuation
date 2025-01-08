@@ -366,9 +366,9 @@ def generate_wikics_split(data, seed=42):
     split_id = 0
     val_test_perc = 0.25
 
-    num_per_class = 1
-    split_id = 0
-    val_test_perc = 0.01
+    # num_per_class = 1
+    # split_id = 0
+    # val_test_perc = 0.01
 
     # Set random seed for reproducibility
     torch.manual_seed(seed)
@@ -425,6 +425,7 @@ def generate_wikics_split(data, seed=42):
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
 
+    print(calculate_md5_of_string(str(loaded_indices_dict)))
     return data
 
 
