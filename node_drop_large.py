@@ -23,6 +23,8 @@ from torch_geometric.data import Data
 from torch_geometric.datasets import Planetoid, WikiCS, Amazon, Coauthor
 from torch_geometric.nn import SGConv
 
+from pc_winter_run import calculate_md5_of_string, set_masks_from_indices
+
 warnings.simplefilter(action='ignore', category=Warning)
 
 # # Parameters
@@ -99,26 +101,6 @@ class SGCNet(nn.Module):
         return acc
 
 
-def set_masks_from_indices(data, indices_dict, device):
-    """Set train, validation, and test masks for the data"""
-    num_nodes = data.num_nodes
-
-    train_mask = torch.zeros(num_nodes, dtype=bool).to(device)
-    train_mask[indices_dict["train"]] = 1
-
-    val_mask = torch.zeros(num_nodes, dtype=bool).to(device)
-    val_mask[indices_dict["val"]] = 1
-
-    test_mask = torch.zeros(num_nodes, dtype=bool).to(device)
-    test_mask[indices_dict["test"]] = 1
-
-    data.train_mask = train_mask
-    data.test_mask = test_mask
-    data.val_mask = val_mask
-
-    return data
-
-
 def get_subgraph_data(data, mask):
     """Extract subgraph data based on the given mask"""
     nodes = mask.nonzero().view(-1)
@@ -189,11 +171,15 @@ if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
 elif dataset_name == 'WikiCS':
     dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
     with open(f'./config/wikics.pkl', 'rb') as f:
+
         loaded_indices_dict = pickle.load(f)
+        assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
         split_id = loaded_indices_dict["split_id"]
         dataset.train_mask = dataset.train_mask[:, split_id].clone()
         dataset.val_mask = dataset.val_mask[:, split_id].clone()
-        dataset = set_masks_from_indices(dataset, loaded_indices_dict, device)
+
+    dataset = set_masks_from_indices(dataset, loaded_indices_dict, device)
+
 elif dataset_name == 'Amazon':
     dataset = Amazon(root='dataset/Amazon', name='Computers', transform=T.NormalizeFeatures())
     raise NotImplementedError
