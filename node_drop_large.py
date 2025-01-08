@@ -25,13 +25,22 @@ from torch_geometric.nn import SGConv
 
 warnings.simplefilter(action='ignore', category=Warning)
 
+# # Parameters
+# dataset_name = 'Cora'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
+# group_trunc_ratio_hop_1 = 0.5
+# group_trunc_ratio_hop_2 = 0.7
+# label_trunc_ratio = 0
+# ratio = 20
+# num_perms = 10
+
 # Parameters
-dataset_name = 'Cora'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
-group_trunc_ratio_hop_1 = 0.5
-group_trunc_ratio_hop_2 = 0.7
+dataset_name = 'WikiCS'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
+group_trunc_ratio_hop_1 = 0.7
+group_trunc_ratio_hop_2 = 0.9
 label_trunc_ratio = 0
 ratio = 20
-num_perms = 10
+num_perms = 1
+
 directory = 'value/'
 pattern = re.compile(rf'^{dataset_name}_(\d+)_{num_perms}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value\.pkl$')
 
@@ -171,6 +180,9 @@ unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
 unlabeled_win = torch.tensor(unlabled_win_df['key'].values)
 unlabeled_win_value = unlabled_win_df['value'].values
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(device)
+
 # Load and preprocess the dataset
 if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
     dataset = Planetoid(root='dataset/', name=dataset_name, transform=T.NormalizeFeatures())
@@ -181,7 +193,7 @@ elif dataset_name == 'WikiCS':
         split_id = loaded_indices_dict["split_id"]
         dataset.train_mask = dataset.train_mask[:, split_id].clone()
         dataset.val_mask = dataset.val_mask[:, split_id].clone()
-
+        dataset = set_masks_from_indices(dataset, loaded_indices_dict, device)
 elif dataset_name == 'Amazon':
     dataset = Amazon(root='dataset/Amazon', name='Computers', transform=T.NormalizeFeatures())
     raise NotImplementedError
@@ -191,18 +203,25 @@ elif dataset_name == 'Coauthor':
 else:
     raise ValueError(f"Dataset {dataset_name} is not supported.")
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(device)
 data = dataset[0].to(device)
 
 train_mask = data.train_mask
 val_mask = data.val_mask
 test_mask = data.test_mask
 
+train_size = train_mask.sum().item()
+val_size = val_mask.sum().item()
+test_size = test_mask.sum().item()
+
 # Print dataset sizes
-print(f"Training size: {train_mask.sum().item()}")
-print(f"Validation size: {val_mask.sum().item()}")
-print(f"Test size: {test_mask.sum().item()}")
+print(f"Train Mask:{train_mask.shape} Size: {train_size}")
+print(f"Validation Mask:{val_mask.shape} Size: {val_size}")
+print(f"Test Mask:{test_mask.shape} Size: {test_size}")
+
+# Assertions to ensure no overlap between masks
+assert (train_mask & val_mask).sum().item() == 0, "Train and Validation masks overlap!"
+assert (val_mask & test_mask).sum().item() == 0, "Validation and Test masks overlap!"
+assert (train_mask & test_mask).sum().item() == 0, "Train and Test masks overlap!"
 
 # Create inductive edge index (removing edges to val/test nodes)
 inductive_edge_index = []
