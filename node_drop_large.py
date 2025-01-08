@@ -265,6 +265,7 @@ start_sim = max(1, parallel_subset * parallel_idx)
 end_sim = (parallel_subset) * (parallel_idx + 1)
 
 print(start_sim, end_sim)
+exit()
 # Iteratively drop nodes and evaluate
 for j in tqdm(range(start_sim, end_sim)):
     # nodes are sorted according to their scores in descending order
