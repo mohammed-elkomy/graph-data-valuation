@@ -32,20 +32,20 @@ WORKERS = 6
 warnings.simplefilter(action='ignore', category=Warning)
 #########################
 # # Parameters
-dataset_name = 'Cora'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
-group_trunc_ratio_hop_1 = 0.5
-group_trunc_ratio_hop_2 = 0.7
-label_trunc_ratio = 0
-ratio = 25
-num_perms = 10
+# dataset_name = 'Cora'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
+# group_trunc_ratio_hop_1 = 0.5
+# group_trunc_ratio_hop_2 = 0.7
+# label_trunc_ratio = 0
+# ratio = 25
+# num_perms = 10
 #########################
 # Parameters
-# dataset_name = 'WikiCS'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
-# group_trunc_ratio_hop_1 = 0.7
-# group_trunc_ratio_hop_2 = 0.9
-# label_trunc_ratio = 0
-# ratio = 20
-# num_perms = 1
+dataset_name = 'WikiCS'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
+group_trunc_ratio_hop_1 = 0.7
+group_trunc_ratio_hop_2 = 0.9
+label_trunc_ratio = 0
+ratio = 20
+num_perms = 1
 #########################
 parallel_idx = int(sys.argv[1])
 assert parallel_idx < WORKERS  # python node_drop_large.py 3 &
@@ -258,13 +258,6 @@ if start_sim == 0:
     val_acc_list += [val_acc]
     start_sim = 1
 
-"""
-python node_drop_large.py 0 & 
-python node_drop_large.py 1 & 
-python node_drop_large.py 2 & 
-python node_drop_large.py 3 & 
-python node_drop_large.py 4 & 
-"""
 # Iteratively drop nodes and evaluate
 for j in tqdm(range(start_sim, end_sim)):
     # nodes are sorted according to their scores in descending order
