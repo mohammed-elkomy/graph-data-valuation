@@ -10,7 +10,7 @@ group_trunc_ratio_hop_1 = 0.5
 group_trunc_ratio_hop_2 = 0.7
 
 pattern = f'./res/*node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_*_{dataset}_test.pkl'
-print(glob.glob(pattern))
+print(sorted(glob.glob(pattern)))
 exit()
 for file_path in glob.glob(pattern):
     print(file_path)
