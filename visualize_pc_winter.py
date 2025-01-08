@@ -23,7 +23,7 @@ for file_path in sorted(glob.glob(pattern)):
 
     with open(file_path, 'rb') as file:
         data = pickle.load(file)
-    print(len(data))
+    print(data[:5])
     datagroups[unique_part].extend(data)
 
 for identifier, data_group in datagroups.items():
