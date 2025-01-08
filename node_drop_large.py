@@ -27,23 +27,25 @@ from tqdm import tqdm
 from pc_winter_run import calculate_md5_of_string, set_masks_from_indices
 
 warnings.simplefilter(action='ignore', category=Warning)
-
+#########################
 # # Parameters
-# dataset_name = 'Cora'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
-# group_trunc_ratio_hop_1 = 0.5
-# group_trunc_ratio_hop_2 = 0.7
-# label_trunc_ratio = 0
-# ratio = 20
-# num_perms = 10
-
-# Parameters
-dataset_name = 'WikiCS'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
-group_trunc_ratio_hop_1 = 0.7
-group_trunc_ratio_hop_2 = 0.9
+dataset_name = 'Cora'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
+group_trunc_ratio_hop_1 = 0.5
+group_trunc_ratio_hop_2 = 0.7
 label_trunc_ratio = 0
 ratio = 20
-num_perms = 1
-
+num_perms = 10
+parallel_idx = 0
+#########################
+# Parameters
+# dataset_name = 'WikiCS'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
+# group_trunc_ratio_hop_1 = 0.7
+# group_trunc_ratio_hop_2 = 0.9
+# label_trunc_ratio = 0
+# ratio = 20
+# num_perms = 1
+# parallel_idx = 0
+#########################
 directory = 'value/'
 pattern = re.compile(rf'^{dataset_name}_(\d+)_{num_perms}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value\.pkl$')
 
@@ -246,6 +248,11 @@ val_acc = model.predict_valid(val_data)
 win_acc += [test_acc]
 val_acc_list += [val_acc]
 
+parllel_subset = len(node_list) // 5
+print(1 + (parllel_subset) * parallel_idx)
+print((parllel_subset) * (parallel_idx + 1))
+exit()
+
 # Iteratively drop nodes and evaluate
 for j in tqdm(range(1, drop_num)):
     # nodes are sorted according to their scores in descending order
@@ -273,8 +280,8 @@ for j in tqdm(range(1, drop_num)):
 # Save results
 path = 'res/'
 os.makedirs(path, exist_ok=True)
-with open(os.path.join(path, f'node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{counter}_{dataset_name}_test.pkl'), 'wb') as file:
+with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{counter}_{dataset_name}_test.pkl'), 'wb') as file:
     pickle.dump(win_acc, file)
 
-with open(os.path.join(path, f'node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{counter}_{dataset_name}_vali.pkl'), 'wb') as file:
+with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{counter}_{dataset_name}_vali.pkl'), 'wb') as file:
     pickle.dump(val_acc_list, file)
