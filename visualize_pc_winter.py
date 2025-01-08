@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # group_trunc_ratio_hop_1 = 0.5
 # group_trunc_ratio_hop_2 = 0.7
 ###########################################
-dataset_name = 'WikiCS'
+dataset = 'WikiCS'
 group_trunc_ratio_hop_1 = 0.7
 group_trunc_ratio_hop_2 = 0.9
 ###########################################
