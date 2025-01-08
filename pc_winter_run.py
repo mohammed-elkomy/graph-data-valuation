@@ -350,19 +350,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def calculate_md5(file_path):
-    """Calculate the MD5 checksum of a file using the Linux md5sum command."""
-    try:
-        result = subprocess.run(['md5sum', file_path], capture_output=True, text=True, check=True)
-        md5_checksum = result.stdout.split()[0]  # md5sum output format: <checksum> <filename>
-        return md5_checksum
-    except subprocess.CalledProcessError as e:
-        print(f"Error occurred while running md5sum: {e}")
-        return None
-    except FileNotFoundError:
-        print("md5sum command not found. Please ensure it is installed.")
-        return None
-
 
 def generate_wikics_split(data, seed=42):
     """
@@ -431,8 +418,7 @@ def generate_wikics_split(data, seed=42):
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
 
-    print(split_config)
-    print("checksum:", calculate_md5(f"config/wikics.pkl"))
+    print(hash(str(split_config)))
     return data
 
 
