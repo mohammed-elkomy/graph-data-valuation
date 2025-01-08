@@ -371,10 +371,10 @@ def generate_wikics_split(data, seed=42):
     num_per_class = 20
     split_id = 0
     val_test_perc = 0.25
-    #
-    # num_per_class = 1
-    # split_id = 0
-    # val_test_perc = 0.01
+
+    num_per_class = 1
+    split_id = 0
+    val_test_perc = 0.01
 
     # Set random seed for reproducibility
     torch.manual_seed(seed)
