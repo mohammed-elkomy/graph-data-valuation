@@ -24,6 +24,7 @@ Key features of the implementation include:
 The script uses command-line arguments to control algorithm behavior, including dataset selection,
 number of hops, random seed, number of permutations, and truncation ratios.
 """
+import hashlib
 import os
 import sys
 from logging import Logger
@@ -349,6 +350,11 @@ def parse_args():
     parser.add_argument('--verbose', type=bool, default=True)
     return parser.parse_args()
 
+def calculate_md5_of_string(input_string):
+    """Calculate the MD5 checksum of a given string."""
+    md5_hash = hashlib.md5()  # Create an MD5 hash object
+    md5_hash.update(input_string.encode('utf-8'))  # Encode the string and update the hash
+    return md5_hash.hexdigest()  # Return the hexadecimal digest
 
 
 def generate_wikics_split(data, seed=42):
@@ -418,7 +424,7 @@ def generate_wikics_split(data, seed=42):
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
 
-    print(hash(str(split_config)))
+    print(calculate_md5_of_string(str(split_config)))
     return data
 
 
