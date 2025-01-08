@@ -350,6 +350,7 @@ def parse_args():
     parser.add_argument('--verbose', type=bool, default=True)
     return parser.parse_args()
 
+
 def calculate_md5_of_string(input_string):
     """Calculate the MD5 checksum of a given string."""
     md5_hash = hashlib.md5()  # Create an MD5 hash object
@@ -424,7 +425,6 @@ def generate_wikics_split(data, seed=42):
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
 
-    print(calculate_md5_of_string(str(split_config)))
     return data
 
 
@@ -481,6 +481,8 @@ if __name__ == "__main__":
         with open(config_path, 'rb') as f:
             loaded_indices_dict = pickle.load(f)
             if args.dataset == 'WikiCS':
+                assert calculate_md5_of_string(str(loaded_indices_dict)) == "f8fe9dce23783245977316ecd3c17f6c"
+
                 split_id = loaded_indices_dict["split_id"]
                 data.train_mask = data.train_mask[:, split_id].clone()
                 data.val_mask = data.val_mask[:, split_id].clone()
@@ -624,7 +626,6 @@ if __name__ == "__main__":
         with open(f"value/{dataset_name}_{seed}_{i + 1}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
             pickle.dump(perf_dict, f)
 
-
     # Save results
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
         pickle.dump(sample_value_dict, f)
@@ -632,5 +633,3 @@ if __name__ == "__main__":
         pickle.dump(sample_counter_dict, f)
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
         pickle.dump(perf_dict, f)
-
-
