@@ -425,8 +425,7 @@ def generate_wikics_split(data, seed=42):
     with open(f"config/wikics.pkl", "wb") as f:
         pickle.dump(split_config, f)
 
-    print(split_config)
-    print(calculate_md5_of_string(str(split_config)))
+    print("hash for configs",calculate_md5_of_string(str(split_config)))
     return data
 
 
@@ -483,7 +482,7 @@ if __name__ == "__main__":
         with open(config_path, 'rb') as f:
             loaded_indices_dict = pickle.load(f)
             if args.dataset == 'WikiCS':
-                assert calculate_md5_of_string(str(loaded_indices_dict)) == "f8fe9dce23783245977316ecd3c17f6c"
+                assert calculate_md5_of_string(str(loaded_indices_dict)) == "e5aa8c07f45d30de62e91e4609e7d5b3"
 
                 split_id = loaded_indices_dict["split_id"]
                 data.train_mask = data.train_mask[:, split_id].clone()
