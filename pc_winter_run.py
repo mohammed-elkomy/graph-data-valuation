@@ -357,9 +357,9 @@ def generate_wikics_split(data, seed=42):
     split_id = 0
     val_test_perc = 0.25
 
-    # num_per_class = 1
-    # split_id = 0
-    # val_test_perc = 0.01
+    num_per_class = 1
+    split_id = 0
+    val_test_perc = 0.01
 
     # Set random seed for reproducibility
     torch.manual_seed(seed)
@@ -459,7 +459,7 @@ if __name__ == "__main__":
     elif args.dataset == 'WikiCS':
         dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
         config_path = f'./config/wikics.pkl'
-        # generate_wikics_split(dataset) # if you want to generate the wikics split and save it into a pickle at config dir
+        generate_wikics_split(dataset) # if you want to generate the wikics split and save it into a pickle at config dir
     else:
         dataset = Planetoid(root='dataset/' + dataset_name, name=dataset_name, transform=T.NormalizeFeatures())
 
