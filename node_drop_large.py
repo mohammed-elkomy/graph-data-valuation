@@ -78,7 +78,19 @@ parallel_idx = args.parallel_idx
 assert parallel_idx < WORKERS  # python node_drop_large.py 3 &
 
 directory = 'value/'
-pattern = re.compile(rf'^{dataset_name}_(\d+)_{num_perms}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value\.pkl$')
+# Correctly escape the decimal point in the ratios
+# Prepare the parts of the pattern
+group_trunc_ratio_hop_1_str = str(group_trunc_ratio_hop_1).replace('.', r'\.')
+group_trunc_ratio_hop_2_str = str(group_trunc_ratio_hop_2).replace('.', r'\.')
+
+# Construct the pattern
+pattern = re.compile(
+    rf'^{dataset_name}_(\d+)_'
+    rf'{num_perms}_'
+    rf'{label_trunc_ratio}_'
+    rf'{group_trunc_ratio_hop_1_str}_'
+    rf'{group_trunc_ratio_hop_2_str}_pc_value\.pkl$'
+)
 
 # Print the parameters to verify
 print(f"Dataset: {dataset_name}")
