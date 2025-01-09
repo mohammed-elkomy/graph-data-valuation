@@ -80,6 +80,7 @@ assert parallel_idx < WORKERS  # python node_drop_large.py 3 &
 directory = 'value/'
 # Correctly escape the decimal point in the ratios
 # Prepare the parts of the pattern
+label_trunc_ratio_str = str(label_trunc_ratio).replace('.', r'\.')
 group_trunc_ratio_hop_1_str = str(group_trunc_ratio_hop_1).replace('.', r'\.')
 group_trunc_ratio_hop_2_str = str(group_trunc_ratio_hop_2).replace('.', r'\.')
 
@@ -87,7 +88,7 @@ group_trunc_ratio_hop_2_str = str(group_trunc_ratio_hop_2).replace('.', r'\.')
 pattern = re.compile(
     rf'^{dataset_name}_(\d+)_'
     rf'{num_perms}_'
-    rf'{label_trunc_ratio}_'
+    rf'{label_trunc_ratio_str}_'
     rf'{group_trunc_ratio_hop_1_str}_'
     rf'{group_trunc_ratio_hop_2_str}_pc_value\.pkl$'
 )
