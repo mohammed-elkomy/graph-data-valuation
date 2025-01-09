@@ -31,6 +31,7 @@ from pc_winter_run import calculate_md5_of_string, set_masks_from_indices
 WORKERS = 6
 warnings.simplefilter(action='ignore', category=Warning)
 
+
 def parse_args():
     """
     Parses command-line arguments for the script and returns the parsed parameters.
@@ -56,10 +57,12 @@ def parse_args():
     parser.add_argument('--parallel_idx', type=int, required=True,
                         help="Index for parallel execution.")
 
-    # Parse the arguments
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
+
+def format_ratio(value):
+    """Converts a float value to both string representations of `0` and `0.0`."""
+    return r'(0|0\.0)' if value == 0 else str(value).replace('.', r'\.')
 
 
 # Parse arguments
@@ -74,18 +77,14 @@ ratio = args.ratio
 num_perms = args.num_perms
 parallel_idx = args.parallel_idx
 
+# Ensure parallel_idx is within a valid range (for demonstration purposes, using a placeholder `WORKERS` variable)
+WORKERS = 10  # Example value; adjust as needed
+assert parallel_idx < WORKERS
 
-assert parallel_idx < WORKERS  # python node_drop_large.py 3 &
-
-directory = 'value/'
-# Correctly escape the decimal point in the ratios
-# Prepare the parts of the pattern
-if label_trunc_ratio == "0.0":
-    label_trunc_ratio_str = str(label_trunc_ratio).replace('.', r'\.')
-else:
-    label_trunc_ratio_str = "0"
-group_trunc_ratio_hop_1_str = str(group_trunc_ratio_hop_1).replace('.', r'\.')
-group_trunc_ratio_hop_2_str = str(group_trunc_ratio_hop_2).replace('.', r'\.')
+# Prepare the regex pattern
+label_trunc_ratio_str = format_ratio(label_trunc_ratio)
+group_trunc_ratio_hop_1_str = format_ratio(group_trunc_ratio_hop_1)
+group_trunc_ratio_hop_2_str = format_ratio(group_trunc_ratio_hop_2)
 
 # Construct the pattern
 pattern = re.compile(
@@ -96,7 +95,7 @@ pattern = re.compile(
     rf'{group_trunc_ratio_hop_2_str}_pc_value\.pkl$'
 )
 
-# Print the parameters to verify
+# Print the parameters and pattern to verify
 print(f"Dataset: {dataset_name}")
 print(f"Group Truncation Ratio Hop 1: {group_trunc_ratio_hop_1}")
 print(f"Group Truncation Ratio Hop 2: {group_trunc_ratio_hop_2}")
@@ -104,7 +103,7 @@ print(f"Label Truncation Ratio: {label_trunc_ratio}")
 print(f"Ratio: {ratio}")
 print(f"Number of Permutations: {num_perms}")
 print(f"Parallel Index: {parallel_idx}")
-print(f"target: {pattern}")
+print(f"Regex Pattern: {pattern.pattern}")
 
 
 class SGCNet(nn.Module):
@@ -200,7 +199,7 @@ for filename in filenames:
 
 # Average the values
 for key, values in results.items():
-    results[key] = sum(values) / (len(values) * num_perms) # TODO is it right to divide by num_perms?
+    results[key] = sum(values) / (len(values) * num_perms)  # TODO is it right to divide by num_perms?
 
 # Convert to DataFrame
 data = [{'key1': k1, 'key2': k2, 'key3': k3, 'value': v} for (k1, k2, k3), v in results.items()]
