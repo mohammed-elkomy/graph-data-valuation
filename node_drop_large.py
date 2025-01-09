@@ -178,7 +178,6 @@ def get_subgraph_data(data, mask):
 # Find matching files for PC-Winter results
 matching_files = []
 for filename in os.listdir(directory):
-    print(filename)
     if pattern.match(filename):
         matching_files.append(filename)
 filenames = matching_files[:ratio]
