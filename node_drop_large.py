@@ -27,10 +27,10 @@ from tqdm import tqdm
 
 import argparse
 from pc_winter_run import calculate_md5_of_string, set_masks_from_indices
-
-WORKERS = 6
 warnings.simplefilter(action='ignore', category=Warning)
 
+WORKERS = 6
+directory = 'value/'
 
 def parse_args():
     """
