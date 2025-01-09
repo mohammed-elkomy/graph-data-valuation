@@ -74,6 +74,12 @@ ratio = args.ratio
 num_perms = args.num_perms
 parallel_idx = args.parallel_idx
 
+
+assert parallel_idx < WORKERS  # python node_drop_large.py 3 &
+
+directory = 'value/'
+pattern = re.compile(rf'^{dataset_name}_(\d+)_{num_perms}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value\.pkl$')
+
 # Print the parameters to verify
 print(f"Dataset: {dataset_name}")
 print(f"Group Truncation Ratio Hop 1: {group_trunc_ratio_hop_1}")
@@ -82,12 +88,7 @@ print(f"Label Truncation Ratio: {label_trunc_ratio}")
 print(f"Ratio: {ratio}")
 print(f"Number of Permutations: {num_perms}")
 print(f"Parallel Index: {parallel_idx}")
-
-
-assert parallel_idx < WORKERS  # python node_drop_large.py 3 &
-print(f"worker {parallel_idx} started")
-directory = 'value/'
-pattern = re.compile(rf'^{dataset_name}_(\d+)_{num_perms}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value\.pkl$')
+print(f"target: {pattern}")
 
 
 class SGCNet(nn.Module):
