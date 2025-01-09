@@ -80,7 +80,7 @@ assert parallel_idx < WORKERS  # python node_drop_large.py 3 &
 directory = 'value/'
 # Correctly escape the decimal point in the ratios
 # Prepare the parts of the pattern
-if label_trunc_ratio == 0:
+if label_trunc_ratio < 1e-5:
     label_trunc_ratio_str = str(label_trunc_ratio).replace('.', r'\.')
 else:
     label_trunc_ratio_str = "0"
