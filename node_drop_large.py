@@ -25,29 +25,65 @@ from torch_geometric.datasets import Planetoid, WikiCS, Amazon, Coauthor
 from torch_geometric.nn import SGConv
 from tqdm import tqdm
 
+import argparse
 from pc_winter_run import calculate_md5_of_string, set_masks_from_indices
 
 WORKERS = 6
-
 warnings.simplefilter(action='ignore', category=Warning)
-#########################
-# # Parameters
-# dataset_name = 'Cora'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
-# group_trunc_ratio_hop_1 = 0.5
-# group_trunc_ratio_hop_2 = 0.7
-# label_trunc_ratio = 0
-# ratio = 25
-# num_perms = 10
-#########################
-# Parameters
-dataset_name = 'WikiCS'  # Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'
-group_trunc_ratio_hop_1 = 0.7
-group_trunc_ratio_hop_2 = 0.9
-label_trunc_ratio = 0
-ratio = 20
-num_perms = 1
-#########################
-parallel_idx = int(sys.argv[1])
+
+def parse_args():
+    """
+    Parses command-line arguments for the script and returns the parsed parameters.
+
+    Returns:
+        args: Namespace object containing the parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description="Script to run graph dataset experiments with specified parameters.")
+
+    # Define command-line arguments
+    parser.add_argument('--dataset_name', type=str, choices=['Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'],
+                        required=True, help="Dataset name. Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'.")
+    parser.add_argument('--group_trunc_ratio_hop_1', type=float, required=True,
+                        help="Group truncation ratio for hop 1.")
+    parser.add_argument('--group_trunc_ratio_hop_2', type=float, required=True,
+                        help="Group truncation ratio for hop 2.")
+    parser.add_argument('--label_trunc_ratio', type=float, required=True,
+                        help="Label truncation ratio.")
+    parser.add_argument('--ratio', type=int, required=True,
+                        help="Ratio parameter.")
+    parser.add_argument('--num_perms', type=int, required=True,
+                        help="Number of permutations.")
+    parser.add_argument('--parallel_idx', type=int, required=True,
+                        help="Index for parallel execution.")
+
+    # Parse the arguments
+    args = parser.parse_args()
+    return args
+
+
+
+# Parse arguments
+args = parse_args()
+
+# Set the parameters from parsed arguments
+dataset_name = args.dataset_name
+group_trunc_ratio_hop_1 = args.group_trunc_ratio_hop_1
+group_trunc_ratio_hop_2 = args.group_trunc_ratio_hop_2
+label_trunc_ratio = args.label_trunc_ratio
+ratio = args.ratio
+num_perms = args.num_perms
+parallel_idx = args.parallel_idx
+
+# Print the parameters to verify
+print(f"Dataset: {dataset_name}")
+print(f"Group Truncation Ratio Hop 1: {group_trunc_ratio_hop_1}")
+print(f"Group Truncation Ratio Hop 2: {group_trunc_ratio_hop_2}")
+print(f"Label Truncation Ratio: {label_trunc_ratio}")
+print(f"Ratio: {ratio}")
+print(f"Number of Permutations: {num_perms}")
+print(f"Parallel Index: {parallel_idx}")
+
+
 assert parallel_idx < WORKERS  # python node_drop_large.py 3 &
 print(f"worker {parallel_idx} started")
 directory = 'value/'
