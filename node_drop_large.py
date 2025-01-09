@@ -146,7 +146,7 @@ for filename in filenames:
 
 # Average the values
 for key, values in results.items():
-    results[key] = sum(values) / (len(values) * num_perms)
+    results[key] = sum(values) / (len(values) * num_perms) # TODO is it right to divide by num_perms?
 
 # Convert to DataFrame
 data = [{'key1': k1, 'key2': k2, 'key3': k3, 'value': v} for (k1, k2, k3), v in results.items()]
