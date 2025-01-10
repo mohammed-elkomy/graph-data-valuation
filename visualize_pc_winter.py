@@ -6,10 +6,12 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import argparse
 
-
-# python visualize_pc_winter.py --dataset "Cora" --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --permutation_count 10
-# python visualize_pc_winter.py --dataset "Cora" --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --permutation_count 1
-# python visualize_pc_winter.py --dataset "WikiCS" --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --permutation_count 1
+"""
+# !mkdir imgs -p
+# !python visualize_pc_winter.py --dataset "Cora" --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --permutation_count 10
+# !python visualize_pc_winter.py --dataset "Cora" --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --permutation_count 1
+# !python visualize_pc_winter.py --dataset "WikiCS" --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --permutation_count 1
+"""
 def parse_args():
     parser = argparse.ArgumentParser(description="Process dataset arguments.")
     parser.add_argument('--dataset', type=str, required=True, help="Name of the dataset")
@@ -51,6 +53,7 @@ for file_path in sorted(glob.glob(pattern)):
     datagroups[unique_part].extend(data)
 
 for dump_count, data_group in datagroups.items():
+    dump_count = int(dump_count)
     print(dump_count, len(data_group))
     plt.figure(figsize=(8, 6))
 
