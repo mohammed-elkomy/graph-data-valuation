@@ -56,7 +56,7 @@ from pc_winter_run import calculate_md5_of_string, set_masks_from_indices
 
 warnings.simplefilter(action='ignore', category=Warning)
 
-WORKERS = 6
+WORKERS = 10
 directory = 'value/'
 
 
@@ -105,8 +105,6 @@ ratio = args.ratio
 num_perms = args.num_perms
 parallel_idx = args.parallel_idx
 
-# Ensure parallel_idx is within a valid range (for demonstration purposes, using a placeholder `WORKERS` variable)
-WORKERS = 10  # Example value; adjust as needed
 assert parallel_idx < WORKERS
 
 # Prepare the regex pattern
