@@ -6,6 +6,32 @@ It includes the following main components:
 2. Data processing functions for graph data
 3. PC-Winter value aggregation and node ranking
 4. Node dropping experiment to evaluate the effectiveness of the valuation
+
+
+
+%%shell
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 0 > /tmp/null &
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 1 > /tmp/null &
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 2 > /tmp/null &
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 3 > /tmp/null &
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 4 > /tmp/null &
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 5 > /tmp/null &
+
+%%shell
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 0 > /tmp/null &
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 1 > /tmp/null &
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 2 > /tmp/null &
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 3 > /tmp/null &
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 4 > /tmp/null &
+python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 5 > /tmp/null &
+
+%%shell
+python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 0 > /tmp/null &
+python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 1 > /tmp/null &
+python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 2 > /tmp/null &
+python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 3 > /tmp/null &
+python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 4 > /tmp/null &
+python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 5 > /tmp/null &
 """
 
 import collections

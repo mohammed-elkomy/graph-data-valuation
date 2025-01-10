@@ -4,18 +4,36 @@ import pickle
 from collections import defaultdict
 
 import matplotlib.pyplot as plt
+import argparse
 
-###########################################
-dataset = "Cora"
-group_trunc_ratio_hop_1 = 0.5
-group_trunc_ratio_hop_2 = 0.7
-permutation_count = 10
-###########################################
-# dataset = 'WikiCS'
-# group_trunc_ratio_hop_1 = 0.7
-# group_trunc_ratio_hop_2 = 0.9
-# permutation_count = 1
-###########################################
+
+# python visualize_pc_winter.py --dataset "Cora" --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --permutation_count 10
+# python visualize_pc_winter.py --dataset "Cora" --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --permutation_count 1
+# python visualize_pc_winter.py --dataset "WikiCS" --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --permutation_count 1
+def parse_args():
+    parser = argparse.ArgumentParser(description="Process dataset arguments.")
+    parser.add_argument('--dataset', type=str, required=True, help="Name of the dataset")
+    parser.add_argument('--group_trunc_ratio_hop_1', type=float, required=True, help="Truncation ratio for hop 1")
+    parser.add_argument('--group_trunc_ratio_hop_2', type=float, required=True, help="Truncation ratio for hop 2")
+    parser.add_argument('--permutation_count', type=int, required=True, help="Number of permutations")
+
+    args = parser.parse_args()
+
+    # Setting the variables based on the parsed arguments
+    dataset = args.dataset
+    group_trunc_ratio_hop_1 = args.group_trunc_ratio_hop_1
+    group_trunc_ratio_hop_2 = args.group_trunc_ratio_hop_2
+    permutation_count = args.permutation_count
+
+    return dataset, group_trunc_ratio_hop_1, group_trunc_ratio_hop_2, permutation_count
+
+
+dataset, group_trunc_ratio_hop_1, group_trunc_ratio_hop_2, permutation_count = parse_args()
+print(f"Dataset: {dataset}")
+print(f"Group Truncation Ratio Hop 1: {group_trunc_ratio_hop_1}")
+print(f"Group Truncation Ratio Hop 2: {group_trunc_ratio_hop_2}")
+print(f"Permutation Count: {permutation_count}")
+
 img_dir = "imgs"
 pattern = f'./res/*node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_*_{dataset}_test.pkl'
 
