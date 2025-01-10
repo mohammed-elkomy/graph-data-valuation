@@ -66,20 +66,20 @@ def process_and_combine_files(pattern, x_axis, title_base, file_suffix):
 
 
 # Process Cora files
-process_and_combine_files("value/Cora_*(\d+)_10_0_0.5_0.7_pc_value.pkl",
+process_and_combine_files(r"value/Cora_*_10_0_0.5_0.7_pc_value.pkl",
                           "PC Value",
                           "Combined Distribution of Cora Values",
                           "pc_value")
-process_and_combine_files("value/Cora_*(\d+)_10_0_0.5_0.7_pc_value_count.pkl",
+process_and_combine_files(r"value/Cora_*_10_0_0.5_0.7_pc_value_count.pkl",
                           "Node updates during pc-value-eval",
                           "Combined Distribution of Cora Counts",
                           "pc_value_count")
 
 # Process WikiCS files #
-process_and_combine_files("value/WikiCS_*(\d+)_1_0_0.7_0.9_pc_value.pkl",
+process_and_combine_files(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
                           "PC Value",
                           "Combined Distribution of WikiCS Values", "pc_value")
-process_and_combine_files("value/WikiCS_*(\d+)_1_0_0.7_0.9_pc_value_count.pkl",
+process_and_combine_files(r"value/WikiCS_*_1_0_0.7_0.9_pc_value_count.pkl",
                           "Node updates during pc-value-eval",
                           "Combined Distribution of WikiCS Counts",
                           "pc_value_count")
