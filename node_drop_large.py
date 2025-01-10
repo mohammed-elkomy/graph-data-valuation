@@ -6,47 +6,6 @@ It includes the following main components:
 2. Data processing functions for graph data
 3. PC-Winter value aggregation and node ranking
 4. Node dropping experiment to evaluate the effectiveness of the valuation
-
-
-
-%%shell
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 0 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 1 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 2 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 3 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 4 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 5 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 6 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 7 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 8 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 5 --num_perms 10 --parallel_idx 9 > /tmp/null &
-
-
-%%shell
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 0 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 1 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 2 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 3 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 4 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 5 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 6 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 7 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 8 > /tmp/null &
-python node_drop_large.py --dataset_name Cora --group_trunc_ratio_hop_1 0.5 --group_trunc_ratio_hop_2 0.7 --label_trunc_ratio 0.0 --ratio 500 --num_perms 1 --parallel_idx 9 > /tmp/null &
-
-
-%%shell
-python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 0 > /tmp/null &
-python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 1 > /tmp/null &
-python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 2 > /tmp/null &
-python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 3 > /tmp/null &
-python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 4 > /tmp/null &
-python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 5 > /tmp/null &
-python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 6 > /tmp/null &
-python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 7 > /tmp/null &
-python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 8 > /tmp/null &
-python node_drop_large.py --dataset_name WikiCS --group_trunc_ratio_hop_1 0.7 --group_trunc_ratio_hop_2 0.9 --label_trunc_ratio 0.0 --ratio 20 --num_perms 1 --parallel_idx 9 > /tmp/null &
-
 """
 
 import collections
@@ -128,12 +87,21 @@ group_trunc_ratio_hop_1_str = format_ratio(group_trunc_ratio_hop_1)
 group_trunc_ratio_hop_2_str = format_ratio(group_trunc_ratio_hop_2)
 
 # Construct the pattern
-pattern = re.compile(
+value_pattern = re.compile(
     rf'^{dataset_name}_(\d+)_'
     rf'{num_perms}_'
     rf'{label_trunc_ratio_str}_'
     rf'{group_trunc_ratio_hop_1_str}_'
     rf'{group_trunc_ratio_hop_2_str}_pc_value\.pkl$'
+)
+
+# Construct the pattern
+count_pattern = re.compile(
+    rf'^{dataset_name}_(\d+)_'
+    rf'{num_perms}_'
+    rf'{label_trunc_ratio_str}_'
+    rf'{group_trunc_ratio_hop_1_str}_'
+    rf'{group_trunc_ratio_hop_2_str}_pc_value_count\.pkl$'
 )
 
 # Print the parameters and pattern to verify
@@ -144,7 +112,7 @@ print(f"Label Truncation Ratio: {label_trunc_ratio}")
 print(f"Ratio: {ratio}")
 print(f"Number of Permutations: {num_perms}")
 print(f"Parallel Index: {parallel_idx}")
-print(f"Regex Pattern: {pattern.pattern}")
+print(f"Regex Pattern: {value_pattern.pattern}")
 
 
 class SGCNet(nn.Module):
@@ -217,26 +185,41 @@ def get_subgraph_data(data, mask):
 
 
 # Find matching files for PC-Winter results
-matching_files = []
+value_matching_files = []
+count_matching_files = []
 for filename in os.listdir(directory):
-    if pattern.match(filename):
-        matching_files.append(filename)
+    if value_pattern.match(filename):
+        value_matching_files.append(filename)
+    if count_pattern.match(filename):
+        count_matching_files.append(filename)
 
-filenames = matching_files[:ratio]
-ratio = min(len(filenames), ratio)  # Limit the number of files to process
-print(f"Processing the files {len(filenames)}: {filenames}\n")
+value_filenames = value_matching_files[:ratio]
+count_filenames = count_matching_files[:ratio]
+ratio = min(len(value_filenames), ratio)  # Limit the number of files to process
+print(f"Processing the files {len(value_filenames)}: {value_filenames}\n")
+print(f"Processing the files {len(count_filenames)}: {count_filenames}\n")
 
 # Extract and aggregate PC-Winter values
 results = collections.defaultdict(list)
-counter = 0
-for filename in filenames:
+counts = collections.defaultdict(int)
+
+for filename in value_filenames:
     with open(os.path.join(directory, filename), 'rb') as f:
         data = pickle.load(f)
     for key, sub_dict in data.items():
         for sub_key, sub_sub_dict in sub_dict.items():
             for sub_sub_key, value in sub_sub_dict.items():
                 results[(key, sub_key, sub_sub_key)].append(value)
-    counter += 1
+
+for filename in count_filenames:
+    with open(os.path.join(directory, filename), 'rb') as f:
+        data = pickle.load(f)
+    for key, sub_dict in data.items():
+        for sub_key, sub_sub_dict in sub_dict.items():
+            for sub_sub_key, value in sub_sub_dict.items():
+                counts[key]+=value
+                counts[sub_key]+=value
+                counts[sub_sub_key]+=value
 
 # Average the values
 for key, values in results.items():
@@ -245,21 +228,27 @@ for key, values in results.items():
 # Convert to DataFrame
 data = [{'key1': k1, 'key2': k2, 'key3': k3, 'value': v} for (k1, k2, k3), v in results.items()]
 win_df = pd.DataFrame(data)
-
+# labeled > hop 1 > hop 2
 # Aggregate values for different hop levels
 win_df_11 = pd.DataFrame(win_df[win_df['key2'].isin(win_df['key1']) == False].groupby('key2').value.sum().sort_values()).reset_index()
-win_df_11.columns = ['key', 'value']
+win_df_11.columns = ['key', 'value']  # unlabelled nodes from hop 1
+
 hop_1_list = win_df[win_df['key2'].isin(win_df['key1']) == False]['key2'].unique()
 win_df_12 = pd.DataFrame(win_df[(win_df['key3'] != win_df['key2']) & (win_df['key3'].isin(hop_1_list))].groupby('key3').value.sum().sort_values()).reset_index()
-win_df_12.columns = ['key', 'value']
+win_df_12.columns = ['key', 'value']  # unlabelled nodes from hop 1 with contributions coming from hop 2
 
-win_df_1 = pd.DataFrame(pd.concat([win_df_11, win_df_12]).groupby('key').value.sum().sort_values()).reset_index()
+win_df_1 = pd.DataFrame(pd.concat([win_df_11, win_df_12]).groupby('key').value.sum().sort_values()).reset_index()  # full winter value for unlabelled nodes from hop 1
+
 win_df_2 = pd.DataFrame(win_df[(win_df['key3'].isin(win_df['key2']) == False) & (win_df['key3'].isin(win_df['key1']) == False)].groupby('key3').value.sum().sort_values()).reset_index()
-win_df_2.columns = ['key', 'value']
+win_df_2.columns = ['key', 'value']  # unlabelled nodes from hop 2 (leaf nodes; no further contribution)
 
 # Combine and sort unlabeled nodes
 unlabled_win_df = pd.concat([win_df_1, win_df_2])
 unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
+# count cut off
+unlabled_win_df['count'] = unlabled_win_df['key'].map(counts)
+unlabled_win_df = unlabled_win_df[unlabled_win_df["count"] > 2]
+
 unlabeled_win = torch.tensor(unlabled_win_df['key'].values)
 unlabeled_win_value = unlabled_win_df['value'].values
 
@@ -332,11 +321,16 @@ val_data = get_subgraph_data(data, data.val_mask)
 win_acc = []
 val_acc_list = []
 node_list = unlabeled_win.cpu().numpy()
+
 drop_num = len(node_list)
 parallel_subset = len(node_list) // WORKERS
 
-start_sim = parallel_subset * parallel_idx
-end_sim = (parallel_subset) * (parallel_idx + 1)
+if parallel_idx == -1:
+    start_sim = 1
+    end_sim = len(node_list)
+else:
+    start_sim = parallel_subset * parallel_idx
+    end_sim = (parallel_subset) * (parallel_idx + 1)
 
 if start_sim == 0:
     # Initial model training and evaluation
