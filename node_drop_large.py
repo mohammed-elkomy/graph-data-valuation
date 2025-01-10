@@ -248,6 +248,7 @@ unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
 # count cut off
 print("before count filtration",unlabled_win_df.shape)
 unlabled_win_df['count'] = unlabled_win_df['key'].map(counts)
+print(unlabled_win_df['count'].value_counts())
 unlabled_win_df = unlabled_win_df[unlabled_win_df["count"] > 2]
 print("after count filtration",unlabled_win_df.shape)
 unlabeled_win = torch.tensor(unlabled_win_df['key'].values)
