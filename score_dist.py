@@ -60,7 +60,7 @@ def process_and_combine_files(pattern, x_axis, title_base, file_suffix):
         with open(file, 'rb') as f:
             data = pickle.load(f)
             combined_values.extend(flatten_dict(data))
-
+    print("loaded",files)
     filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
     analyze_dist(combined_values, x_axis, title_base, filename)
 
