@@ -180,13 +180,12 @@ matching_files = []
 for filename in os.listdir(directory):
     if pattern.match(filename):
         matching_files.append(filename)
-    else:
-        print(filename)
+
 filenames = matching_files[:ratio]
 ratio = min(len(filenames), ratio)  # Limit the number of files to process
 print(f"Processing the files: {filenames}\n")
 
-exit()
+
 # Extract and aggregate PC-Winter values
 results = collections.defaultdict(list)
 counter = 0
