@@ -45,7 +45,7 @@ def analyze_dist(values, x_axis, title, filename):
     - filename: Filename to save the plot.
     """
     value_counts = Counter(values)
-    most_common_values = value_counts.most_common(5)
+    most_common_values = value_counts.most_common(15)
 
     total_values = sum(value_counts.values())
 
