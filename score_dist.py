@@ -3,7 +3,7 @@ import pickle
 import glob
 from collections import defaultdict, Counter
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 def aggregate_data(file_list, is_count):
     """
