@@ -27,10 +27,12 @@ from tqdm import tqdm
 
 import argparse
 from pc_winter_run import calculate_md5_of_string, set_masks_from_indices
+
 warnings.simplefilter(action='ignore', category=Warning)
 
 WORKERS = 6
 directory = 'value/'
+
 
 def parse_args():
     """
@@ -183,8 +185,7 @@ for filename in os.listdir(directory):
 
 filenames = matching_files[:ratio]
 ratio = min(len(filenames), ratio)  # Limit the number of files to process
-print(f"Processing the files: {filenames}\n")
-
+print(f"Processing the files {len(filenames)}: {filenames}\n")
 
 # Extract and aggregate PC-Winter values
 results = collections.defaultdict(list)
