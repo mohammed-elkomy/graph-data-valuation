@@ -1,88 +1,109 @@
-import os.path
+import os
 import pickle
 import glob
-from collections import Counter
+from collections import defaultdict, Counter
 import matplotlib.pyplot as plt
-import re
 
 
-def flatten_dict(d):
+def aggregate_data(file_list, is_count):
     """
-    Recursively flatten a 3-level nested dictionary and collect all values.
+    Aggregates data from a list of files.
 
     Parameters:
-    - d: A dictionary of the form d[k1][k2][k3] = v
+    - file_list: List of filenames to process.
+    - is_count: Boolean indicating whether the files contain counts (True) or values (False).
 
     Returns:
-    - A list of all values v from the nested dictionary.
+    - A dictionary of aggregated data.
     """
-    flattened_values = []
+    results = defaultdict(list) if not is_count else defaultdict(int)
 
-    for k1 in d:
-        for k2 in d[k1]:
-            for k3 in d[k1][k2]:
-                flattened_values.append(d[k1][k2][k3])
+    for filename in file_list:
+        with open(filename, 'rb') as f:
+            data = pickle.load(f)
+            for key, sub_dict in data.items():
+                for sub_key, sub_sub_dict in sub_dict.items():
+                    for sub_sub_key, value in sub_sub_dict.items():
+                        if is_count:
+                            results[key] += value
+                            results[sub_key] += value
+                            results[sub_sub_key] += value
+                        else:
+                            results[(key, sub_key, sub_sub_key)].append(value)
 
-    return flattened_values
+    return results
 
 
 def analyze_dist(values, x_axis, title, filename):
-    # Use Counter to get the most common values
+    """
+    Analyzes and plots the distribution of values.
+
+    Parameters:
+    - values: List of values to analyze.
+    - x_axis: Label for the x-axis of the plot.
+    - title: Title of the plot.
+    - filename: Filename to save the plot.
+    """
     value_counts = Counter(values)
     most_common_values = value_counts.most_common(5)
 
-    # Total number of values
     total_values = sum(value_counts.values())
 
-    print(filename)
-    # Print the top 5 values and their percentages
+    print(f"Analyzing: {filename}")
     print(f"{'Value':<30}{'Count':<30}{'Percentage':<30}")
     for value, count in most_common_values:
         percentage = (count / total_values) * 100
         print(f"{value:<30}{count:<30}{percentage:.2f}%")
-
     print()
-    # Plot the distribution
+
     plt.hist(values, bins=10, alpha=0.75, edgecolor='black')
     plt.title(title)
     plt.xlabel(x_axis)
     plt.ylabel('Frequency')
     plt.grid(True)
-
-    # Save the plot to a file
     plt.savefig(filename)
     plt.close()
 
 
-def process_and_combine_files(pattern, x_axis, title_base, file_suffix):
-    combined_values = []
-
+def process_and_combine_files(pattern, x_axis, title_base, file_suffix, is_count=False, num_perms=1):
     files = glob.glob(pattern)
-    for file in files:
-        with open(file, 'rb') as f:
-            data = pickle.load(f)
-            combined_values.extend(flatten_dict(data))
+    combined_data = aggregate_data(files, is_count)
 
-    print("loaded",files)
+    if not is_count:
+        # For value files, calculate the average values
+        combined_values = [sum(values) / (len(values) * num_perms) for values in combined_data.values()]
+    else:
+        # For count files, the combined_data already contains the aggregated counts
+        combined_values = list(combined_data.values())
+
+    print(f"Loaded files: {files}")
     filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
     analyze_dist(combined_values, x_axis, title_base, filename)
 
 
-# Process Cora files
+# Define file patterns and process each
 process_and_combine_files(r"value/Cora_*_10_0_0.5_0.7_pc_value.pkl",
                           "PC Value",
                           "Combined Distribution of Cora Values",
-                          "pc_value")
+                          "pc_value",
+                          is_count=False,
+                          num_perms=10)
+
 process_and_combine_files(r"value/Cora_*_10_0_0.5_0.7_pc_value_count.pkl",
                           "Node updates during pc-value-eval",
                           "Combined Distribution of Cora Counts",
-                          "pc_value_count")
+                          "pc_value_count",
+                          is_count=True)
 
-# Process WikiCS files #
 process_and_combine_files(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
                           "PC Value",
-                          "Combined Distribution of WikiCS Values", "pc_value")
+                          "Combined Distribution of WikiCS Values",
+                          "pc_value",
+                          is_count=False,
+                          num_perms=1)
+
 process_and_combine_files(r"value/WikiCS_*_1_0_0.7_0.9_pc_value_count.pkl",
                           "Node updates during pc-value-eval",
                           "Combined Distribution of WikiCS Counts",
-                          "pc_value_count")
+                          "pc_value_count",
+                          is_count=True)
