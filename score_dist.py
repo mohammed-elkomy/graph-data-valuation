@@ -34,12 +34,14 @@ def analyze_dist(values, x_axis, title, filename):
     # Total number of values
     total_values = sum(value_counts.values())
 
+    print(filename)
     # Print the top 5 values and their percentages
     print(f"{'Value':<30}{'Count':<30}{'Percentage':<30}")
     for value, count in most_common_values:
         percentage = (count / total_values) * 100
         print(f"{value:<30}{count:<30}{percentage:.2f}%")
 
+    print()
     # Plot the distribution
     plt.hist(values, bins=10, alpha=0.75, edgecolor='black')
     plt.title(title)
