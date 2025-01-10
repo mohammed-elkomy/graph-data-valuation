@@ -324,7 +324,8 @@ parallel_subset = len(node_list) // WORKERS
 
 start_sim = parallel_subset * parallel_idx
 end_sim = (parallel_subset) * (parallel_idx + 1)
-
+print(start_sim, end_sim),len(node_list)
+exit(0)
 if start_sim == 0:
     # Initial model training and evaluation
     data_copy = data.clone()
