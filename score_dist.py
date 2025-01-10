@@ -43,7 +43,7 @@ def analyze_dist(values, x_axis, title, filename):
 
     # Use Counter to get the most common values
     value_counts = Counter(filtered_values)
-    most_common_values = value_counts.most_common(5)
+    most_common_values = value_counts.most_common(20)
 
     # Total number of values
     total_values = sum(value_counts.values())
