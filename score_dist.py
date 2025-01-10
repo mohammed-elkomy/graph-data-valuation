@@ -33,20 +33,19 @@ def aggregate_data(file_list, is_count):
 
     return results
 
-
 def analyze_dist(values, x_axis, title, filename):
-    """
-    Analyzes and plots the distribution of values.
+    # Calculate percentiles to exclude extreme values
+    lower_percentile = np.percentile(values, 1)  # 1st percentile
+    upper_percentile = np.percentile(values, 99)  # 99th percentile
 
-    Parameters:
-    - values: List of values to analyze.
-    - x_axis: Label for the x-axis of the plot.
-    - title: Title of the plot.
-    - filename: Filename to save the plot.
-    """
-    value_counts = Counter(values)
-    most_common_values = value_counts.most_common(15)
+    # Filter values to exclude outliers
+    filtered_values = [v for v in values if lower_percentile <= v <= upper_percentile]
 
+    # Use Counter to get the most common values
+    value_counts = Counter(filtered_values)
+    most_common_values = value_counts.most_common(5)
+
+    # Total number of values
     total_values = sum(value_counts.values())
 
     print(f"Analyzing: {filename}")
@@ -56,14 +55,16 @@ def analyze_dist(values, x_axis, title, filename):
         print(f"{value:<30}{count:<30}{percentage:.2f}%")
     print()
 
-    plt.hist(values, bins=100, alpha=0.75, edgecolor='black')
+    # Plot the filtered distribution
+    plt.hist(filtered_values, bins=1000, alpha=0.75, edgecolor='black')
     plt.title(title)
     plt.xlabel(x_axis)
     plt.ylabel('Frequency')
     plt.grid(True)
+
+    # Save the plot to a file
     plt.savefig(filename)
     plt.close()
-
 
 def process_and_combine_files(pattern, x_axis, title_base, file_suffix, is_count=False, num_perms=1):
     files = glob.glob(pattern)
