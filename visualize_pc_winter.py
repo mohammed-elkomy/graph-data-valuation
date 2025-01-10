@@ -6,15 +6,15 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 
 ###########################################
-# dataset = "Cora"
-# group_trunc_ratio_hop_1 = 0.5
-# group_trunc_ratio_hop_2 = 0.7
-# permutation_count = 10
+dataset = "Cora"
+group_trunc_ratio_hop_1 = 0.5
+group_trunc_ratio_hop_2 = 0.7
+permutation_count = 10
 ###########################################
-dataset = 'WikiCS'
-group_trunc_ratio_hop_1 = 0.7
-group_trunc_ratio_hop_2 = 0.9
-permutation_count = 1
+# dataset = 'WikiCS'
+# group_trunc_ratio_hop_1 = 0.7
+# group_trunc_ratio_hop_2 = 0.9
+# permutation_count = 1
 ###########################################
 img_dir = "imgs"
 pattern = f'./res/*node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_*_{dataset}_test.pkl'
