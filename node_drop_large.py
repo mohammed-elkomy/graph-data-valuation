@@ -58,6 +58,9 @@ def parse_args():
                         help="Number of permutations.")
     parser.add_argument('--parallel_idx', type=int, required=True,
                         help="Index for parallel execution.")
+    parser.add_argument('--min_occ', type=int, required=True,
+                        help="Minimum occurrences for each node during the pc-winter value approximation")
+
 
     return parser.parse_args()
 
@@ -78,6 +81,7 @@ label_trunc_ratio = args.label_trunc_ratio
 ratio = args.ratio
 num_perms = args.num_perms
 parallel_idx = args.parallel_idx
+min_occ = args.min_occ
 
 assert parallel_idx < WORKERS
 
@@ -246,11 +250,11 @@ win_df_2.columns = ['key', 'value']  # unlabelled nodes from hop 2 (leaf nodes; 
 unlabled_win_df = pd.concat([win_df_1, win_df_2])
 unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
 # count cut off
-print("before count filtration",unlabled_win_df.shape)
+print("before count filtration", unlabled_win_df.shape)
 unlabled_win_df['count'] = unlabled_win_df['key'].map(counts)
 print(unlabled_win_df['count'].value_counts())
-unlabled_win_df = unlabled_win_df[unlabled_win_df["count"] > 2]
-print("after count filtration",unlabled_win_df.shape)
+unlabled_win_df = unlabled_win_df[unlabled_win_df["count"] > min_occ]
+print("after count filtration", unlabled_win_df.shape)
 unlabeled_win = torch.tensor(unlabled_win_df['key'].values)
 unlabeled_win_value = unlabled_win_df['value'].values
 
