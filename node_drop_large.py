@@ -217,9 +217,9 @@ for filename in count_filenames:
     for key, sub_dict in data.items():
         for sub_key, sub_sub_dict in sub_dict.items():
             for sub_sub_key, value in sub_sub_dict.items():
-                counts[key]+=value
-                counts[sub_key]+=value
-                counts[sub_sub_key]+=value
+                counts[key] += value
+                counts[sub_key] += value
+                counts[sub_sub_key] += value
 
 # Average the values
 for key, values in results.items():
@@ -246,9 +246,10 @@ win_df_2.columns = ['key', 'value']  # unlabelled nodes from hop 2 (leaf nodes; 
 unlabled_win_df = pd.concat([win_df_1, win_df_2])
 unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
 # count cut off
+print("before count filtration",unlabled_win_df.shape)
 unlabled_win_df['count'] = unlabled_win_df['key'].map(counts)
 unlabled_win_df = unlabled_win_df[unlabled_win_df["count"] > 2]
-
+print("after count filtration",unlabled_win_df.shape)
 unlabeled_win = torch.tensor(unlabled_win_df['key'].values)
 unlabeled_win_value = unlabled_win_df['value'].values
 
@@ -346,6 +347,7 @@ if start_sim == 0:
     val_acc_list += [val_acc]
     start_sim = 1
 
+print("starting at id", start_sim, "to", end_sim)
 # Iteratively drop nodes and evaluate
 for j in tqdm(range(start_sim, end_sim)):
     # nodes are sorted according to their scores in descending order
