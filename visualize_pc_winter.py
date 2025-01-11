@@ -52,15 +52,27 @@ for dump_count, matched_files in files_per_dump_count.items():
     sub = "\n".join(matched_files)
     assert len(matched_files) == 10, f"failed to get parts of \n{sub}"
 
+# Function to calculate the simple moving average
+def moving_average(data, window_size=5):
+    return np.convolve(data, np.ones(window_size) / window_size, mode='valid')
+
 for dump_count, data_group in datagroups.items():
     dump_count = int(dump_count)
     print(dump_count, len(data_group))
     plt.figure(figsize=(8, 6))
 
+    # Plot the original data
     plt.plot(data_group, label='PC-Winter Value Reproduction')
 
+    # Calculate and plot the moving average
+    smooth_data = moving_average(data_group, window_size=10)
+    plt.plot(range(len(data_group) - len(smooth_data) + 1, len(data_group) + 1),
+             smooth_data,
+             color='red',
+             label='Moving Average (Window=10)')
+
     # Set the x and y axis labels with increased font size
-    plt.xlabel('Number of Unlabled Node Removed', fontsize=16)
+    plt.xlabel('Number of Unlabeled Nodes Removed', fontsize=16)
     plt.ylabel('Prediction Accuracy (%)', fontsize=16)
     plt.title(f'{dataset} up to {dump_count * permutation_count}', fontsize=16)
 
