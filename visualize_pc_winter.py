@@ -72,7 +72,7 @@ for dump_count, data_group in datagroups.items():
     plt.plot(range(len(data_group) - len(smooth_data) + 1, len(data_group) + 1),
              smooth_data,
              color='red',
-             label='Moving Average (Window=window_size)')
+             label=f'Moving Average (Window={window_size})')
 
     # Set the x and y axis labels with increased font size
     plt.xlabel('Number of Unlabeled Nodes Removed', fontsize=16)

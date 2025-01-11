@@ -274,7 +274,7 @@ unlabeled_win_value = unlabled_win_df['value'].values
 # Load and preprocess the dataset
 if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
     dataset = Planetoid(root='dataset/', name=dataset_name, transform=T.NormalizeFeatures())
-elif dataset_name == 'WikiCS':
+elif dataset_name in ['WikiCS', 'WikiCS2']:
     dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
     config_path = f'./config/wikics.pkl'
 elif dataset_name == 'Amazon':
@@ -290,10 +290,10 @@ print(device)
 data = dataset[0].to(device)
 
 # Load train/valid/test split for non-Citation datasets
-if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS']:
+if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2']:
     with open(config_path, 'rb') as f:
         loaded_indices_dict = pickle.load(f)
-        if dataset_name == 'WikiCS':
+        if dataset_name in ['WikiCS', 'WikiCS2']:
             assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
             split_id = loaded_indices_dict["split_id"]
             data.train_mask = data.train_mask[:, split_id].clone()
