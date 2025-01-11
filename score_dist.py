@@ -35,6 +35,7 @@ def aggregate_data(file_list, is_count):
     return results
 
 
+
 def analyze_dist(values, x_axis, y_axis, title, filename):
     """
     Analyzes and plots the distribution of values.
@@ -42,6 +43,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     Parameters:
     - values: List of values to analyze.
     - x_axis: Label for the x-axis of the plot.
+    - y_axis: Label for the y-axis of the plot.
     - title: Title of the plot.
     - filename: Filename to save the plot.
     """
@@ -57,19 +59,21 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
         print(f"{value:<30}{count:<30}{percentage:.2f}%")
     print()
 
-    plt.hist(values, bins=20, alpha=0.75, edgecolor='black', )
+    # Plot the histogram and get the counts and bin edges
+    n, bins, patches = plt.hist(values, bins=20, alpha=0.75, edgecolor='black', density=True)
 
-    # Set y-ticks manually to show 10 evenly spaced ticks
-    max_count = max(value_counts.values())
-    y_ticks = np.linspace(0, max_count / len(values), 10)  # 10 ticks
-    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y / len(values) * 100:.2f}%'))
-    plt.yticks(y_ticks, [f'{y / len(values) * 100:.2f}%' for y in y_ticks])
+    # Set y-ticks to show 10 evenly spaced ticks
+    y_max = n.max()  # Maximum density value from the histogram
+    y_ticks = np.linspace(0, y_max, 10)  # 10 evenly spaced ticks
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y * 100:.2f}%'))
+    plt.yticks(y_ticks, [f'{y * 100:.2f}%' for y in y_ticks])
 
     plt.title(title)
     plt.xlabel(x_axis)
     plt.ylabel(y_axis)
-
     plt.grid(True)
+
+    # Save the plot to a file
     plt.savefig(filename)
     plt.close()
 
