@@ -56,7 +56,7 @@ def analyze_dist(values, x_axis, title, filename):
         print(f"{value:<30}{count:<30}{percentage:.2f}%")
     print()
 
-    plt.hist(values, bins=1000, alpha=0.75, edgecolor='black')
+    plt.hist(values, bins=10000, alpha=0.75, edgecolor='black')
     plt.title(title)
     plt.xlabel(x_axis)
     plt.ylabel('Frequency')
