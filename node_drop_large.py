@@ -15,6 +15,7 @@ import re
 import sys
 import warnings
 
+import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -26,7 +27,7 @@ from torch_geometric.nn import SGConv
 from tqdm import tqdm
 
 import argparse
-from pc_winter_run import calculate_md5_of_string, set_masks_from_indices
+from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, dataset_params
 
 warnings.simplefilter(action='ignore', category=Warning)
 
@@ -58,9 +59,8 @@ def parse_args():
                         help="Number of permutations.")
     parser.add_argument('--parallel_idx', type=int, required=True,
                         help="Index for parallel execution.")
-    parser.add_argument('--min_occ', type=int, required=True,
-                        help="Minimum occurrences for each node during the pc-winter value approximation")
-
+    parser.add_argument('--min_occ_perc', type=int, required=True,
+                        help="Minimum occurrences (based on percentiles) for each node during the pc-winter value approximation")
 
     return parser.parse_args()
 
@@ -81,7 +81,7 @@ label_trunc_ratio = args.label_trunc_ratio
 ratio = args.ratio
 num_perms = args.num_perms
 parallel_idx = args.parallel_idx
-min_occ = args.min_occ
+min_occ_perc = args.min_occ_perc
 
 assert parallel_idx < WORKERS
 
@@ -118,6 +118,16 @@ print(f"Number of Permutations: {num_perms}")
 print(f"Parallel Index: {parallel_idx}")
 print(f"Regex Pattern: {value_pattern.pattern}")
 
+if dataset_name in dataset_params:
+    params = dataset_params[dataset_name]
+    num_epochs = params['num_epochs']
+    lr = params['lr']
+    weight_decay = params['weight_decay']
+else:
+    num_epochs = 200
+    lr = 0.01
+    weight_decay = 5e-4
+
 
 class SGCNet(nn.Module):
     """
@@ -137,11 +147,11 @@ class SGCNet(nn.Module):
         x = self.conv(x, edge_index)
         return F.log_softmax(x, dim=1)
 
-    def fit(self, dataset, num_epochs=200):
+    def fit(self, dataset, num_epochs=num_epochs):
         """Train the model"""
         model = self.to(self.device)
         input_data = dataset.to(self.device)
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
         model.train()
         for epoch in range(num_epochs):
             optimizer.zero_grad()
@@ -253,8 +263,11 @@ unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
 print("before count filtration", unlabled_win_df.shape)
 unlabled_win_df['count'] = unlabled_win_df['key'].map(counts)
 print(unlabled_win_df['count'].value_counts())
-unlabled_win_df = unlabled_win_df[unlabled_win_df["count"] > min_occ]
+percentile_threshold = np.percentile(unlabled_win_df['count'], 70)
+# Filter rows where 'count' is greater than the 90th percentile
+unlabled_win_df = unlabled_win_df[unlabled_win_df["count"] > percentile_threshold]
 print("after count filtration", unlabled_win_df.shape)
+
 unlabeled_win = torch.tensor(unlabled_win_df['key'].values)
 unlabeled_win_value = unlabled_win_df['value'].values
 
@@ -334,6 +347,7 @@ parallel_subset = len(node_list) // WORKERS
 if parallel_idx == -1:
     start_sim = 1
     end_sim = len(node_list)
+    parallel_idx = 0  # for the file naming
 else:
     start_sim = parallel_subset * parallel_idx
     end_sim = (parallel_subset) * (parallel_idx + 1)
@@ -380,8 +394,8 @@ for j in tqdm(range(start_sim, end_sim)):
 # Save results
 path = 'res/'
 os.makedirs(path, exist_ok=True)
-with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{counter}_{dataset_name}_test.pkl'), 'wb') as file:
+with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{dataset_name}_test.pkl'), 'wb') as file:
     pickle.dump(win_acc, file)
 
-with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{counter}_{dataset_name}_vali.pkl'), 'wb') as file:
+with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{dataset_name}_vali.pkl'), 'wb') as file:
     pickle.dump(val_acc_list, file)
