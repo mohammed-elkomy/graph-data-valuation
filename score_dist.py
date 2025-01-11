@@ -58,13 +58,17 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     print()
 
     plt.hist(values, bins=20, alpha=0.75, edgecolor='black', )
-    # Convert y-axis to percentage
-    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y/len(values)*100:.2f}%'))
+
+    # Set y-ticks manually to show 10 evenly spaced ticks
+    max_count = max(value_counts.values())
+    y_ticks = np.linspace(0, max_count / len(values), 10)  # 10 ticks
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y / len(values) * 100:.2f}%'))
+    plt.yticks(y_ticks, [f'{y / len(values) * 100:.2f}%' for y in y_ticks])
+
     plt.title(title)
     plt.xlabel(x_axis)
     plt.ylabel(y_axis)
-    # Set y-ticks from 0% to 100% with a step of 10%
-    plt.yticks(np.linspace(0, 1, 11), [f'{int(y * 100)}%' for y in np.linspace(0, 1, 11)])
+
     plt.grid(True)
     plt.savefig(filename)
     plt.close()
