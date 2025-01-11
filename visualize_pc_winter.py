@@ -66,12 +66,13 @@ for dump_count, data_group in datagroups.items():
     # Plot the original data
     plt.plot(data_group, label='PC-Winter Value Reproduction')
 
+    window_size = 20
     # Calculate and plot the moving average
-    smooth_data = moving_average(data_group, window_size=10)
+    smooth_data = moving_average(data_group, window_size=window_size)
     plt.plot(range(len(data_group) - len(smooth_data) + 1, len(data_group) + 1),
              smooth_data,
              color='red',
-             label='Moving Average (Window=10)')
+             label='Moving Average (Window=window_size)')
 
     # Set the x and y axis labels with increased font size
     plt.xlabel('Number of Unlabeled Nodes Removed', fontsize=16)
