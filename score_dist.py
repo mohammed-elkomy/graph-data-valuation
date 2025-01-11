@@ -60,7 +60,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     print()
 
     # Plot the histogram and get the counts and bin edges
-    n, bins, patches = plt.hist(values, bins=5, alpha=0.75, edgecolor='black', )
+    n, bins, patches = plt.hist(values, bins=1000, alpha=0.75, edgecolor='black', )
 
     # Set y-ticks to show 10 evenly spaced ticks
     y_max = n.max()  # Maximum density value from the histogram
