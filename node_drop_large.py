@@ -59,7 +59,7 @@ def parse_args():
                         help="Number of permutations.")
     parser.add_argument('--parallel_idx', type=int, required=True,
                         help="Index for parallel execution.")
-    parser.add_argument('--min_occ_perc', type=int, required=True,
+    parser.add_argument('--min_occ_perc', type=int, default=70,
                         help="Minimum occurrences (based on percentiles) for each node during the pc-winter value approximation")
 
     return parser.parse_args()
