@@ -37,9 +37,16 @@ def aggregate_data(file_list, is_count):
     return results
 
 
-def analyze_dist(values, x_axis, y_axis, title, filename):
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import Counter
+from scipy import stats
+
+
+def analyze_dist(values, x_axis, y_axis, title, filename, fit_uniform=True):
     """
     Analyzes and plots the distribution of values, focusing on the range covering 97% of the data.
+    Optionally fits a uniform distribution and shows its mean and sigma.
 
     Parameters:
     - values: List of values to analyze.
@@ -47,6 +54,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     - y_axis: Label for the y-axis of the plot.
     - title: Title of the plot.
     - filename: Filename to save the plot.
+    - fit_uniform: Whether to fit a uniform distribution and display its mean and sigma.
     """
     value_counts = Counter(values)
     most_common_values = value_counts.most_common(15)
@@ -63,25 +71,42 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     upper_bound = np.percentile(values, 97)
     lower_bound = np.percentile(values, 3)
 
-    # Filter values up to the 97th percentile
+    # Filter values within the 3rd to 97th percentile
     filtered_values = [v for v in values if lower_bound <= v <= upper_bound]
     plt.figure(figsize=(14, 7))
-    # Plot the histogram with filtered values
-    n, bins, patches = plt.hist(filtered_values, bins=10000, edgecolor='red',color="red")
 
-    # Set y-ticks to show 20 evenly spaced ticks
+    # Plot the histogram with filtered values
+    n, bins, patches = plt.hist(filtered_values, bins=10000, edgecolor='red', color="red", alpha=0.75)
+
+    # Set y-ticks to show 10 evenly spaced ticks
     y_max = n.max()  # Maximum density value from the histogram
     y_ticks = np.linspace(0, y_max, 10)  # 10 evenly spaced ticks
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y / len(values) * 100:.2f}%'))
     plt.yticks(y_ticks, [f'{y / len(values) * 100:.2f}%' for y in y_ticks])
 
-    plt.xlim(left=lower_bound*0.9-1e-3, right=upper_bound*1.1+1e-3)
+    # Adjust the x-axis limits based on the percentile bounds
+    plt.xlim(left=lower_bound * 0.9 - 1e-3, right=upper_bound * 1.1 + 1e-3)
+
+    # If fitting a uniform distribution
+    if fit_uniform:
+        # Fit a uniform distribution to the filtered data
+        loc, scale = stats.uniform.fit(filtered_values)
+
+        # Display the fitted uniform distribution's mean (loc) and sigma (scale)
+        print(f"Fitted Uniform Distribution: Mean (loc) = {loc:.2f}, Sigma (scale) = {scale:.2f}")
+
+        # Plot the fitted uniform distribution
+        x = np.linspace(lower_bound, upper_bound, 1000)
+        y = stats.uniform.pdf(x, loc, scale) * len(filtered_values) * (x[1] - x[0])  # PDF scaled to histogram
+        plt.plot(x, y, 'b-', label=f'Uniform Distribution\nMean = {loc:.2f}, Sigma = {scale:.2f}')
+        plt.legend()
 
     plt.title(title)
     plt.xlabel(x_axis)
     plt.ylabel(y_axis)
     plt.grid(True)
     plt.tight_layout()
+
     # Save the plot to a file
     plt.savefig(filename)
     plt.close()
