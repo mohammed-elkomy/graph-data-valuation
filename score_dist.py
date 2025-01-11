@@ -60,11 +60,11 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     print()
 
     # Plot the histogram and get the counts and bin edges
-    n, bins, patches = plt.hist(values, bins=1000, alpha=0.75, edgecolor='black', )
+    n, bins, patches = plt.hist(values, bins=5, alpha=0.75, edgecolor='black', )
 
     # Set y-ticks to show 10 evenly spaced ticks
     y_max = n.max()  # Maximum density value from the histogram
-    y_ticks = np.linspace(0, y_max, 5)  # 20 evenly spaced ticks
+    y_ticks = np.linspace(0, y_max, 20)  # 20 evenly spaced ticks
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y/len(values)  * 100:.2f}%'))
     plt.yticks(y_ticks, [f'{y/len(values) * 100:.2f}%' for y in y_ticks])
 
