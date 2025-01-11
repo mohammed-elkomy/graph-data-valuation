@@ -56,7 +56,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
         print(f"{value:<30}{count:<30}{percentage:.2f}%")
     print()
 
-    plt.hist(values, bins=10000, alpha=0.75, edgecolor='black', density=True)
+    plt.hist(values, bins=20, alpha=0.75, edgecolor='black', density=True)
     # Convert y-axis to percentage
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y * 100:.2f}%'))
     plt.title(title)
