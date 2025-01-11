@@ -37,7 +37,6 @@ def aggregate_data(file_list, is_count):
     return results
 
 
-
 def analyze_dist(values, x_axis, y_axis, title, filename):
     """
     Analyzes and plots the distribution of values, focusing on the range covering 97% of the data.
@@ -62,9 +61,10 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
 
     # Determine the value at the 97th percentile
     upper_bound = np.percentile(values, 97)
+    lower_bound = np.percentile(values, 3)
 
     # Filter values up to the 97th percentile
-    filtered_values = [v for v in values if v <= upper_bound]
+    filtered_values = [v for v in values if lower_bound <= v <= upper_bound]
 
     # Plot the histogram with filtered values
     n, bins, patches = plt.hist(filtered_values, bins=1000, alpha=0.75, edgecolor='black')
@@ -75,8 +75,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y / len(values) * 100:.2f}%'))
     plt.yticks(y_ticks, [f'{y / len(values) * 100:.2f}%' for y in y_ticks])
 
-    # Adjust x-axis to limit it to the 97th percentile
-    plt.xlim(left=bins[0], right=upper_bound)
+    plt.xlim(left=lower_bound*0.9, right=upper_bound*1.1)
 
     plt.title(title)
     plt.xlabel(x_axis)
