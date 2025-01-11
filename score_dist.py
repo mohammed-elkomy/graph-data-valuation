@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy import stats
 
 
 def aggregate_data(file_list, is_count):
@@ -41,12 +42,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 from scipy import stats
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import Counter
+from scipy import stats
 
 
-def analyze_dist(values, x_axis, y_axis, title, filename, fit_uniform=True):
+def analyze_dist(values, x_axis, y_axis, title, filename, fit_normal=False):
     """
     Analyzes and plots the distribution of values, focusing on the range covering 97% of the data.
-    Optionally fits a uniform distribution and shows its mean and sigma.
+    Optionally fits a normal distribution to the histogram bars and shows its mean and sigma.
 
     Parameters:
     - values: List of values to analyze.
@@ -54,7 +59,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename, fit_uniform=True):
     - y_axis: Label for the y-axis of the plot.
     - title: Title of the plot.
     - filename: Filename to save the plot.
-    - fit_uniform: Whether to fit a uniform distribution and display its mean and sigma.
+    - fit_normal: Whether to fit a normal distribution to the histogram bars and display its mean and sigma.
     """
     value_counts = Counter(values)
     most_common_values = value_counts.most_common(15)
@@ -87,18 +92,19 @@ def analyze_dist(values, x_axis, y_axis, title, filename, fit_uniform=True):
     # Adjust the x-axis limits based on the percentile bounds
     plt.xlim(left=lower_bound * 0.9 - 1e-3, right=upper_bound * 1.1 + 1e-3)
 
-    # If fitting a uniform distribution
-    if fit_uniform:
-        # Fit a uniform distribution to the filtered data
-        loc, scale = stats.uniform.fit(filtered_values)
+    # If fitting a normal distribution to the histogram bars
+    if fit_normal:
+        # Fit a normal distribution to the data (mean and std)
+        mean, std = np.mean(filtered_values), np.std(filtered_values)
 
-        # Display the fitted uniform distribution's mean (loc) and sigma (scale)
-        print(f"Fitted Uniform Distribution: Mean (loc) = {loc:.2f}, Sigma (scale) = {scale:.2f}")
+        # Display the fitted normal distribution's mean and sigma
+        print(f"Fitted Normal Distribution: Mean = {mean:.5f}, Sigma = {std:.5f}")
 
-        # Plot the fitted uniform distribution
+        # Plot the fitted normal distribution over the histogram
         x = np.linspace(lower_bound, upper_bound, 1000)
-        y = stats.uniform.pdf(x, loc, scale) * len(filtered_values) * (x[1] - x[0])  # PDF scaled to histogram
-        plt.plot(x, y, 'b-', label=f'Uniform Distribution\nMean = {loc:.2f}, Sigma = {scale:.2f}')
+        y = stats.norm.pdf(x, mean, std)
+        y = y / y.max() * y_max
+        plt.plot(x, y, 'b-', label=f'Normal Distribution\nMean = {mean:.5f}, Sigma = {std:.5f}')
         plt.legend()
 
     plt.title(title)
@@ -112,7 +118,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename, fit_uniform=True):
     plt.close()
 
 
-def process_and_combine_files(pattern, x_axis, y_axis, title_base, file_suffix, is_count=False, num_perms=1):
+def process_and_combine_files(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms, is_count=False):
     files = glob.glob(pattern)
     combined_data = aggregate_data(files, is_count)
 
@@ -125,7 +131,7 @@ def process_and_combine_files(pattern, x_axis, y_axis, title_base, file_suffix, 
 
     print(f"Loaded files: {files}")
     filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
-    analyze_dist(combined_values, x_axis, y_axis, title_base, filename)
+    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal)
 
 
 # Define file patterns and process each
@@ -133,6 +139,7 @@ process_and_combine_files(r"value/Cora_*_10_0_0.5_0.7_pc_value.pkl",
                           "PC Value", "Percentage of nodes",
                           "Combined Distribution of Cora Values",
                           "pc_value",
+                          fit_normal=True,
                           is_count=False,
                           num_perms=10)
 
@@ -140,12 +147,17 @@ process_and_combine_files(r"value/Cora_*_10_0_0.5_0.7_pc_value_count.pkl",
                           "Node updates during pc-winter value evaluation", "Percentage of nodes",
                           "Combined Distribution of Cora Counts",
                           "pc_value_count",
-                          is_count=True)
+                          fit_normal=False,
+                          is_count=True,
+                          num_perms=10
+
+                          )
 
 process_and_combine_files(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
                           "PC Value", "Percentage of nodes",
                           "Combined Distribution of WikiCS Values",
                           "pc_value",
+                          fit_normal=True,
                           is_count=False,
                           num_perms=1)
 
@@ -153,4 +165,7 @@ process_and_combine_files(r"value/WikiCS_*_1_0_0.7_0.9_pc_value_count.pkl",
                           "Node updates during pc-winter value evaluation", "Percentage of nodes",
                           "Combined Distribution of WikiCS Counts",
                           "pc_value_count",
-                          is_count=True)
+                          fit_normal=False,
+                          is_count=True,
+                          num_perms=1
+                          )
