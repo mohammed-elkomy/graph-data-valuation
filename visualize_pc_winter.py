@@ -35,7 +35,7 @@ img_dir = "imgs"
 pattern = f'./res/*node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_*_{dataset}_test.pkl'
 
 datagroups = defaultdict(list)
-files_per_dump_count = defaultdict(int)
+files_per_dump_count = defaultdict(list)
 # Get the unique part of the filename based on the wildcard `*`
 for file_path in sorted(glob.glob(pattern)):
     print("processing subset", file_path)
@@ -46,9 +46,10 @@ for file_path in sorted(glob.glob(pattern)):
     with open(file_path, 'rb') as file:
         data = pickle.load(file)
     datagroups[dump_count].extend(data)
-    files_per_dump_count[dump_count] += 1
+    files_per_dump_count[dump_count].append(file_path)
 
-print("files_per_dump_count",files_per_dump_count)
+for dump_count, matched_files in files_per_dump_count.items():
+    assert len(matched_files) == 10, f"failed to get parts of {matched_files}"
 for dump_count, data_group in datagroups.items():
     dump_count = int(dump_count)
     print(dump_count, len(data_group))
