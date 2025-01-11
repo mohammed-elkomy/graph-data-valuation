@@ -65,7 +65,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
 
     # Filter values up to the 97th percentile
     filtered_values = [v for v in values if lower_bound <= v <= upper_bound]
-
+    plt.figure(figsize=(18, 8))
     # Plot the histogram with filtered values
     n, bins, patches = plt.hist(filtered_values, bins=10000, edgecolor='red',color="red")
 
