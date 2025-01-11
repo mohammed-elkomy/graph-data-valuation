@@ -64,7 +64,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
 
     # Set y-ticks to show 10 evenly spaced ticks
     y_max = n.max()  # Maximum density value from the histogram
-    y_ticks = np.linspace(0, y_max, 10)  # 10 evenly spaced ticks
+    y_ticks = np.linspace(0, y_max, 20)  # 10 evenly spaced ticks
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y/len(values)  * 100:.2f}%'))
     plt.yticks(y_ticks, [f'{y/len(values) * 100:.2f}%' for y in y_ticks])
 
