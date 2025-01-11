@@ -75,7 +75,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y / len(values) * 100:.2f}%'))
     plt.yticks(y_ticks, [f'{y / len(values) * 100:.2f}%' for y in y_ticks])
 
-    plt.xlim(left=lower_bound*0.9-1e-4, right=upper_bound*1.1+1e-4)
+    plt.xlim(left=lower_bound*0.9-1e-3, right=upper_bound*1.1+1e-3)
 
     plt.title(title)
     plt.xlabel(x_axis)
