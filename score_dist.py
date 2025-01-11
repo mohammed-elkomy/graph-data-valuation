@@ -1,7 +1,9 @@
+import glob
 import os
 import pickle
-import glob
-from collections import defaultdict, Counter
+from collections import Counter
+from collections import defaultdict
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -34,9 +36,7 @@ def aggregate_data(file_list, is_count):
 
     return results
 
-import numpy as np
-import matplotlib.pyplot as plt
-from collections import Counter
+
 
 def analyze_dist(values, x_axis, y_axis, title, filename):
     """
@@ -63,12 +63,15 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     # Determine the value at the 97th percentile
     upper_bound = np.percentile(values, 97)
 
-    # Plot the histogram, focusing on the range up to the 97th percentile
-    n, bins, patches = plt.hist(values, bins=1000, alpha=0.75, edgecolor='black', range=(bins[0], upper_bound))
+    # Filter values up to the 97th percentile
+    filtered_values = [v for v in values if v <= upper_bound]
+
+    # Plot the histogram with filtered values
+    n, bins, patches = plt.hist(filtered_values, bins=1000, alpha=0.75, edgecolor='black')
 
     # Set y-ticks to show 20 evenly spaced ticks
     y_max = n.max()  # Maximum density value from the histogram
-    y_ticks = np.linspace(0, y_max, 20)  # 20 evenly spaced ticks
+    y_ticks = np.linspace(0, y_max, 10)  # 10 evenly spaced ticks
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y / len(values) * 100:.2f}%'))
     plt.yticks(y_ticks, [f'{y / len(values) * 100:.2f}%' for y in y_ticks])
 
