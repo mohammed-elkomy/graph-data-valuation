@@ -476,6 +476,7 @@ if __name__ == "__main__":
         dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
         config_path = f'./config/wikics.pkl'
         generate_wikics_split(dataset)  # if you want to generate the wikics split and save it into a pickle at config dir
+        exit()
     else:
         dataset = Planetoid(root='dataset/' + dataset_name, name=dataset_name, transform=T.NormalizeFeatures())
 
