@@ -6,6 +6,8 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import argparse
 
+import numpy as np
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Process dataset arguments.")
