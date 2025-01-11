@@ -34,7 +34,7 @@ def aggregate_data(file_list, is_count):
     return results
 
 
-def analyze_dist(values, x_axis, title, filename):
+def analyze_dist(values, x_axis, y_axis, title, filename):
     """
     Analyzes and plots the distribution of values.
 
@@ -56,16 +56,16 @@ def analyze_dist(values, x_axis, title, filename):
         print(f"{value:<30}{count:<30}{percentage:.2f}%")
     print()
 
-    plt.hist(values, bins=10000, alpha=0.75, edgecolor='black')
+    plt.hist(values, bins=10000, alpha=0.75, edgecolor='black', density=True)
     plt.title(title)
     plt.xlabel(x_axis)
-    plt.ylabel('Frequency')
+    plt.ylabel(y_axis)
     plt.grid(True)
     plt.savefig(filename)
     plt.close()
 
 
-def process_and_combine_files(pattern, x_axis, title_base, file_suffix, is_count=False, num_perms=1):
+def process_and_combine_files(pattern, x_axis, y_axis, title_base, file_suffix, is_count=False, num_perms=1):
     files = glob.glob(pattern)
     combined_data = aggregate_data(files, is_count)
 
@@ -78,32 +78,32 @@ def process_and_combine_files(pattern, x_axis, title_base, file_suffix, is_count
 
     print(f"Loaded files: {files}")
     filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
-    analyze_dist(combined_values, x_axis, title_base, filename)
+    analyze_dist(combined_values, x_axis, y_axis, title_base, filename)
 
 
 # Define file patterns and process each
 process_and_combine_files(r"value/Cora_*_10_0_0.5_0.7_pc_value.pkl",
-                          "PC Value",
+                          "PC Value", "Percentage of nodes",
                           "Combined Distribution of Cora Values",
                           "pc_value",
                           is_count=False,
                           num_perms=10)
 
 process_and_combine_files(r"value/Cora_*_10_0_0.5_0.7_pc_value_count.pkl",
-                          "Node updates during pc-value-eval",
+                          "Node updates during pc-winter value evaluation", "Percentage of nodes",
                           "Combined Distribution of Cora Counts",
                           "pc_value_count",
                           is_count=True)
 
 process_and_combine_files(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
-                          "PC Value",
+                          "PC Value", "Percentage of nodes",
                           "Combined Distribution of WikiCS Values",
                           "pc_value",
                           is_count=False,
                           num_perms=1)
 
 process_and_combine_files(r"value/WikiCS_*_1_0_0.7_0.9_pc_value_count.pkl",
-                          "Node updates during pc-value-eval",
+                          "Node updates during pc-winter value evaluation", "Percentage of nodes",
                           "Combined Distribution of WikiCS Counts",
                           "pc_value_count",
                           is_count=True)
