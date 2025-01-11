@@ -3,6 +3,7 @@ import pickle
 import glob
 from collections import defaultdict, Counter
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 def aggregate_data(file_list, is_count):
@@ -62,6 +63,8 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     plt.title(title)
     plt.xlabel(x_axis)
     plt.ylabel(y_axis)
+    # Set y-ticks from 0% to 100% with a step of 10%
+    plt.yticks(np.linspace(0, 1, 11), [f'{int(y * 100)}%' for y in np.linspace(0, 1, 11)])
     plt.grid(True)
     plt.savefig(filename)
     plt.close()
