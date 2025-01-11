@@ -34,11 +34,13 @@ def aggregate_data(file_list, is_count):
 
     return results
 
-
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import Counter
 
 def analyze_dist(values, x_axis, y_axis, title, filename):
     """
-    Analyzes and plots the distribution of values.
+    Analyzes and plots the distribution of values, focusing on the range covering 97% of the data.
 
     Parameters:
     - values: List of values to analyze.
@@ -47,12 +49,6 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     - title: Title of the plot.
     - filename: Filename to save the plot.
     """
-    # Drop the top and bottom 2% of values
-    lower_bound = np.percentile(values, 3)
-    upper_bound = np.percentile(values, 97)
-    values = [v for v in values if lower_bound <= v <= upper_bound]
-
-
     value_counts = Counter(values)
     most_common_values = value_counts.most_common(15)
 
@@ -63,16 +59,21 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     for value, count in most_common_values:
         percentage = (count / total_values) * 100
         print(f"{value:<30}{count:<30}{percentage:.2f}%")
-    print()
 
-    # Plot the histogram and get the counts and bin edges
-    n, bins, patches = plt.hist(values, bins=1000, alpha=0.75, edgecolor='black', )
+    # Determine the value at the 97th percentile
+    upper_bound = np.percentile(values, 97)
 
-    # Set y-ticks to show 10 evenly spaced ticks
+    # Plot the histogram, focusing on the range up to the 97th percentile
+    n, bins, patches = plt.hist(values, bins=1000, alpha=0.75, edgecolor='black', range=(bins[0], upper_bound))
+
+    # Set y-ticks to show 20 evenly spaced ticks
     y_max = n.max()  # Maximum density value from the histogram
     y_ticks = np.linspace(0, y_max, 20)  # 20 evenly spaced ticks
-    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y/len(values)  * 100:.2f}%'))
-    plt.yticks(y_ticks, [f'{y/len(values) * 100:.2f}%' for y in y_ticks])
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y / len(values) * 100:.2f}%'))
+    plt.yticks(y_ticks, [f'{y / len(values) * 100:.2f}%' for y in y_ticks])
+
+    # Adjust x-axis to limit it to the 97th percentile
+    plt.xlim(left=bins[0], right=upper_bound)
 
     plt.title(title)
     plt.xlabel(x_axis)
