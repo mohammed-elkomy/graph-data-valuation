@@ -47,6 +47,12 @@ def analyze_dist(values, x_axis, y_axis, title, filename):
     - title: Title of the plot.
     - filename: Filename to save the plot.
     """
+    # Drop the top and bottom 2% of values
+    lower_bound = np.percentile(values, 2)
+    upper_bound = np.percentile(values, 98)
+    values = [v for v in values if lower_bound <= v <= upper_bound]
+
+
     value_counts = Counter(values)
     most_common_values = value_counts.most_common(15)
 
