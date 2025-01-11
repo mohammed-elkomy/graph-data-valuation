@@ -49,7 +49,8 @@ for file_path in sorted(glob.glob(pattern)):
     files_per_dump_count[dump_count].append(file_path)
 
 for dump_count, matched_files in files_per_dump_count.items():
-    assert len(matched_files) == 10, f"failed to get parts of \n {'\n'.join(matched_files)}"
+    sub = "\n".join(matched_files)
+    assert len(matched_files) == 10, f"failed to get parts of \n{sub}"
 
 for dump_count, data_group in datagroups.items():
     dump_count = int(dump_count)
