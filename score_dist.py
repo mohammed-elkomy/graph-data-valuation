@@ -34,25 +34,15 @@ def nested_aggregation(file_list, is_count):
                             results[sub_sub_key] += value
                         else:
                             results[key].append(value)
-                            results[sub_key] .append(value)
-                            results[sub_sub_key] .append(value)
+                            results[sub_key].append(value)
+                            results[sub_sub_key].append(value)
 
                             # results[(key, sub_key, sub_sub_key)].append(value)
 
     return results
 
 
-import numpy as np
-import matplotlib.pyplot as plt
-from collections import Counter
-from scipy import stats
-import numpy as np
-import matplotlib.pyplot as plt
-from collections import Counter
-from scipy import stats
-
-
-def analyze_dist(values, x_axis, y_axis, title, filename, fit_normal=False):
+def analyze_dist(values, x_axis, y_axis, title, filename, bins, fit_normal=False):
     """
     Analyzes and plots the distribution of values, focusing on the range covering 97% of the data.
     Optionally fits a normal distribution to the histogram bars and shows its mean and sigma.
@@ -85,7 +75,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename, fit_normal=False):
     plt.figure(figsize=(14, 7))
 
     # Plot the histogram with filtered values
-    n, bins, patches = plt.hist(filtered_values, bins=10000, edgecolor='red', color="red", alpha=0.75)
+    n, bins, patches = plt.hist(filtered_values, bins=bins, edgecolor='red', color="red", alpha=0.75)
 
     # Set y-ticks to show 10 evenly spaced ticks
     y_max = n.max()  # Maximum density value from the histogram
@@ -94,7 +84,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename, fit_normal=False):
     plt.yticks(y_ticks, [f'{y / len(values) * 100:.2f}%' for y in y_ticks])
 
     # Adjust the x-axis limits based on the percentile bounds
-    plt.xlim(left=lower_bound * 0.9 - 1e-3, right=upper_bound * 1.1 + 1e-3)
+    plt.xlim(left=lower_bound * 0.9 - 1e-4, right=upper_bound * 1.1 + 1e-4)
 
     # If fitting a normal distribution to the histogram bars
     if fit_normal:
@@ -108,7 +98,7 @@ def analyze_dist(values, x_axis, y_axis, title, filename, fit_normal=False):
         x = np.linspace(lower_bound, upper_bound, 1000)
         y = stats.norm.pdf(x, mean, std)
         y = y / y.max() * y_max
-        plt.plot(x, y, 'b-', label=f'Normal Distribution\nMean = {mean:.5f}, Sigma = {std:.5f}')
+        plt.plot(x, y, 'b-', label=f'Normal Distribution\nMean = {mean:.5e}, Sigma = {std:.5e}')
         plt.legend()
 
     plt.title(title)
@@ -143,10 +133,10 @@ def process_and_combine_files_values(pattern, x_axis, y_axis, title_base, file_s
 
     print(f"Loaded files: {files}")
     filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
-    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal)
+    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal, bins=100)
 
 
-def process_and_combine_files_values_with_top_counts(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms):
+def process_and_combine_files_values_trunc_counts(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms):
     """
     Process and combine value_files when is_count is False. It handles the aggregation of values (non-count data).
 
@@ -160,15 +150,21 @@ def process_and_combine_files_values_with_top_counts(pattern, x_axis, y_axis, ti
     - num_perms: Number of permutations to calculate the average.
     """
     value_files = glob.glob(pattern)
-    other_files = pattern.replace("pc_value.pkl","pc_value_count.pkl")
-    combined_data = nested_aggregation(value_files, is_count=False)
+    count_files = glob.glob(pattern.replace("pc_value.pkl", "pc_value_count.pkl"))
+    val_agg_data = nested_aggregation(value_files, is_count=False)
+    count_agg_data = nested_aggregation(count_files, is_count=True)
 
+    p = np.percentile(np.array(list(count_agg_data.values())), 70)
+    print("p", p)
+    well_represented_nodes = [k for k, v in count_agg_data.items() if v > p]
     # Calculate the average values for each key in the combined data
-    combined_values = [sum(values) / (len(values) * num_perms) for values in combined_data.values()]
+    combined_values = [sum(values) / (len(values) * num_perms)
+                       for node_id, values in val_agg_data.items()
+                       if node_id in well_represented_nodes]
 
     print(f"Loaded value_files: {value_files}")
     filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
-    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal)
+    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, bins=100, fit_normal=fit_normal)
 
 
 def process_and_combine_files_counts(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms):
@@ -192,15 +188,15 @@ def process_and_combine_files_counts(pattern, x_axis, y_axis, title_base, file_s
 
     print(f"Loaded files: {files}")
     filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
-    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal)
+    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal, bins=10000)
 
 
-# process_and_combine_files_values_with_top_counts(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
-#                                                   "PC Value", "Percentage of nodes",
-#                                                   "Combined Distribution of WikiCS Values",
-#                                                   "pc_value",
-#                                                  fit_normal=True,
-#                                                  num_perms=1)
+process_and_combine_files_values_trunc_counts(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
+                                              "PC Value", "Percentage of nodes",
+                                              "Combined Distribution of WikiCS Values After Truncation",
+                                              "pc_value_truncated",
+                                              fit_normal=True,
+                                              num_perms=1)
 
 process_and_combine_files_values(r"value/Cora_*_10_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",

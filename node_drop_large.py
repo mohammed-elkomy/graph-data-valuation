@@ -264,7 +264,7 @@ print("before count filtration", unlabled_win_df.shape)
 unlabled_win_df['count'] = unlabled_win_df['key'].map(counts)
 print(unlabled_win_df['count'].value_counts())
 percentile_threshold = np.percentile(unlabled_win_df['count'], min_occ_perc)
-# Filter rows where 'count' is greater than the 90th percentile
+# Filter rows where 'count' is greater than the xth percentile (min_occ_perc)
 unlabled_win_df = unlabled_win_df[unlabled_win_df["count"] > percentile_threshold]
 print("after count filtration", unlabled_win_df.shape)
 
