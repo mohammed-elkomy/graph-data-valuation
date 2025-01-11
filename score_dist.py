@@ -9,7 +9,7 @@ import numpy as np
 from scipy import stats
 
 
-def aggregate_data(file_list, is_count):
+def nested_aggregation(file_list, is_count):
     """
     Aggregates data from a list of files.
 
@@ -33,7 +33,11 @@ def aggregate_data(file_list, is_count):
                             results[sub_key] += value
                             results[sub_sub_key] += value
                         else:
-                            results[(key, sub_key, sub_sub_key)].append(value)
+                            results[key].append(value)
+                            results[sub_key] .append(value)
+                            results[sub_sub_key] .append(value)
+
+                            # results[(key, sub_key, sub_sub_key)].append(value)
 
     return results
 
@@ -118,54 +122,111 @@ def analyze_dist(values, x_axis, y_axis, title, filename, fit_normal=False):
     plt.close()
 
 
-def process_and_combine_files(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms, is_count=False):
-    files = glob.glob(pattern)
-    combined_data = aggregate_data(files, is_count)
+def process_and_combine_files_values(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms):
+    """
+    Process and combine files when is_count is False. It handles the aggregation of values (non-count data).
 
-    if not is_count:
-        # For value files, calculate the average values
-        combined_values = [sum(values) / (len(values) * num_perms) for values in combined_data.values()]
-    else:
-        # For count files, the combined_data already contains the aggregated counts
-        combined_values = list(combined_data.values())
+    Parameters:
+    - pattern: File pattern to match the files.
+    - x_axis: Label for the x-axis of the plot.
+    - y_axis: Label for the y-axis of the plot.
+    - title_base: Base title for the plot.
+    - file_suffix: Suffix to be added to the plot filename.
+    - fit_normal: Boolean indicating whether to fit a normal distribution.
+    - num_perms: Number of permutations to calculate the average.
+    """
+    files = glob.glob(pattern)
+    combined_data = nested_aggregation(files, is_count=False)
+
+    # Calculate the average values for each key in the combined data
+    combined_values = [sum(values) / (len(values) * num_perms) for values in combined_data.values()]
 
     print(f"Loaded files: {files}")
     filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
     analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal)
 
 
-# Define file patterns and process each
-process_and_combine_files(r"value/Cora_*_10_0_0.5_0.7_pc_value.pkl",
-                          "PC Value", "Percentage of nodes",
-                          "Combined Distribution of Cora Values",
-                          "pc_value",
-                          fit_normal=True,
-                          is_count=False,
-                          num_perms=10)
+def process_and_combine_files_values_with_top_counts(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms):
+    """
+    Process and combine value_files when is_count is False. It handles the aggregation of values (non-count data).
 
-process_and_combine_files(r"value/Cora_*_10_0_0.5_0.7_pc_value_count.pkl",
-                          "Node updates during pc-winter value evaluation", "Percentage of nodes",
-                          "Combined Distribution of Cora Counts",
-                          "pc_value_count",
-                          fit_normal=False,
-                          is_count=True,
-                          num_perms=10
+    Parameters:
+    - pattern: File pattern to match the value_files.
+    - x_axis: Label for the x-axis of the plot.
+    - y_axis: Label for the y-axis of the plot.
+    - title_base: Base title for the plot.
+    - file_suffix: Suffix to be added to the plot filename.
+    - fit_normal: Boolean indicating whether to fit a normal distribution.
+    - num_perms: Number of permutations to calculate the average.
+    """
+    value_files = glob.glob(pattern)
+    other_files = pattern.replace("pc_value.pkl","pc_value_count.pkl")
+    combined_data = nested_aggregation(value_files, is_count=False)
 
-                          )
+    # Calculate the average values for each key in the combined data
+    combined_values = [sum(values) / (len(values) * num_perms) for values in combined_data.values()]
 
-process_and_combine_files(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
-                          "PC Value", "Percentage of nodes",
-                          "Combined Distribution of WikiCS Values",
-                          "pc_value",
-                          fit_normal=True,
-                          is_count=False,
-                          num_perms=1)
+    print(f"Loaded value_files: {value_files}")
+    filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
+    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal)
 
-process_and_combine_files(r"value/WikiCS_*_1_0_0.7_0.9_pc_value_count.pkl",
-                          "Node updates during pc-winter value evaluation", "Percentage of nodes",
-                          "Combined Distribution of WikiCS Counts",
-                          "pc_value_count",
-                          fit_normal=False,
-                          is_count=True,
-                          num_perms=1
-                          )
+
+def process_and_combine_files_counts(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms):
+    """
+    Process and combine files when is_count is True. It handles the aggregation of counts (count data).
+
+    Parameters:
+    - pattern: File pattern to match the files.
+    - x_axis: Label for the x-axis of the plot.
+    - y_axis: Label for the y-axis of the plot.
+    - title_base: Base title for the plot.
+    - file_suffix: Suffix to be added to the plot filename.
+    - fit_normal: Boolean indicating whether to fit a normal distribution.
+    - num_perms: Number of permutations to calculate the average (if necessary).
+    """
+    files = glob.glob(pattern)
+    combined_data = nested_aggregation(files, is_count=True)
+
+    # The combined_data already contains the aggregated counts
+    combined_values = list(combined_data.values())
+
+    print(f"Loaded files: {files}")
+    filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
+    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal)
+
+
+# process_and_combine_files_values_with_top_counts(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
+#                                                   "PC Value", "Percentage of nodes",
+#                                                   "Combined Distribution of WikiCS Values",
+#                                                   "pc_value",
+#                                                  fit_normal=True,
+#                                                  num_perms=1)
+
+process_and_combine_files_values(r"value/Cora_*_10_0_0.5_0.7_pc_value.pkl",
+                                 "PC Value", "Percentage of nodes",
+                                 "Combined Distribution of Cora Values",
+                                 "pc_value",
+                                 fit_normal=True,
+                                 num_perms=10)
+
+process_and_combine_files_counts(r"value/Cora_*_10_0_0.5_0.7_pc_value_count.pkl",
+                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
+                                 "Combined Distribution of Cora Counts",
+                                 "pc_value_count",
+                                 fit_normal=False,
+                                 num_perms=10)
+
+process_and_combine_files_values(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
+                                 "PC Value", "Percentage of nodes",
+                                 "Combined Distribution of WikiCS Values",
+                                 "pc_value",
+                                 fit_normal=True,
+                                 num_perms=1)
+
+process_and_combine_files_counts(r"value/WikiCS_*_1_0_0.7_0.9_pc_value_count.pkl",
+                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
+                                 "Combined Distribution of WikiCS Counts",
+                                 "pc_value_count",
+                                 fit_normal=False,
+                                 num_perms=1
+                                 )

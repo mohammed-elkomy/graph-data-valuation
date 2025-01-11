@@ -40,19 +40,19 @@ for file_path in sorted(glob.glob(pattern)):
     print("processing subset", file_path)
     # Extract the unique part of the filename based on the wildcard `*`
     base_name = os.path.basename(file_path)
-    unique_part = base_name.split('_')[7]  # Assuming the dump_count is after the 6th underscore
+    dump_count = base_name.split('_')[7]  # Assuming the dump_count is after the 6th underscore
 
     with open(file_path, 'rb') as file:
         data = pickle.load(file)
     print(data[:5])
-    datagroups[unique_part].extend(data)
+    datagroups[dump_count].extend(data)
 
 for dump_count, data_group in datagroups.items():
     dump_count = int(dump_count)
     print(dump_count, len(data_group))
     plt.figure(figsize=(8, 6))
 
-    plt.plot(data_group, label='Our method')
+    plt.plot(data_group, label='PC-Winter Value Reproduction')
 
     # Set the x and y axis labels with increased font size
     plt.xlabel('Number of Unlabled Node Removed', fontsize=16)
