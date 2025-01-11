@@ -46,6 +46,7 @@ for file_path in sorted(glob.glob(pattern)):
         data = pickle.load(file)
     datagroups[dump_count].extend(data)
 
+print(len(datagroups))
 for dump_count, data_group in datagroups.items():
     dump_count = int(dump_count)
     print(dump_count, len(data_group))
