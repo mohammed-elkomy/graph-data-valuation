@@ -10,8 +10,8 @@ import torch
 import torch_geometric.transforms as T
 from torch_geometric.datasets import WikiCS
 
-from node_drop_large import SGCNet
-from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, dataset_params, get_subgraph_data
+from node_drop_large import SGCNet, get_subgraph_data
+from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, dataset_params
 
 warnings.simplefilter(action='ignore', category=Warning)
 
@@ -92,8 +92,8 @@ for i, (src, tgt) in enumerate(data.edge_index.t().tolist()):
 indu_mask = indu_mask.to(device)
 
 # Prepare test and validation data
-test_data = get_subgraph_data(data, test_mask)
-val_data = get_subgraph_data(data, val_mask)
+test_data = get_subgraph_data(data, data.test_mask)
+val_data = get_subgraph_data(data, data.val_mask)
 
 # Initial model training and evaluation
 data_copy = data.clone()
