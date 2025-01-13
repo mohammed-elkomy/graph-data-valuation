@@ -58,7 +58,7 @@ with open(config_path, 'rb') as f:
         print(f"BEFORE: Validation Mask:{val_mask.shape} Size: {val_size}")
         print(f"BEFORE: Test Mask:{test_mask.shape} Size: {test_size}")
 
-    data = set_masks_from_indices(data, loaded_indices_dict, device)
+    # data = set_masks_from_indices(data, loaded_indices_dict, device)
 
 train_mask = data.train_mask
 val_mask = data.val_mask
@@ -116,6 +116,11 @@ BEFORE: Test Mask:torch.Size([11701]) Size: 5847
 Train Mask:torch.Size([11701]) Size: 194
 Validation Mask:torch.Size([11701]) Size: 442
 Test Mask:torch.Size([11701]) Size: 1461
+
+wikics
+0.06091718001368925 0.06561085972850679
+0.07529089664613278 0.029411764705882353
+
 
 wikics2
 0.0620831195484864 0.058790276992651214
