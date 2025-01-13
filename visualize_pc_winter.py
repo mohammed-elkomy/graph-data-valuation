@@ -52,11 +52,14 @@ for file_path in sorted(glob.glob(pattern)):
 
 for dump_count, matched_files in files_per_dump_count.items():
     sub = "\n".join(matched_files)
-    assert len(matched_files) == 10, f"failed to get parts of \n{sub}"
+    assert len(matched_files) in [10, 1], f"failed to get parts of \n{sub}"
+    if len(matched_files) == 1:
+        print("only found",sub)
 
 # Function to calculate the simple moving average
 def moving_average(data, window_size=5):
     return np.convolve(data, np.ones(window_size) / window_size, mode='valid')
+
 
 for dump_count, data_group in datagroups.items():
     dump_count = int(dump_count)
