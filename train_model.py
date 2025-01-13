@@ -7,7 +7,7 @@ import pickle
 import warnings
 
 import torch
-import torch.transforms as T
+import torch_geometric.transforms as T
 from torch.datasets import Planetoid, WikiCS, Amazon, Coauthor
 
 from node_drop_large import SGCNet, get_subgraph_data
