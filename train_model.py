@@ -8,7 +8,7 @@ import warnings
 
 import torch
 import torch_geometric.transforms as T
-from torch.datasets import Planetoid, WikiCS, Amazon, Coauthor
+from torch_geometric.datasets import Amazon, Planetoid, Coauthor, WikiCS
 
 from node_drop_large import SGCNet, get_subgraph_data
 from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, dataset_params
