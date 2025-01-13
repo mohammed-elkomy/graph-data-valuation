@@ -124,11 +124,28 @@ print(test_acc, val_acc)
 model.fit(data_copy, num_epochs, lr, weight_decay)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
+print(test_acc, val_acc)
 
 # Distribution of classes in test and validation sets
 output_dim = dataset.num_classes
+
+# Calculate the total number of samples in each set
+total_test_samples = data.test_mask.sum().item()
+total_val_samples = data.val_mask.sum().item()
+
+# Calculate the class distributions as counts
 test_class_distribution = np.bincount(data.y[data.test_mask].cpu().numpy(), minlength=output_dim)
 val_class_distribution = np.bincount(data.y[data.val_mask].cpu().numpy(), minlength=output_dim)
 
-print("Test Class Distribution:", test_class_distribution)
-print("Validation Class Distribution:", val_class_distribution)
+# Convert counts to percentages
+test_class_percentages = (test_class_distribution / total_test_samples) * 100
+val_class_percentages = (val_class_distribution / total_val_samples) * 100
+
+# Print the distributions
+print("Test Class Distribution (Percentages):")
+for i, percentage in enumerate(test_class_percentages):
+    print(f"Class {i}: {percentage:.2f}%")
+
+print("\nValidation Class Distribution (Percentages):")
+for i, percentage in enumerate(val_class_percentages):
+    print(f"Class {i}: {percentage:.2f}%")
