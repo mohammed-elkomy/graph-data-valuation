@@ -15,7 +15,7 @@ from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, datas
 
 warnings.simplefilter(action='ignore', category=Warning)
 
-dataset_name = "WikiCS2"
+dataset_name = "WikiCS"
 
 # Print the parameters and pattern to verify
 print(f"Dataset: {dataset_name}")
@@ -110,8 +110,15 @@ val_acc = model.predict_valid(val_data)
 print(test_acc, val_acc)
 
 """
+BEFORE: Train Mask:torch.Size([11701]) Size: 580
+BEFORE: Validation Mask:torch.Size([11701]) Size: 1769
+BEFORE: Test Mask:torch.Size([11701]) Size: 5847
+Train Mask:torch.Size([11701]) Size: 194
+Validation Mask:torch.Size([11701]) Size: 442
+Test Mask:torch.Size([11701]) Size: 1461
+
 wikics2
 0.0620831195484864 0.058790276992651214
-
+0.09034907597535935 0.049773755656108594
 0.19839233795108602 0.23742227247032222
 """
