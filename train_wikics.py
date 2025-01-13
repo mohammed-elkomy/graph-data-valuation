@@ -58,7 +58,7 @@ with open(config_path, 'rb') as f:
         print(f"BEFORE: Validation Mask:{val_mask.shape} Size: {val_size}")
         print(f"BEFORE: Test Mask:{test_mask.shape} Size: {test_size}")
 
-    #data = set_masks_from_indices(data, loaded_indices_dict, device)
+    data = set_masks_from_indices(data, loaded_indices_dict, device)
 
 train_mask = data.train_mask
 val_mask = data.val_mask
@@ -108,3 +108,10 @@ model.fit(data_copy, num_epochs, lr, weight_decay)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 print(test_acc, val_acc)
+
+"""
+wikics2
+0.0620831195484864 0.058790276992651214
+
+0.19839233795108602 0.23742227247032222
+"""
