@@ -77,12 +77,12 @@ class SGCNet(nn.Module):
     Simple Graph Convolutional Network model
     """
 
-    def __init__(self, num_features, num_classes, seed=0):
+    def __init__(self, num_features, num_classes,K=2, seed=0):
         super(SGCNet, self).__init__()
         torch.manual_seed(seed)  # Set the seed for CPU
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)  # Set the seed for all GPUs
-        self.conv = SGConv(num_features, num_classes, K=2)
+        self.conv = SGConv(num_features, num_classes, K=K)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def forward(self, input_data):
