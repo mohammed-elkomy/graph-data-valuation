@@ -74,7 +74,7 @@ if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2']:
             print(f"BEFORE: Validation Mask:{val_mask.shape} Size: {val_size}")
             print(f"BEFORE: Test Mask:{test_mask.shape} Size: {test_size}")
 
-    data = set_masks_from_indices(data, loaded_indices_dict, device)
+    # data = set_masks_from_indices(data, loaded_indices_dict, device)
 
 train_mask = data.train_mask
 val_mask = data.val_mask
@@ -116,11 +116,11 @@ data_copy = data.clone()
 data_copy = data_copy.to(device)
 data_copy.edge_index = data_copy.edge_index[:, indu_mask]
 
-model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes,K=8).to(device)
+model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes,K=6).to(device)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 print(test_acc, val_acc)
-model.fit(data_copy, num_epochs, lr, weight_decay)
+model.fit(data_copy, num_epochs*5, lr, weight_decay)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 print(test_acc, val_acc)
