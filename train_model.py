@@ -6,6 +6,7 @@ import argparse
 import pickle
 import warnings
 
+import numpy as np
 import torch
 import torch_geometric.transforms as T
 from torch_geometric.datasets import Amazon, Planetoid, Coauthor, WikiCS
@@ -123,4 +124,11 @@ print(test_acc, val_acc)
 model.fit(data_copy, num_epochs, lr, weight_decay)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
-print(test_acc, val_acc)
+
+# Distribution of classes in test and validation sets
+output_dim = dataset.num_classes
+test_class_distribution = np.bincount(data.y[data.test_mask].cpu().numpy(), minlength=output_dim)
+val_class_distribution = np.bincount(data.y[data.val_mask].cpu().numpy(), minlength=output_dim)
+
+print("Test Class Distribution:", test_class_distribution)
+print("Validation Class Distribution:", val_class_distribution)
