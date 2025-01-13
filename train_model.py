@@ -58,8 +58,8 @@ if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2']:
         if dataset_name in ['WikiCS', 'WikiCS2']:
             assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
             split_id = loaded_indices_dict["split_id"]
-            data.train_mask = data.train_mask[:, split_id].clone()
-            data.val_mask = data.val_mask[:, split_id].clone()
+            data.train_mask = data.train_mask[:, 3].clone()
+            data.val_mask = data.val_mask[:, 3].clone()
 
             train_mask = data.train_mask
             val_mask = data.val_mask
