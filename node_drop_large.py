@@ -90,7 +90,7 @@ class SGCNet(nn.Module):
         x = self.conv(x, edge_index)
         return F.log_softmax(x, dim=1)
 
-    def fit(self, dataset, num_epochs):
+    def fit(self, dataset, num_epochs,lr,weight_decay):
         """Train the model"""
         model = self.to(self.device)
         input_data = dataset.to(self.device)
@@ -361,7 +361,7 @@ if __name__ == "__main__":
         data_copy.edge_index = data_copy.edge_index[:, indu_mask]
 
         model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes).to(device)
-        model.fit(data_copy,num_epochs)
+        model.fit(data_copy,num_epochs,lr,weight_decay)
         test_acc = model.predict(test_data)
         val_acc = model.predict_valid(val_data)
         win_acc += [test_acc]
@@ -387,7 +387,7 @@ if __name__ == "__main__":
         data_copy.edge_index = data_copy.edge_index[:, edge_mask]
 
         model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes).to(device)
-        model.fit(data_copy,num_epochs)
+        model.fit(data_copy,num_epochs,lr,weight_decay)
         test_acc = model.predict(test_data)
         val_acc = model.predict_valid(val_data)
         win_acc += [test_acc]
