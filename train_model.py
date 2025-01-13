@@ -116,11 +116,11 @@ data_copy = data.clone()
 data_copy = data_copy.to(device)
 data_copy.edge_index = data_copy.edge_index[:, indu_mask]
 
-model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes,K=5).to(device)
+model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes,K=8).to(device)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 print(test_acc, val_acc)
-model.fit(data_copy, num_epochs*200, lr*.1, weight_decay)
+model.fit(data_copy, num_epochs, lr, weight_decay)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 print(test_acc, val_acc)
