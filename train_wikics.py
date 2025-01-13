@@ -48,6 +48,7 @@ with open(config_path, 'rb') as f:
         train_mask = data.train_mask
         val_mask = data.val_mask
         test_mask = data.test_mask
+
         train_size = train_mask.sum().item()
         val_size = val_mask.sum().item()
         test_size = test_mask.sum().item()
@@ -91,8 +92,8 @@ for i, (src, tgt) in enumerate(data.edge_index.t().tolist()):
 indu_mask = indu_mask.to(device)
 
 # Prepare test and validation data
-test_data = get_subgraph_data(data, data.test_mask)
-val_data = get_subgraph_data(data, data.val_mask)
+test_data = get_subgraph_data(data, test_mask)
+val_data = get_subgraph_data(data, val_mask)
 
 # Initial model training and evaluation
 data_copy = data.clone()
