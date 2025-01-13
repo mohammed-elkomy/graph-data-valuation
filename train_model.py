@@ -58,8 +58,8 @@ if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2']:
         if dataset_name in ['WikiCS', 'WikiCS2']:
             assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
             split_id = loaded_indices_dict["split_id"]
-            data.train_mask = data.train_mask[:, 3].clone()
-            data.val_mask = data.val_mask[:, 3].clone()
+            data.train_mask = data.train_mask[:, split_id].clone()
+            data.val_mask = data.val_mask[:, split_id].clone()
 
             train_mask = data.train_mask
             val_mask = data.val_mask
@@ -116,11 +116,11 @@ data_copy = data.clone()
 data_copy = data_copy.to(device)
 data_copy.edge_index = data_copy.edge_index[:, indu_mask]
 
-model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes,K=6).to(device)
+model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes, K=2).to(device)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 print(test_acc, val_acc)
-model.fit(data_copy, num_epochs*5, lr, weight_decay)
+model.fit(data_copy, num_epochs, lr, weight_decay)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 print(test_acc, val_acc)

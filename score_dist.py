@@ -205,6 +205,36 @@ process_and_combine_files_counts(r"value/Cora_*_10_0_0.5_0.7_pc_value_count.pkl"
                                  fit_normal=False,
                                  num_perms=10)
 
+process_and_combine_files_values(r"value/PubMed_*_10_0_0.5_0.7_pc_value.pkl",
+                                 "PC Value", "Percentage of nodes",
+                                 "Combined Distribution of PubMed Values",
+                                 "pc_value",
+                                 fit_normal=True,
+                                 num_perms=10)
+
+process_and_combine_files_counts(r"value/PubMed_*_10_0_0.5_0.7_pc_value_count.pkl",
+                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
+                                 "Combined Distribution of PubMed Counts",
+                                 "pc_value_count",
+                                 fit_normal=False,
+                                 num_perms=10)
+
+process_and_combine_files_values(r"value/CiteSeer_*_10_0_0.5_0.7_pc_value.pkl",
+                                 "PC Value", "Percentage of nodes",
+                                 "Combined Distribution of CiteSeer Values",
+                                 "pc_value",
+                                 fit_normal=True,
+                                 num_perms=10)
+
+process_and_combine_files_counts(r"value/CiteSeer_*_10_0_0.5_0.7_pc_value_count.pkl",
+                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
+                                 "Combined Distribution of CiteSeer Counts",
+                                 "pc_value_count",
+                                 fit_normal=False,
+                                 num_perms=10)
+
+
+
 process_and_combine_files_values_trunc_counts(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
                                               "PC Value", "Percentage of nodes",
                                               "Combined Distribution of WikiCS Values After Truncation",
