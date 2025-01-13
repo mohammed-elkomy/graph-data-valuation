@@ -2,20 +2,22 @@
 This script trains a model on WikiCS for a number of epochs with the full data
 This shows a single model retraining from the node dropping experiment
 """
-
+import argparse
 import pickle
 import warnings
 
 import torch
-import torch_geometric.transforms as T
-from torch_geometric.datasets import WikiCS
+import torch.transforms as T
+from torch.datasets import Planetoid, WikiCS, Amazon, Coauthor
 
 from node_drop_large import SGCNet, get_subgraph_data
 from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, dataset_params
 
 warnings.simplefilter(action='ignore', category=Warning)
 
-dataset_name = "WikiCS"
+parser = argparse.ArgumentParser(description="Network")
+parser.add_argument('--dataset', default='Cora', help='Input dataset.')
+dataset_name = parser.parse_args().dataset
 
 # Print the parameters and pattern to verify
 print(f"Dataset: {dataset_name}")
@@ -30,35 +32,49 @@ else:
     lr = 0.01
     weight_decay = 5e-4
 
-dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
-config_path = f'./config/wikics.pkl'
+# Load and preprocess the dataset
+if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
+    dataset = Planetoid(root='dataset/', name=dataset_name, transform=T.NormalizeFeatures())
+elif dataset_name in ['WikiCS', 'WikiCS2']:
+    dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
+    config_path = f'./config/wikics.pkl'
+elif dataset_name == 'Amazon':
+    dataset = Amazon(root='dataset/Amazon', name='Computers', transform=T.NormalizeFeatures())
+    raise NotImplementedError
+elif dataset_name == 'Coauthor':
+    dataset = Coauthor(root='dataset/Coauthor', name='CS', transform=T.NormalizeFeatures())
+    raise NotImplementedError
+else:
+    raise ValueError(f"Dataset {dataset_name} is not supported.")
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 data = dataset[0].to(device)
 
-with open(config_path, 'rb') as f:
-    loaded_indices_dict = pickle.load(f)
-    if dataset_name in ['WikiCS', 'WikiCS2']:
-        assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
-        split_id = loaded_indices_dict["split_id"]
-        data.train_mask = data.train_mask[:, split_id].clone()
-        data.val_mask = data.val_mask[:, split_id].clone()
+# Load train/valid/test split for non-Citation datasets
+if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2']:
+    with open(config_path, 'rb') as f:
+        loaded_indices_dict = pickle.load(f)
+        if dataset_name in ['WikiCS', 'WikiCS2']:
+            assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
+            split_id = loaded_indices_dict["split_id"]
+            data.train_mask = data.train_mask[:, split_id].clone()
+            data.val_mask = data.val_mask[:, split_id].clone()
 
-        train_mask = data.train_mask
-        val_mask = data.val_mask
-        test_mask = data.test_mask
+            train_mask = data.train_mask
+            val_mask = data.val_mask
+            test_mask = data.test_mask
 
-        train_size = train_mask.sum().item()
-        val_size = val_mask.sum().item()
-        test_size = test_mask.sum().item()
+            train_size = train_mask.sum().item()
+            val_size = val_mask.sum().item()
+            test_size = test_mask.sum().item()
 
-        # Print dataset sizes
-        print(f"BEFORE: Train Mask:{train_mask.shape} Size: {train_size}")
-        print(f"BEFORE: Validation Mask:{val_mask.shape} Size: {val_size}")
-        print(f"BEFORE: Test Mask:{test_mask.shape} Size: {test_size}")
+            # Print dataset sizes
+            print(f"BEFORE: Train Mask:{train_mask.shape} Size: {train_size}")
+            print(f"BEFORE: Validation Mask:{val_mask.shape} Size: {val_size}")
+            print(f"BEFORE: Test Mask:{test_mask.shape} Size: {test_size}")
 
-    # data = set_masks_from_indices(data, loaded_indices_dict, device)
+    data = set_masks_from_indices(data, loaded_indices_dict, device)
 
 train_mask = data.train_mask
 val_mask = data.val_mask
@@ -108,22 +124,3 @@ model.fit(data_copy, num_epochs, lr, weight_decay)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 print(test_acc, val_acc)
-
-"""
-BEFORE: Train Mask:torch.Size([11701]) Size: 580
-BEFORE: Validation Mask:torch.Size([11701]) Size: 1769
-BEFORE: Test Mask:torch.Size([11701]) Size: 5847
-Train Mask:torch.Size([11701]) Size: 194
-Validation Mask:torch.Size([11701]) Size: 442
-Test Mask:torch.Size([11701]) Size: 1461
-
-wikics
-0.06091718001368925 0.06561085972850679
-0.07529089664613278 0.029411764705882353
-
-
-wikics2
-0.0620831195484864 0.058790276992651214
-0.09034907597535935 0.049773755656108594
-0.19839233795108602 0.23742227247032222
-"""
