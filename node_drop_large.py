@@ -45,7 +45,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Script to run graph dataset experiments with specified parameters.")
 
     # Define command-line arguments
-    parser.add_argument('--dataset_name', type=str, choices=['Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'],
+    parser.add_argument('--dataset_name', type=str, choices=['Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'WikiCS2','Amazon', 'Coauthor'],
                         required=True, help="Dataset name. Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'.")
     parser.add_argument('--group_trunc_ratio_hop_1', type=float, required=True,
                         help="Group truncation ratio for hop 1.")
