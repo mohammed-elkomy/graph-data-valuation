@@ -89,7 +89,7 @@ dataset_params = {
     },
     'WikiCS3': {
         'num_epochs': 30,
-        'lr': 0.01,
+        'lr': 0.1,
         'weight_decay': 1e-5
     }
 }
