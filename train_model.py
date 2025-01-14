@@ -53,10 +53,10 @@ print(device)
 data = dataset[0].to(device)
 
 # Load train/valid/test split for non-Citation datasets
-if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2']:
+if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2',"WikiCS3"]:
     with open(config_path, 'rb') as f:
         loaded_indices_dict = pickle.load(f)
-        if dataset_name in ['WikiCS', 'WikiCS2']:
+        if dataset_name in ['WikiCS', 'WikiCS2',"WikiCS3"]:
             assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
             split_id = loaded_indices_dict["split_id"]
             data.train_mask = data.train_mask[:, split_id].clone()
