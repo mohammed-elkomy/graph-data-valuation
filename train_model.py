@@ -36,7 +36,7 @@ else:
 # Load and preprocess the dataset
 if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
     dataset = Planetoid(root='dataset/', name=dataset_name, transform=T.NormalizeFeatures())
-elif dataset_name in ['WikiCS', 'WikiCS2']:
+elif dataset_name in ['WikiCS', 'WikiCS2',"WikiCS3"]:
     dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
     config_path = f'./config/wikics.pkl'
 elif dataset_name == 'Amazon':
