@@ -121,7 +121,7 @@ model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classe
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 train_acc = model.predict_train(data_copy)
-print("data shape",data_copy.shape)
+print("data shape", data_copy.x[train_mask].shape, data_copy.y[train_mask].shape)
 print("train_acc", train_acc, "val_acc", val_acc, "test_acc", test_acc)
 model.fit(data_copy, num_epochs, lr, weight_decay)
 test_acc = model.predict(test_data)
