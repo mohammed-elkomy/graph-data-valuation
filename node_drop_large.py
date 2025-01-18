@@ -45,7 +45,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Script to run graph dataset experiments with specified parameters.")
 
     # Define command-line arguments
-    parser.add_argument('--dataset_name', type=str, choices=['Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'WikiCS2','Amazon', 'Coauthor'],
+    parser.add_argument('--dataset_name', type=str, choices=['Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'WikiCS2', 'Amazon', 'Coauthor'],
                         required=True, help="Dataset name. Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'.")
     parser.add_argument('--group_trunc_ratio_hop_1', type=float, required=True,
                         help="Group truncation ratio for hop 1.")
@@ -133,6 +133,7 @@ class SGCNet(nn.Module):
         acc = correct / input_data.train_mask.sum().item()
         # print('Test Accuracy: {:.4f}'.format(acc))
         return acc
+
 
 def get_subgraph_data(data, mask):
     """Extract subgraph data based on the given mask"""
@@ -383,9 +384,9 @@ if __name__ == "__main__":
         cur_player = node_list[j - 1]
         print('cur_player: ', cur_player)
         cur_node_list = node_list[:j]
-        print(data.edge_index.shape[1])
-        exit()
         edge_mask = torch.ones(data.edge_index.shape[1], dtype=torch.bool, device=device)
+        print("data.edge_index", data.edge_index.shape, "edge_mask", edge_mask.shape)
+        exit()
         for node in cur_node_list:
             edge_mask[data.edge_index[0] == node] = False
             edge_mask[data.edge_index[1] == node] = False
