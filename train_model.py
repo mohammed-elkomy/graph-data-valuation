@@ -122,6 +122,23 @@ test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 train_acc = model.predict_train(data_copy)
 print("data shape", data_copy.x[train_mask].shape, data_copy.y[train_mask].shape)
+
+# Calculate statistics
+max_values = data_copy.x[train_mask].max(dim=0).values
+min_values = data_copy.x[train_mask].min(dim=0).values
+median_values = data_copy.x[train_mask].median(dim=0).values
+mean_values = data_copy.x[train_mask].mean(dim=0)
+std_values = data_copy.x[train_mask].std(dim=0)
+
+# Print statistics
+print("Max values per feature:", max_values)
+print("Min values per feature:", min_values)
+print("Median values per feature:", median_values)
+print("Mean values per feature:", mean_values)
+print("Standard deviation per feature:", std_values)
+print("Tensor Shape:", data_copy.x[train_mask].shape)
+
+
 print("train_acc", train_acc, "val_acc", val_acc, "test_acc", test_acc)
 model.fit(data_copy, num_epochs, lr, weight_decay)
 test_acc = model.predict(test_data)
