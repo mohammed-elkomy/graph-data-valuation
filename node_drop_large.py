@@ -45,7 +45,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Script to run graph dataset experiments with specified parameters.")
 
     # Define command-line arguments
-    parser.add_argument('--dataset_name', type=str, choices=['Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'WikiCS2', 'Amazon', 'Coauthor'],
+    parser.add_argument('--dataset_name', type=str, choices=['Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'WikiCSX', 'Amazon', 'Coauthor'],
                         required=True, help="Dataset name. Options: 'Cora', 'CiteSeer', 'PubMed', 'WikiCS', 'Amazon', 'Coauthor'.")
     parser.add_argument('--group_trunc_ratio_hop_1', type=float, required=True,
                         help="Group truncation ratio for hop 1.")
@@ -285,7 +285,7 @@ if __name__ == "__main__":
     # Load and preprocess the dataset
     if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
         dataset = Planetoid(root='dataset/', name=dataset_name, transform=T.NormalizeFeatures())
-    elif dataset_name in ['WikiCS', 'WikiCS2']:
+    elif dataset_name in ['WikiCS', 'WikiCSX']:
         dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
         config_path = f'./config/wikics.pkl'
     elif dataset_name == 'Amazon':
@@ -301,10 +301,10 @@ if __name__ == "__main__":
     data = dataset[0].to(device)
 
     # Load train/valid/test split for non-Citation datasets
-    if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2']:
+    if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCSX']:
         with open(config_path, 'rb') as f:
             loaded_indices_dict = pickle.load(f)
-            if dataset_name in ['WikiCS', 'WikiCS2']:
+            if dataset_name in ['WikiCS', 'WikiCSX']:
                 assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
                 split_id = loaded_indices_dict["split_id"]
                 data.train_mask = data.train_mask[:, split_id].clone()

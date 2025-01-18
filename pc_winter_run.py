@@ -82,16 +82,11 @@ dataset_params = {
         'lr': 0.05,
         'weight_decay': 5e-4
     },
-    'WikiCS2': {
+    'WikiCSX': {
         'num_epochs': 30,
         'lr': 0.01,
         'weight_decay': 5e-4
     },
-    'WikiCS3': {
-        'num_epochs': 200,
-        'lr': 0.1,
-        'weight_decay': 1e-1
-    }
 }
 
 
@@ -489,7 +484,7 @@ if __name__ == "__main__":
     elif args.dataset == 'Physics':
         dataset = Coauthor(root='dataset/Coauthor', name=args.dataset, transform=T.NormalizeFeatures())
         config_path = f'./config/Coauthor-{args.dataset}.pkl'
-    elif args.dataset in ['WikiCS', 'WikiCS2']:
+    elif args.dataset in ['WikiCS', 'WikiCSX',]:
         dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
         config_path = f'./config/wikics.pkl'
         # generate_wikics_split(dataset)  # if you want to generate the wikics split and save it into a pickle at config dir
@@ -501,10 +496,10 @@ if __name__ == "__main__":
     num_classes = dataset.num_classes
 
     # Load train/valid/test split for non-Citation datasets
-    if args.dataset in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2']:
+    if args.dataset in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCSX']:
         with open(config_path, 'rb') as f:
             loaded_indices_dict = pickle.load(f)
-            if args.dataset in ['WikiCS', 'WikiCS2']:
+            if args.dataset in ['WikiCS', 'WikiCSX']:
                 assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
                 split_id = loaded_indices_dict["split_id"]
                 data.train_mask = data.train_mask[:, split_id].clone()
