@@ -136,12 +136,19 @@ total_test_samples = data.test_mask.sum().item()
 total_val_samples = data.val_mask.sum().item()
 
 # Calculate the class distributions as counts
+train_class_distribution = np.bincount(data.y[data.train_mask].cpu().numpy(), minlength=output_dim)
 test_class_distribution = np.bincount(data.y[data.test_mask].cpu().numpy(), minlength=output_dim)
 val_class_distribution = np.bincount(data.y[data.val_mask].cpu().numpy(), minlength=output_dim)
 
 # Convert counts to percentages
 test_class_percentages = (test_class_distribution / total_test_samples) * 100
 val_class_percentages = (val_class_distribution / total_val_samples) * 100
+train_class_percentages = (train_class_distribution / total_val_samples) * 100
+
+# Print the distributions
+print("Train Class Distribution (Percentages):")
+for i, percentage in enumerate(train_class_percentages):
+    print(f"Class {i}: {percentage:.2f}%")
 
 # Print the distributions
 print("Test Class Distribution (Percentages):")
