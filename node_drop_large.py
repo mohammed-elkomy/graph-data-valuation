@@ -123,6 +123,16 @@ class SGCNet(nn.Module):
         # print('Validation Accuracy: {:.6f}'.format(acc))
         return acc
 
+    def predict_train(self, dataset):
+        """Predict on test set and return accuracy"""
+        model = self.to(self.device)
+        input_data = dataset.to(self.device)
+        model.eval()
+        _, pred = model(input_data).max(dim=1)
+        correct = float(pred[input_data.train_mask].eq(input_data.y[input_data.train_mask]).sum().item())
+        acc = correct / input_data.train_mask.sum().item()
+        # print('Test Accuracy: {:.4f}'.format(acc))
+        return acc
 
 def get_subgraph_data(data, mask):
     """Extract subgraph data based on the given mask"""

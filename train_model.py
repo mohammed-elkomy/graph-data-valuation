@@ -36,7 +36,7 @@ else:
 # Load and preprocess the dataset
 if dataset_name in ['Cora', 'CiteSeer', 'PubMed']:
     dataset = Planetoid(root='dataset/', name=dataset_name, transform=T.NormalizeFeatures())
-elif dataset_name in ['WikiCS', 'WikiCS2',"WikiCS3"]:
+elif dataset_name in ['WikiCS', 'WikiCS2', "WikiCS3"]:
     dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
     config_path = f'./config/wikics.pkl'
 elif dataset_name == 'Amazon':
@@ -53,10 +53,10 @@ print(device)
 data = dataset[0].to(device)
 
 # Load train/valid/test split for non-Citation datasets
-if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2',"WikiCS3"]:
+if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2', "WikiCS3"]:
     with open(config_path, 'rb') as f:
         loaded_indices_dict = pickle.load(f)
-        if dataset_name in ['WikiCS', 'WikiCS2',"WikiCS3"]:
+        if dataset_name in ['WikiCS', 'WikiCS2', "WikiCS3"]:
             assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
             split_id = loaded_indices_dict["split_id"]
             data.train_mask = data.train_mask[:, split_id].clone()
@@ -95,12 +95,12 @@ assert (train_mask & val_mask).sum().item() == 0, "Train and Validation masks ov
 assert (val_mask & test_mask).sum().item() == 0, "Validation and Test masks overlap!"
 assert (train_mask & test_mask).sum().item() == 0, "Train and Test masks overlap!"
 
-# Create inductive edge index (removing edges to val/test nodes)
-inductive_edge_index = []
-for src, tgt in data.edge_index.t().tolist():
-    if not (val_mask[src] or test_mask[src] or val_mask[tgt] or test_mask[tgt]):
-        inductive_edge_index.append([src, tgt])
-inductive_edge_index = torch.tensor(inductive_edge_index).t().contiguous()
+# # Create inductive edge index (removing edges to val/test nodes)
+# inductive_edge_index = []
+# for src, tgt in data.edge_index.t().tolist():
+#     if not (val_mask[src] or test_mask[src] or val_mask[tgt] or test_mask[tgt]):
+#         inductive_edge_index.append([src, tgt])
+# inductive_edge_index = torch.tensor(inductive_edge_index).t().contiguous()
 
 indu_mask = torch.ones(data.edge_index.shape[1], dtype=torch.bool)
 for i, (src, tgt) in enumerate(data.edge_index.t().tolist()):
@@ -120,11 +120,13 @@ data_copy.edge_index = data_copy.edge_index[:, indu_mask]
 model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes, K=2).to(device)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
-print(test_acc, val_acc)
+train_acc = model.predict_train(data_copy)
+print(train_acc, val_acc, test_acc)
 model.fit(data_copy, num_epochs, lr, weight_decay)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
-print(test_acc, val_acc)
+train_acc = model.predict_train(data_copy)
+print(train_acc, val_acc, test_acc)
 
 # Distribution of classes in test and validation sets
 output_dim = dataset.num_classes
