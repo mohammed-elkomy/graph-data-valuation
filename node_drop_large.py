@@ -383,7 +383,8 @@ if __name__ == "__main__":
         cur_player = node_list[j - 1]
         print('cur_player: ', cur_player)
         cur_node_list = node_list[:j]
-
+        print(data.edge_index.shape[1])
+        exit()
         edge_mask = torch.ones(data.edge_index.shape[1], dtype=torch.bool, device=device)
         for node in cur_node_list:
             edge_mask[data.edge_index[0] == node] = False

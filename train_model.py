@@ -121,12 +121,12 @@ model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classe
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 train_acc = model.predict_train(data_copy)
-print(train_acc, val_acc, test_acc)
+print("train_acc",train_acc,"val_acc", val_acc,"test_acc", test_acc)
 model.fit(data_copy, num_epochs, lr, weight_decay)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 train_acc = model.predict_train(data_copy)
-print(train_acc, val_acc, test_acc)
+print("train_acc",train_acc,"val_acc", val_acc,"test_acc", test_acc)
 
 # Distribution of classes in test and validation sets
 output_dim = dataset.num_classes
