@@ -27,7 +27,7 @@ from torch_geometric.nn import SGConv
 from tqdm import tqdm
 
 import argparse
-from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, dataset_params
+from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, dataset_params, standardize_features
 
 warnings.simplefilter(action='ignore', category=Warning)
 
@@ -309,6 +309,11 @@ if __name__ == "__main__":
                 split_id = loaded_indices_dict["split_id"]
                 data.train_mask = data.train_mask[:, split_id].clone()
                 data.val_mask = data.val_mask[:, split_id].clone()
+
+                print("before standardize_features", data.x.min(), "to", data.x.max())
+                data.x = standardize_features(data.x)
+                print("after standardize_features", data.x.min(), "to", data.x.max())
+
 
             data = set_masks_from_indices(data, loaded_indices_dict, device)
 

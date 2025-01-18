@@ -12,7 +12,7 @@ import torch_geometric.transforms as T
 from torch_geometric.datasets import Amazon, Planetoid, Coauthor, WikiCS
 
 from node_drop_large import SGCNet, get_subgraph_data
-from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, dataset_params
+from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, dataset_params, standardize_features
 
 warnings.simplefilter(action='ignore', category=Warning)
 
@@ -52,6 +52,10 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 data = dataset[0].to(device)
 
+
+
+
+
 # Load train/valid/test split for non-Citation datasets
 if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2', "WikiCS3"]:
     with open(config_path, 'rb') as f:
@@ -61,6 +65,11 @@ if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2', "WikiC
             split_id = loaded_indices_dict["split_id"]
             data.train_mask = data.train_mask[:, split_id].clone()
             data.val_mask = data.val_mask[:, split_id].clone()
+            # Apply the normalization
+
+            print("before standardize_features", data.x.min(), "to", data.x.max())
+            data.x = standardize_features(data.x)
+            print("after standardize_features", data.x.min(), "to", data.x.max())
 
             train_mask = data.train_mask
             val_mask = data.val_mask
@@ -75,7 +84,7 @@ if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCS2', "WikiC
             print(f"BEFORE: Validation Mask:{val_mask.shape} Size: {val_size}")
             print(f"BEFORE: Test Mask:{test_mask.shape} Size: {test_size}")
 
-    # data = set_masks_from_indices(data, loaded_indices_dict, device)
+    data = set_masks_from_indices(data, loaded_indices_dict, device)
 
 train_mask = data.train_mask
 val_mask = data.val_mask
@@ -123,21 +132,9 @@ val_acc = model.predict_valid(val_data)
 train_acc = model.predict_train(data_copy)
 print("data shape", data_copy.x[train_mask].shape, data_copy.y[train_mask].shape)
 
-# Calculate statistics
-max_values = data_copy.x[train_mask].max(dim=0).values
-min_values = data_copy.x[train_mask].min(dim=0).values
-median_values = data_copy.x[train_mask].median(dim=0).values
-mean_values = data_copy.x[train_mask].mean(dim=0)
-std_values = data_copy.x[train_mask].std(dim=0)
-
 # Print statistics
-print("Max values per feature:", max_values)
-print("Min values per feature:", min_values)
-print("Median values per feature:", median_values)
-print("Mean values per feature:", mean_values)
-print("Standard deviation per feature:", std_values)
-print("Tensor Shape:", data_copy.x[train_mask].shape)
-
+print("Max values per feature:", data_copy.x[train_mask].max())
+print("Min values per feature:", data_copy.x[train_mask].min())
 
 print("train_acc", train_acc, "val_acc", val_acc, "test_acc", test_acc)
 model.fit(data_copy, num_epochs, lr, weight_decay)

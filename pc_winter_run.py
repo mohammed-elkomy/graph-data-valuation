@@ -137,6 +137,17 @@ class SGConvNoWeight(MessagePassing):
         return (f'{self.__class__.__name__}({self.channels}, K={self.K})')
 
 
+def standardize_features(x):
+    # Calculate the mean of each row
+    row_mean = x.mean(dim=1, keepdim=True)
+    # Calculate the standard deviation of each row
+    row_std = x.std(dim=1, keepdim=True)
+    # Prevent division by zero by setting any zero std values to 1
+    row_std[row_std == 0] = 1
+    # Standardize each row: (x - mean) / std
+    return (x - row_mean) / row_std
+
+
 class MLP(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(MLP, self).__init__()
@@ -498,6 +509,10 @@ if __name__ == "__main__":
                 split_id = loaded_indices_dict["split_id"]
                 data.train_mask = data.train_mask[:, split_id].clone()
                 data.val_mask = data.val_mask[:, split_id].clone()
+
+                print("before standardize_features", data.x.min(), "to", data.x.max())
+                data.x = standardize_features(data.x)
+                print("after standardize_features", data.x.min(), "to", data.x.max())
 
             data = set_masks_from_indices(data, loaded_indices_dict, device)
 
