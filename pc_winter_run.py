@@ -604,7 +604,7 @@ if __name__ == "__main__":
         'dataset': [], 'seed': [], 'perm': [], 'label': [],
         'first_hop': [], 'second_hop': [], 'accu': []
     }
-
+    count+=1
     strt = time.time()
     val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes,
                                      X_ind_propogated, data.y, val_features, val_labels,
