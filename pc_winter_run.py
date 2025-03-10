@@ -196,6 +196,11 @@ def stack_torch_tensors(input_tensors):
     return torch.cat(unrolled)
 
 
+fitting = 0
+const = 0
+count = 0
+
+
 def generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled_list, target_node, node_map, ind_edge_index, data, device):
     """
     This function implements the local propagation strategy for the PC-Winter algorithm.
@@ -209,7 +214,11 @@ def generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled
 
     This approach allows for efficient computation of node contributions in the PC-Winter algorithm.
     """
-
+    global const, fitting, count
+    count += 1
+    # cur_hop_1_list = list(node_map[target_node])
+    # cur_hop_2_list = list(node_map[target_node][list(node_map[target_node])[-1]].keys())
+    start = time.time()
     A_temp = torch.zeros((data.x.size(0), data.x.size(0)), device=device)
     A_temp[ind_edge_index[0], ind_edge_index[1]] = 1
 
@@ -231,7 +240,7 @@ def generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled
     conv = SGConvNoWeight(K=2)
     cur_edge_index = adjacency_to_edge_list(mask)
     X_ind_propogated_temp_ = conv(data.x, cur_edge_index)
-
+    const = ((const * (count - 1)) + (time.time() - start)) / count  # Running average update
     train_features = torch.cat((X_ind_propogated[cur_labeled_list], X_ind_propogated_temp_[target_node].unsqueeze(0)), dim=0)
     train_labels = torch.cat((data.y[cur_labeled_list], data.y[target_node].unsqueeze(0)), dim=0)
 
@@ -244,6 +253,8 @@ def evaluate_retrain_model(model_class, num_features, num_classes, train_feature
     It's used to compute the utility function in the PC-Winter algorithm.
     The utility is measured as the validation accuracy of the trained model.
     """
+    global fitting, count
+    start = time.time()
 
     # Create and train the model
     model = model_class(num_features, num_classes).to(device)
@@ -252,6 +263,8 @@ def evaluate_retrain_model(model_class, num_features, num_classes, train_feature
     predictions = model(val_features)
     # Calculate the accuracy of the model
     val_acc = (predictions.argmax(dim=1) == val_labels).float().mean().item()
+
+    fitting = ((fitting * (count - 1)) + (time.time() - start)) / count  # Running average update
     return val_acc
 
 
@@ -484,7 +497,7 @@ if __name__ == "__main__":
     elif args.dataset == 'Physics':
         dataset = Coauthor(root='dataset/Coauthor', name=args.dataset, transform=T.NormalizeFeatures())
         config_path = f'./config/Coauthor-{args.dataset}.pkl'
-    elif args.dataset in ['WikiCS', 'WikiCSX',]:
+    elif args.dataset in ['WikiCS', 'WikiCSX', ]:
         dataset = WikiCS(root='dataset/WikiCS', transform=T.NormalizeFeatures())
         config_path = f'./config/wikics.pkl'
         # generate_wikics_split(dataset)  # if you want to generate the wikics split and save it into a pickle at config dir
@@ -545,6 +558,34 @@ if __name__ == "__main__":
             inductive_edge_index.append([src, tgt])
     inductive_edge_index = torch.tensor(inductive_edge_index).t().contiguous()
     X_ind_propogated = propagate_features(inductive_edge_index, data.x)
+
+    # conv1 = SGConvNoWeight(K=1)
+    # X_ind_propogated1 = conv1(data.x, inductive_edge_index)
+    #
+    # conv2 = SGConvNoWeight(K=2)
+    # X_ind_propogated2 = conv2(data.x, inductive_edge_index)
+    #
+    # conv3 = SGConvNoWeight(K=3)
+    # X_ind_propogated3 = conv3(data.x, inductive_edge_index)
+    #
+    # edge_index2 = k_hop_subgraph(45, num_hops=2, edge_index=inductive_edge_index, relabel_nodes=False)[1]
+    # edge_index3 = k_hop_subgraph(45, num_hops=3, edge_index=inductive_edge_index, relabel_nodes=False)[1]
+    #
+    # X_ind_propogated12 = conv1(data.x, edge_index2)
+    # X_ind_propogated22 = conv2(data.x, edge_index2)
+    # X_ind_propogated32 = conv3(data.x, edge_index2)
+    #
+    # X_ind_propogated13 = conv1(data.x, edge_index3)
+    # X_ind_propogated23 = conv2(data.x, edge_index3)
+    # X_ind_propogated33 = conv3(data.x, edge_index3)
+    #
+    # print("torch.allclose(X_ind_propogated1[45], X_ind_propogated12[45])", torch.allclose(X_ind_propogated1[45], X_ind_propogated12[45]))
+    # print("torch.allclose(X_ind_propogated1[45], X_ind_propogated13[45])", torch.allclose(X_ind_propogated1[45], X_ind_propogated13[45]))
+    #
+    # print("torch.allclose(X_ind_propogated2[45], X_ind_propogated23[45])", torch.allclose(X_ind_propogated2[45], X_ind_propogated23[45]))
+    #
+    # time.sleep(2)
+    # print()
 
     if verbose:
         original_edge_count = data.edge_index.size(1)
@@ -618,7 +659,7 @@ if __name__ == "__main__":
                     # calculate marginal contribution 
                     sample_value_dict[labeled_node][player_hop_1][player_hop_2] += (val_acc - pre_performance)
                     sample_counter_dict[labeled_node][player_hop_1][player_hop_2] += 1
-                    print('pre_performance ', pre_performance, 'val_acc', val_acc)
+                    # print('pre_performance ', pre_performance, 'val_acc', val_acc)
                     pre_performance = val_acc
 
                     # Record performance data
@@ -629,6 +670,8 @@ if __name__ == "__main__":
                     perf_dict['first_hop'] += [player_hop_1]
                     perf_dict['second_hop'] += [player_hop_2]
                     perf_dict['accu'] += [val_acc]
+
+                    print('fitting ', fitting, 'const', const)
 
             # Update labeled node list and compute full group accuracy
             cur_labeled_node_list += [labeled_node]

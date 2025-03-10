@@ -278,3 +278,26 @@ process_and_combine_files_counts(r"value/WikiCS2_*_1_0_0.7_0.9_pc_value_count.pk
                                  fit_normal=False,
                                  num_perms=1
                                  )
+
+
+process_and_combine_files_values_trunc_counts(r"value/WikiCSX_*_1_0_0.7_0.9_pc_value.pkl",
+                                              "PC Value", "Percentage of nodes",
+                                              "Combined Distribution of WikiCSX Values After Truncation",
+                                              "pc_value_truncated",
+                                              fit_normal=True,
+                                              num_perms=1)
+
+process_and_combine_files_values(r"value/WikiCSX_*_1_0_0.7_0.9_pc_value.pkl",
+                                 "PC Value", "Percentage of nodes",
+                                 "Combined Distribution of WikiCSX Values",
+                                 "pc_value",
+                                 fit_normal=True,
+                                 num_perms=1)
+
+process_and_combine_files_counts(r"value/WikiCSX_*_1_0_0.7_0.9_pc_value_count.pkl",
+                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
+                                 "Combined Distribution of WikiCSX Counts",
+                                 "pc_value_count",
+                                 fit_normal=False,
+                                 num_perms=1
+                                 )

@@ -314,7 +314,6 @@ if __name__ == "__main__":
                 data.x = standardize_features(data.x)
                 print("after standardize_features", data.x.min(), "to", data.x.max())
 
-
             data = set_masks_from_indices(data, loaded_indices_dict, device)
 
     train_mask = data.train_mask
@@ -390,7 +389,7 @@ if __name__ == "__main__":
         print('cur_player: ', cur_player)
         cur_node_list = node_list[:j]
         edge_mask = torch.ones(data.edge_index.shape[1], dtype=torch.bool, device=device)
-        for node in cur_node_list:
+        for node in cur_node_list:  # disable all edges for the dropped nodes [up to jth node]
             edge_mask[data.edge_index[0] == node] = False
             edge_mask[data.edge_index[1] == node] = False
 
