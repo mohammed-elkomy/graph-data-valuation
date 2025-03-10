@@ -4,6 +4,7 @@ This shows a single model retraining from the node dropping experiment
 """
 import argparse
 import pickle
+import time
 import warnings
 
 import numpy as np
@@ -52,15 +53,11 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
 data = dataset[0].to(device)
 
-
-
-
-
 # Load train/valid/test split for non-Citation datasets
 if dataset_name in ['Computers', 'Photo', 'Physics', 'WikiCS', 'WikiCSX', ]:
     with open(config_path, 'rb') as f:
         loaded_indices_dict = pickle.load(f)
-        if dataset_name in ['WikiCS', 'WikiCSX',]:
+        if dataset_name in ['WikiCS', 'WikiCSX', ]:
             assert calculate_md5_of_string(str(loaded_indices_dict)) == "ff62ecc913c95fba03412f445aae153f"
             split_id = loaded_indices_dict["split_id"]
             data.train_mask = data.train_mask[:, split_id].clone()
@@ -137,7 +134,10 @@ print("Max values per feature:", data_copy.x[train_mask].max())
 print("Min values per feature:", data_copy.x[train_mask].min())
 
 print("train_acc", train_acc, "val_acc", val_acc, "test_acc", test_acc)
+start_time = time.time()
 model.fit(data_copy, num_epochs, lr, weight_decay)
+print("training time", time.time() - start_time)
+
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 train_acc = model.predict_train(data_copy)

@@ -13,6 +13,7 @@ import os
 import pickle
 import re
 import sys
+import time
 import warnings
 
 import numpy as np
@@ -90,6 +91,7 @@ class SGCNet(nn.Module):
 
     def fit(self, dataset, num_epochs, lr, weight_decay):
         """Train the model"""
+        s = time.time()
         model = self.to(self.device)
         input_data = dataset.to(self.device)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
