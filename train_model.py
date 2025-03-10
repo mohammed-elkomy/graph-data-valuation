@@ -134,9 +134,7 @@ print("Max values per feature:", data_copy.x[train_mask].max())
 print("Min values per feature:", data_copy.x[train_mask].min())
 
 print("train_acc", train_acc, "val_acc", val_acc, "test_acc", test_acc)
-start_time = time.time()
 model.fit(data_copy, num_epochs, lr, weight_decay)
-print("training time", time.time() - start_time)
 
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)

@@ -605,6 +605,12 @@ if __name__ == "__main__":
         'first_hop': [], 'second_hop': [], 'accu': []
     }
 
+    strt = time.time()
+    val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes,
+                                     X_ind_propogated, data.y, val_features, val_labels,
+                                     device, num_iter=num_epochs, lr=lr, weight_decay=weight_decay)
+    print('time to start', time.time() - strt)
+    exit()
     total_time = 0
     # Main loop for PC-Winter algorithm with online Pre-order traversal
     for i in range(num_perm):
