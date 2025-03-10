@@ -196,9 +196,7 @@ def stack_torch_tensors(input_tensors):
     return torch.cat(unrolled)
 
 
-fitting = 0
-const = 0
-count = 0
+
 
 
 def generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled_list, target_node, node_map, ind_edge_index, data, device):
@@ -214,8 +212,6 @@ def generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled
 
     This approach allows for efficient computation of node contributions in the PC-Winter algorithm.
     """
-    global const, fitting, count
-    count += 1
     # cur_hop_1_list = list(node_map[target_node])
     # cur_hop_2_list = list(node_map[target_node][list(node_map[target_node])[-1]].keys())
     start = time.time()
@@ -240,7 +236,7 @@ def generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled
     conv = SGConvNoWeight(K=2)
     cur_edge_index = adjacency_to_edge_list(mask)
     X_ind_propogated_temp_ = conv(data.x, cur_edge_index)
-    const = ((const * (count - 1)) + (time.time() - start)) / count  # Running average update
+
     train_features = torch.cat((X_ind_propogated[cur_labeled_list], X_ind_propogated_temp_[target_node].unsqueeze(0)), dim=0)
     train_labels = torch.cat((data.y[cur_labeled_list], data.y[target_node].unsqueeze(0)), dim=0)
 
@@ -253,8 +249,7 @@ def evaluate_retrain_model(model_class, num_features, num_classes, train_feature
     It's used to compute the utility function in the PC-Winter algorithm.
     The utility is measured as the validation accuracy of the trained model.
     """
-    global fitting, count
-    start = time.time()
+
 
     # Create and train the model
     model = model_class(num_features, num_classes).to(device)
@@ -264,7 +259,6 @@ def evaluate_retrain_model(model_class, num_features, num_classes, train_feature
     # Calculate the accuracy of the model
     val_acc = (predictions.argmax(dim=1) == val_labels).float().mean().item()
 
-    fitting = ((fitting * (count - 1)) + (time.time() - start)) / count  # Running average update
     return val_acc
 
 
@@ -604,13 +598,10 @@ if __name__ == "__main__":
         'dataset': [], 'seed': [], 'perm': [], 'label': [],
         'first_hop': [], 'second_hop': [], 'accu': []
     }
-    count+=1
-    strt = time.time()
     val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes,
                                      X_ind_propogated, data.y, val_features, val_labels,
                                      device, num_iter=num_epochs, lr=lr, weight_decay=weight_decay)
-    print('time to start', time.time() - strt)
-    exit()
+
     total_time = 0
     # Main loop for PC-Winter algorithm with online Pre-order traversal
     for i in range(num_perm):
