@@ -548,11 +548,9 @@ def pc_winter(max_model_retrainings=10000, verbose=False):
             if verbose:
                 print('full group acc:', val_acc)
 
-        if verbose:
-            print(f"Permutation {i} finished, seed {seed}")
+        print(f"Permutation {i} finished, seed {seed}")
 
     eval_progress.close()
-
 
 
 if __name__ == "__main__":
@@ -699,7 +697,7 @@ if __name__ == "__main__":
     # Store the performance of different seed, permutation index, added new contribution path and accrued performace
     perf_dict = {
         'dataset': [], 'seed': [], 'perm': [], 'label': [],
-        'first_hop': [], 'second_hop': [], 'accu': []
+        'first_hop': [], 'second_hop': [], 'accu': [], "model_retraining_idx": []
     }
     val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes,
                                      X_ind_propogated, data.y, val_features, val_labels,
@@ -781,8 +779,8 @@ if __name__ == "__main__":
     #         print('full group acc:', val_acc)
     #     print(f"Permutation: {i} finished seed {seed}")
 
-    pc_winter(max_model_retrainings=100000)
-
+    pc_winter(max_model_retrainings=10000)
+    print("last permutation", perf_dict["perm"][-1])
     #############################################
     # Save results
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
