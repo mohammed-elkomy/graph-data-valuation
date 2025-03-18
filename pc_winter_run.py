@@ -246,7 +246,6 @@ def evaluate_retrain_model(model_class, num_features, num_classes, train_feature
     It's used to compute the utility function in the PC-Winter algorithm.
     The utility is measured as the validation accuracy of the trained model.
     """
-    return 0
     # Create and train the model
     model = model_class(num_features, num_classes).to(device)
     model.fit(train_features, train_labels, val_features, val_labels, num_iter=num_iter, lr=lr, weight_decay=weight_decay)
@@ -777,8 +776,8 @@ if __name__ == "__main__":
     #         print('full group acc:', val_acc)
     #     print(f"Permutation: {i} finished seed {seed}")
 
-    wg_l1 = 1
-    wg_l2 = 1
+    wg_l1 = 5
+    wg_l2 = 10
     pc_winter(wg_l1=wg_l1, wg_l2=wg_l2, max_model_retrainings=20000, verbose=False)
     print("last permutation", perf_dict["perm"][-1])
     #############################################
