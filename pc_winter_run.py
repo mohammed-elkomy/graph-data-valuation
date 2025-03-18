@@ -246,7 +246,7 @@ def evaluate_retrain_model(model_class, num_features, num_classes, train_feature
     It's used to compute the utility function in the PC-Winter algorithm.
     The utility is measured as the validation accuracy of the trained model.
     """
-
+    return 0
     # Create and train the model
     model = model_class(num_features, num_classes).to(device)
     model.fit(train_features, train_labels, val_features, val_labels, num_iter=num_iter, lr=lr, weight_decay=weight_decay)
@@ -448,7 +448,7 @@ def generate_wikics_split(data, seed=42):
     return data
 
 
-def pc_winter(max_model_retrainings=10000, verbose=False):
+def pc_winter(wg_l1, wg_l2, max_model_retrainings=10000, verbose=False):
     eval_count = 0
     eval_progress = tqdm(total=max_model_retrainings, desc="Evaluations Progress")
 
@@ -456,78 +456,76 @@ def pc_winter(max_model_retrainings=10000, verbose=False):
         np.random.shuffle(labeled_node_list)  # Randomize order of labeled nodes
         cur_labeled_node_list = []
         pre_performance = 0
+        for lab_idx, labeled_node in enumerate(labeled_node_list):
+            for _ in range(wg_l1):  # within group level 1 (for each labeled node)
+                # Process 1-hop neighbors
+                cur_hop_1_list = []
+                hop_1_list = list(labeled_to_player_map[labeled_node].keys())
+                np.random.shuffle(hop_1_list)  # Randomize order
+                # Keep the precedence constraint between labeled and 1-hop neighbor by putting labeled node front
+                hop_1_list.remove(labeled_node)
+                hop_1_list.insert(0, labeled_node)
 
-        for labeled_node in labeled_node_list:
-            if eval_count >= max_model_retrainings:
-                if verbose:
-                    print("Termination condition reached: Maximum evaluations exceeded.")
-                return
-
-            # Process 1-hop neighbors
-            cur_hop_1_list = []
-            hop_1_list = list(labeled_to_player_map[labeled_node].keys())
-            np.random.shuffle(hop_1_list)  # Randomize order
-            # Keep the precedence constraint between labeled and 1-hop neighbor by putting labeled node front
-            hop_1_list.remove(labeled_node)
-            hop_1_list.insert(0, labeled_node)
-
-            truncate_length = int(np.ceil((len(hop_1_list) - 1) * (1 - group_trunc_ratio_hop_1))) + 1
-            truncate_length = min(truncate_length, len(hop_1_list))
-            hop_1_list = hop_1_list[:truncate_length]
-
-            if verbose:
-                print('hop_1_list after truncation', len(hop_1_list))
-                print('labeled_node iteration:', i)
-                print('current target labeled_node:', cur_labeled_node_list, '=>', labeled_node)
-                print('hop_1_list', hop_1_list)
-
-            for player_hop_1 in hop_1_list:
-                cur_hop_2_list = []
-                cur_hop_1_list.append(player_hop_1)
-                hop_2_list = list(labeled_to_player_map[labeled_node][player_hop_1].keys())
-                np.random.shuffle(hop_2_list)  # Randomize order
-                # Keep the precedence constraint between 1-hop neighbor and 2-hop neighbor
-                hop_2_list.remove(player_hop_1)
-                hop_2_list.insert(0, player_hop_1)
-
-                truncate_length = int(np.ceil((len(hop_2_list) - 1) * (1 - group_trunc_ratio_hop_2))) + 1
-                truncate_length = min(truncate_length, len(hop_2_list))
-                hop_2_list = hop_2_list[:truncate_length]
+                truncate_length = int(np.ceil((len(hop_1_list) - 1) * (1 - group_trunc_ratio_hop_1))) + 1
+                truncate_length = min(truncate_length, len(hop_1_list))
+                hop_1_list = hop_1_list[:truncate_length]
 
                 if verbose:
-                    print('hop_2_list after truncation', len(hop_2_list))
+                    print('hop_1_list after truncation', len(hop_1_list))
+                    print('labeled_node iteration:', i)
+                    print('current target labeled_node:', cur_labeled_node_list, '=>', labeled_node)
+                    print('hop_1_list', hop_1_list)
 
-                for player_hop_2 in hop_2_list:
-                    cur_hop_2_list.append(player_hop_2)
-                    # Local propagation and performance computation
-                    ind_train_features, ind_train_labels = generate_features_and_labels_ind(
-                        cur_hop_1_list, cur_hop_2_list, cur_labeled_node_list, labeled_node,
-                        labeled_to_player_map, inductive_edge_index, data, device)
+                for player_hop_1 in hop_1_list:
+                    cur_hop_1_list.append(player_hop_1)
+                    for _ in range(wg_l2):
+                        cur_hop_2_list = []
+                        hop_2_list = list(labeled_to_player_map[labeled_node][player_hop_1].keys())
+                        np.random.shuffle(hop_2_list)  # Randomize order
+                        # Keep the precedence constraint between 1-hop neighbor and 2-hop neighbor
+                        hop_2_list.remove(player_hop_1)
+                        hop_2_list.insert(0, player_hop_1)
 
-                    val_acc = evaluate_retrain_model(
-                        MLP, dataset.num_features, dataset.num_classes,
-                        ind_train_features, ind_train_labels, val_features, val_labels,
-                        device, num_iter=num_epochs, lr=lr, weight_decay=weight_decay)
+                        truncate_length = int(np.ceil((len(hop_2_list) - 1) * (1 - group_trunc_ratio_hop_2))) + 1
+                        truncate_length = min(truncate_length, len(hop_2_list))
+                        hop_2_list = hop_2_list[:truncate_length]
 
-                    eval_count += 1
-                    eval_progress.update(1)
-                    if eval_count >= max_model_retrainings:
                         if verbose:
-                            print("Termination condition reached: Maximum evaluations exceeded.")
-                        return
+                            print('hop_2_list after truncation', len(hop_2_list))
 
-                    sample_value_dict[labeled_node][player_hop_1][player_hop_2] += (val_acc - pre_performance)
-                    sample_counter_dict[labeled_node][player_hop_1][player_hop_2] += 1
-                    pre_performance = val_acc
+                        for player_hop_2 in hop_2_list:
+                            cur_hop_2_list.append(player_hop_2)
+                            # Local propagation and performance computation
+                            ind_train_features, ind_train_labels = generate_features_and_labels_ind(
+                                cur_hop_1_list, cur_hop_2_list, cur_labeled_node_list, labeled_node,
+                                labeled_to_player_map, inductive_edge_index, data, device)
+                            assert set(cur_hop_1_list).issubset(hop_1_list)
+                            assert set(cur_hop_2_list).issubset(hop_2_list)
+                            assert len(cur_labeled_node_list) == lab_idx
+                            val_acc = evaluate_retrain_model(
+                                MLP, dataset.num_features, dataset.num_classes,
+                                ind_train_features, ind_train_labels, val_features, val_labels,
+                                device, num_iter=num_epochs, lr=lr, weight_decay=weight_decay)
 
-                    perf_dict["dataset"].append(dataset_name)
-                    perf_dict["seed"].append(seed)
-                    perf_dict["perm"].append(i)
-                    perf_dict["label"].append(labeled_node)
-                    perf_dict["first_hop"].append(player_hop_1)
-                    perf_dict["second_hop"].append(player_hop_2)
-                    perf_dict["accu"].append(val_acc)
-                    perf_dict["model_retraining_idx"].append(eval_count)
+                            eval_count += 1
+                            eval_progress.update(1)
+                            if eval_count >= max_model_retrainings:
+                                if verbose:
+                                    print("Termination condition reached: Maximum evaluations exceeded.")
+                                return
+
+                            sample_value_dict[labeled_node][player_hop_1][player_hop_2] += (val_acc - pre_performance)
+                            sample_counter_dict[labeled_node][player_hop_1][player_hop_2] += 1
+                            pre_performance = val_acc
+
+                            perf_dict["dataset"].append(dataset_name)
+                            perf_dict["seed"].append(seed)
+                            perf_dict["perm"].append(i)
+                            perf_dict["label"].append(labeled_node)
+                            perf_dict["first_hop"].append(player_hop_1)
+                            perf_dict["second_hop"].append(player_hop_2)
+                            perf_dict["accu"].append(val_acc)
+                            perf_dict["model_retraining_idx"].append(eval_count)
 
             cur_labeled_node_list.append(labeled_node)
             ind_train_features = X_ind_propogated[cur_labeled_node_list]
@@ -779,13 +777,15 @@ if __name__ == "__main__":
     #         print('full group acc:', val_acc)
     #     print(f"Permutation: {i} finished seed {seed}")
 
-    pc_winter(max_model_retrainings=20000)
+    wg_l1 = 10
+    wg_l2 = 5
+    pc_winter(wg_l1=wg_l1, wg_l2=wg_l2, max_model_retrainings=20000)
     print("last permutation", perf_dict["perm"][-1])
     #############################################
     # Save results
-    with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
+    with open(f"value/{dataset_name}_{wg_l1}_{wg_l2}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
         pickle.dump(sample_value_dict, f)
-    with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value_count.pkl", "wb") as f:
+    with open(f"value/{dataset_name}_{wg_l1}_{wg_l2}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value_count.pkl", "wb") as f:
         pickle.dump(sample_counter_dict, f)
-    with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
+    with open(f"value/{dataset_name}_{wg_l1}_{wg_l2}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
         pickle.dump(perf_dict, f)
