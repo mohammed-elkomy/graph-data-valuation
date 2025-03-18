@@ -527,6 +527,7 @@ def pc_winter(max_model_retrainings=10000, verbose=False):
                     perf_dict["first_hop"].append(player_hop_1)
                     perf_dict["second_hop"].append(player_hop_2)
                     perf_dict["accu"].append(val_acc)
+                    perf_dict["model_retraining_idx"].append(eval_count)
 
             cur_labeled_node_list.append(labeled_node)
             ind_train_features = X_ind_propogated[cur_labeled_node_list]
@@ -551,6 +552,7 @@ def pc_winter(max_model_retrainings=10000, verbose=False):
             print(f"Permutation {i} finished, seed {seed}")
 
     eval_progress.close()
+
 
 
 if __name__ == "__main__":
