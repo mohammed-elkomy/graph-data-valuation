@@ -32,7 +32,7 @@ from logging import Logger
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
+from tqdm import tqdm
 from torch_geometric.utils import add_self_loops, degree
 from sklearn.metrics import accuracy_score
 import random
@@ -196,9 +196,6 @@ def stack_torch_tensors(input_tensors):
     return torch.cat(unrolled)
 
 
-
-
-
 def generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled_list, target_node, node_map, ind_edge_index, data, device):
     """
     This function implements the local propagation strategy for the PC-Winter algorithm.
@@ -250,7 +247,6 @@ def evaluate_retrain_model(model_class, num_features, num_classes, train_feature
     The utility is measured as the validation accuracy of the trained model.
     """
 
-
     # Create and train the model
     model = model_class(num_features, num_classes).to(device)
     model.fit(train_features, train_labels, val_features, val_labels, num_iter=num_iter, lr=lr, weight_decay=weight_decay)
@@ -266,13 +262,13 @@ def generate_maps(train_idx_list, num_hops, edge_index):
     """
     This function generates the necessary data structures for efficient computation
     of the PC-Winter algorithm, including the labeled_to_player_map which represents
-    the contribution tree structure. 
-    
+    the contribution tree structure.
+
     The key chain stands for one contribution path of a node in a computational tree:
     [labeled][labeled][labeled] is a labeled node;
     [labeled][hop_1_node][hop_1_node] is a label' node's 1-distance neighbor;
     [labeled][hop_1_node][hop_2_node] is a label' node's 2-distance neighbor;
-    Here the key index is the node index in the graph. 
+    Here the key index is the node index in the graph.
     """
 
     labeled_to_player_map = {}
@@ -452,6 +448,111 @@ def generate_wikics_split(data, seed=42):
     return data
 
 
+def pc_winter(max_model_retrainings=10000, verbose=False):
+    eval_count = 0
+    eval_progress = tqdm(total=max_model_retrainings, desc="Evaluations Progress")
+
+    for i in range(num_perm):
+        np.random.shuffle(labeled_node_list)  # Randomize order of labeled nodes
+        cur_labeled_node_list = []
+        pre_performance = 0
+
+        for labeled_node in labeled_node_list:
+            if eval_count >= max_model_retrainings:
+                if verbose:
+                    print("Termination condition reached: Maximum evaluations exceeded.")
+                return
+
+            # Process 1-hop neighbors
+            cur_hop_1_list = []
+            hop_1_list = list(labeled_to_player_map[labeled_node].keys())
+            np.random.shuffle(hop_1_list)  # Randomize order
+            # Keep the precedence constraint between labeled and 1-hop neighbor by putting labeled node front
+            hop_1_list.remove(labeled_node)
+            hop_1_list.insert(0, labeled_node)
+
+            truncate_length = int(np.ceil((len(hop_1_list) - 1) * (1 - group_trunc_ratio_hop_1))) + 1
+            truncate_length = min(truncate_length, len(hop_1_list))
+            hop_1_list = hop_1_list[:truncate_length]
+
+            if verbose:
+                print('hop_1_list after truncation', len(hop_1_list))
+                print('labeled_node iteration:', i)
+                print('current target labeled_node:', cur_labeled_node_list, '=>', labeled_node)
+                print('hop_1_list', hop_1_list)
+
+            for player_hop_1 in hop_1_list:
+                cur_hop_2_list = []
+                cur_hop_1_list.append(player_hop_1)
+                hop_2_list = list(labeled_to_player_map[labeled_node][player_hop_1].keys())
+                np.random.shuffle(hop_2_list)  # Randomize order
+                # Keep the precedence constraint between 1-hop neighbor and 2-hop neighbor
+                hop_2_list.remove(player_hop_1)
+                hop_2_list.insert(0, player_hop_1)
+
+                truncate_length = int(np.ceil((len(hop_2_list) - 1) * (1 - group_trunc_ratio_hop_2))) + 1
+                truncate_length = min(truncate_length, len(hop_2_list))
+                hop_2_list = hop_2_list[:truncate_length]
+
+                if verbose:
+                    print('hop_2_list after truncation', len(hop_2_list))
+
+                for player_hop_2 in hop_2_list:
+                    cur_hop_2_list.append(player_hop_2)
+                    # Local propagation and performance computation
+                    ind_train_features, ind_train_labels = generate_features_and_labels_ind(
+                        cur_hop_1_list, cur_hop_2_list, cur_labeled_node_list, labeled_node,
+                        labeled_to_player_map, inductive_edge_index, data, device)
+
+                    val_acc = evaluate_retrain_model(
+                        MLP, dataset.num_features, dataset.num_classes,
+                        ind_train_features, ind_train_labels, val_features, val_labels,
+                        device, num_iter=num_epochs, lr=lr, weight_decay=weight_decay)
+
+                    eval_count += 1
+                    eval_progress.update(1)
+                    if eval_count >= max_model_retrainings:
+                        if verbose:
+                            print("Termination condition reached: Maximum evaluations exceeded.")
+                        return
+
+                    sample_value_dict[labeled_node][player_hop_1][player_hop_2] += (val_acc - pre_performance)
+                    sample_counter_dict[labeled_node][player_hop_1][player_hop_2] += 1
+                    pre_performance = val_acc
+
+                    perf_dict["dataset"].append(dataset_name)
+                    perf_dict["seed"].append(seed)
+                    perf_dict["perm"].append(i)
+                    perf_dict["label"].append(labeled_node)
+                    perf_dict["first_hop"].append(player_hop_1)
+                    perf_dict["second_hop"].append(player_hop_2)
+                    perf_dict["accu"].append(val_acc)
+
+            cur_labeled_node_list.append(labeled_node)
+            ind_train_features = X_ind_propogated[cur_labeled_node_list]
+            ind_train_labels = data.y[cur_labeled_node_list]
+
+            val_acc = evaluate_retrain_model(
+                MLP, dataset.num_features, dataset.num_classes,
+                ind_train_features, ind_train_labels, val_features, val_labels, device)
+
+            eval_count += 1
+            eval_progress.update(1)
+            if eval_count >= max_model_retrainings:
+                if verbose:
+                    print("Termination condition reached: Maximum evaluations exceeded.")
+                return
+
+            pre_performance = val_acc
+            if verbose:
+                print('full group acc:', val_acc)
+
+        if verbose:
+            print(f"Permutation {i} finished, seed {seed}")
+
+    eval_progress.close()
+
+
 if __name__ == "__main__":
 
     # Parse command line arguments
@@ -602,84 +703,85 @@ if __name__ == "__main__":
                                      X_ind_propogated, data.y, val_features, val_labels,
                                      device, num_iter=num_epochs, lr=lr, weight_decay=weight_decay)
 
-    total_time = 0
-    # Main loop for PC-Winter algorithm with online Pre-order traversal
-    for i in range(num_perm):
-        iteration_start_time = time.time()
-        np.random.shuffle(labeled_node_list)  # Randomize order of labeled nodes
-        cur_labeled_node_list = []
-        pre_performance = 0
+    # # # Main loop for PC-Winter algorithm with online Pre-order traversal
+    # for i in range(num_perm):
+    #     iteration_start_time = time.time()
+    #     np.random.shuffle(labeled_node_list)  # Randomize order of labeled nodes
+    #     cur_labeled_node_list = []
+    #     pre_performance = 0
+    #
+    #     for labeled_node in tqdm(labeled_node_list):
+    #         sample_value_dict_copy = copy.deepcopy(sample_value_dict)
+    #
+    #         # Process 1-hop neighbors
+    #         cur_hop_1_list = []
+    #         hop_1_list = list(labeled_to_player_map[labeled_node].keys())
+    #         np.random.shuffle(hop_1_list)  # Randomize order
+    #         # Keep the precedence constraint between labeled and 1-hop neighbor by putting labeled node front
+    #         hop_1_list.remove(labeled_node)
+    #         hop_1_list.insert(0, labeled_node)
+    #         print('hop_1_list before truncation', len(hop_1_list), 'group_trunc_ratio_hop_1:', group_trunc_ratio_hop_1)
+    #         truncate_length = int(np.ceil((len(hop_1_list) - 1) * (1 - group_trunc_ratio_hop_1))) + 1
+    #         truncate_length = min(truncate_length, len(hop_1_list))
+    #         hop_1_list = hop_1_list[:truncate_length]
+    #         print('hop_1_list after truncation', len(hop_1_list))
+    #
+    #         print('labeled_node iteration:', i)
+    #         print('current target labeled_node:', cur_labeled_node_list, '=>', labeled_node)
+    #         print('hop_1_list ', hop_1_list)
+    #
+    #         for player_hop_1 in hop_1_list:
+    #             # Process 2-hop neighbors
+    #             cur_hop_2_list = []
+    #             cur_hop_1_list += [player_hop_1]
+    #             hop_2_list = list(labeled_to_player_map[labeled_node][player_hop_1].keys())
+    #             np.random.shuffle(hop_2_list)  # Randomize order
+    #             # keep the precedence constraint between 1-hop neighbor and 2-hop neighbor
+    #             hop_2_list.remove(player_hop_1)
+    #             hop_2_list.insert(0, player_hop_1)
+    #             print('hop_2_list before truncation', len(hop_2_list), 'group_trunc_ratio_hop_2:', group_trunc_ratio_hop_2)
+    #             truncate_length = int(np.ceil((len(hop_2_list) - 1) * (1 - group_trunc_ratio_hop_2))) + 1
+    #             truncate_length = min(truncate_length, len(hop_2_list))
+    #             hop_2_list = hop_2_list[:truncate_length]
+    #             print('hop_2_list after truncation', len(hop_2_list))
+    #
+    #             for player_hop_2 in hop_2_list:
+    #                 cur_hop_2_list += [player_hop_2]
+    #                 # Local propagation and performance computation
+    #                 ind_train_features, ind_train_labels = generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled_node_list,
+    #                                                                                         labeled_node, labeled_to_player_map, inductive_edge_index, data, device)
+    #                 val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes,
+    #                                                  ind_train_features, ind_train_labels, val_features, val_labels,
+    #                                                  device, num_iter=num_epochs, lr=lr, weight_decay=weight_decay)
+    #                 # calculate marginal contribution
+    #                 sample_value_dict[labeled_node][player_hop_1][player_hop_2] += (val_acc - pre_performance)
+    #                 sample_counter_dict[labeled_node][player_hop_1][player_hop_2] += 1
+    #                 # print('pre_performance ', pre_performance, 'val_acc', val_acc)
+    #                 pre_performance = val_acc
+    #
+    #                 # Record performance data
+    #                 perf_dict['dataset'] += [dataset_name]
+    #                 perf_dict['seed'] += [seed]
+    #                 perf_dict['perm'] += [i]
+    #                 perf_dict['label'] += [labeled_node]
+    #                 perf_dict['first_hop'] += [player_hop_1]
+    #                 perf_dict['second_hop'] += [player_hop_2]
+    #                 perf_dict['accu'] += [val_acc]
+    #
+    #
+    #         # Update labeled node list and compute full group accuracy
+    #         cur_labeled_node_list += [labeled_node]
+    #         ind_train_features = X_ind_propogated[cur_labeled_node_list]
+    #         ind_train_labels = data.y[cur_labeled_node_list]
+    #         val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes, \
+    #                                          ind_train_features, ind_train_labels, val_features, val_labels, device)
+    #         pre_performance = val_acc
+    #         print('full group acc:', val_acc)
+    #     print(f"Permutation: {i} finished seed {seed}")
 
-        for labeled_node in tqdm(labeled_node_list):
-            sample_value_dict_copy = copy.deepcopy(sample_value_dict)
+    pc_winter(max_model_retrainings=100000)
 
-            # Process 1-hop neighbors
-            cur_hop_1_list = []
-            hop_1_list = list(labeled_to_player_map[labeled_node].keys())
-            np.random.shuffle(hop_1_list)  # Randomize order
-            # Keep the precedence constraint between labeled and 1-hop neighbor by putting labeled node front
-            hop_1_list.remove(labeled_node)
-            hop_1_list.insert(0, labeled_node)
-            print('hop_1_list before truncation', len(hop_1_list), 'group_trunc_ratio_hop_1:', group_trunc_ratio_hop_1)
-            truncate_length = int(np.ceil((len(hop_1_list) - 1) * (1 - group_trunc_ratio_hop_1))) + 1
-            truncate_length = min(truncate_length, len(hop_1_list))
-            hop_1_list = hop_1_list[:truncate_length]
-            print('hop_1_list after truncation', len(hop_1_list))
-
-            print('labeled_node iteration:', i)
-            print('current target labeled_node:', cur_labeled_node_list, '=>', labeled_node)
-            print('hop_1_list ', hop_1_list)
-
-            for player_hop_1 in hop_1_list:
-                # Process 2-hop neighbors
-                cur_hop_2_list = []
-                cur_hop_1_list += [player_hop_1]
-                hop_2_list = list(labeled_to_player_map[labeled_node][player_hop_1].keys())
-                np.random.shuffle(hop_2_list)  # Randomize order
-                # keep the precedence constraint between 1-hop neighbor and 2-hop neighbor 
-                hop_2_list.remove(player_hop_1)
-                hop_2_list.insert(0, player_hop_1)
-                print('hop_2_list before truncation', len(hop_2_list), 'group_trunc_ratio_hop_2:', group_trunc_ratio_hop_2)
-                truncate_length = int(np.ceil((len(hop_2_list) - 1) * (1 - group_trunc_ratio_hop_2))) + 1
-                truncate_length = min(truncate_length, len(hop_2_list))
-                hop_2_list = hop_2_list[:truncate_length]
-                print('hop_2_list after truncation', len(hop_2_list))
-
-                for player_hop_2 in hop_2_list:
-                    cur_hop_2_list += [player_hop_2]
-                    # Local propagation and performance computation
-                    ind_train_features, ind_train_labels = generate_features_and_labels_ind(cur_hop_1_list, cur_hop_2_list, cur_labeled_node_list,
-                                                                                            labeled_node, labeled_to_player_map, inductive_edge_index, data, device)
-                    val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes,
-                                                     ind_train_features, ind_train_labels, val_features, val_labels,
-                                                     device, num_iter=num_epochs, lr=lr, weight_decay=weight_decay)
-                    # calculate marginal contribution 
-                    sample_value_dict[labeled_node][player_hop_1][player_hop_2] += (val_acc - pre_performance)
-                    sample_counter_dict[labeled_node][player_hop_1][player_hop_2] += 1
-                    # print('pre_performance ', pre_performance, 'val_acc', val_acc)
-                    pre_performance = val_acc
-
-                    # Record performance data
-                    perf_dict['dataset'] += [dataset_name]
-                    perf_dict['seed'] += [seed]
-                    perf_dict['perm'] += [i]
-                    perf_dict['label'] += [labeled_node]
-                    perf_dict['first_hop'] += [player_hop_1]
-                    perf_dict['second_hop'] += [player_hop_2]
-                    perf_dict['accu'] += [val_acc]
-
-                    print('fitting ', fitting, 'const', const)
-
-            # Update labeled node list and compute full group accuracy
-            cur_labeled_node_list += [labeled_node]
-            ind_train_features = X_ind_propogated[cur_labeled_node_list]
-            ind_train_labels = data.y[cur_labeled_node_list]
-            val_acc = evaluate_retrain_model(MLP, dataset.num_features, dataset.num_classes, \
-                                             ind_train_features, ind_train_labels, val_features, val_labels, device)
-            pre_performance = val_acc
-            print('full group acc:', val_acc)
-        print(f"Permutation: {i} finished seed {seed}")
-
+    #############################################
     # Save results
     with open(f"value/{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_pc_value.pkl", "wb") as f:
         pickle.dump(sample_value_dict, f)

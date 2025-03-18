@@ -34,9 +34,10 @@ class SGC(nn.Module):
         self.weights = nn.Parameter(weights.T)
 
     def fit(self, x, edge_index, y, train_mask):
-        adj = pyg.utils.to_dense_adj(edge_index, max_num_nodes=x.shape[0])[0]
+        device = x.device
+        adj = pyg.utils.to_dense_adj(edge_index, max_num_nodes=x.shape[0])[0].to(device)
         if adj.diagonal().sum() != x.shape[0]:
-            adj = adj + torch.eye(x.shape[0], device=x.device)  # self-loops
+            adj = adj + torch.eye(x.shape[0], device=device)  # self-loops
 
         deg = adj.sum(1)  # same for bidirectional and self-connected graphs
         deg_inv_sqrt = torch.diag(deg.pow(-0.5))
@@ -47,9 +48,9 @@ class SGC(nn.Module):
         diff_x = diff_x[train_mask]
 
         self.weights = nn.Parameter(
-            torch.linalg.inv(diff_x.T @ diff_x + 1 * torch.eye(diff_x.shape[1]))
+            torch.linalg.inv(diff_x.T @ diff_x + 1 * torch.eye(diff_x.shape[1], device=device))
             @ diff_x.T
-            @ torch.eye(self.out_channels)[y[train_mask]]
+            @ torch.eye(self.out_channels, device=device)[y[train_mask]]
         )
 
     def forward(self, x, edge_index, mask=None):
@@ -71,12 +72,35 @@ class SGC(nn.Module):
 
     def predict(self, dataset):
         """Predict on test set and return accuracy"""
-        model = self.to(self.device)
-        input_data = dataset.to(self.device)
-        model.eval()
-        _, pred = model(input_data).max(dim=1)
-        correct = float(pred[input_data.test_mask].eq(input_data.y[input_data.test_mask]).sum().item())
-        acc = correct / input_data.test_mask.sum().item()
+        x = dataset.x
+        edge_index = dataset.edge_index
+        self.eval()
+        _, pred = self(x,edge_index,).max(dim=1)
+        correct = float(pred[dataset.test_mask].eq(dataset.y[dataset.test_mask]).sum().item())
+        acc = correct / dataset.test_mask.sum().item()
+        # print('Test Accuracy: {:.4f}'.format(acc))
+        return acc
+
+
+    def predict_train(self, dataset):
+        """Predict on test set and return accuracy"""
+        x = dataset.x
+        edge_index = dataset.edge_index
+        self.eval()
+        _, pred = self(x,edge_index,).max(dim=1)
+        correct = float(pred[dataset.train_mask].eq(dataset.y[dataset.train_mask]).sum().item())
+        acc = correct / dataset.train_mask.sum().item()
+        # print('Test Accuracy: {:.4f}'.format(acc))
+        return acc
+
+    def predict_valid(self, dataset):
+        """Predict on test set and return accuracy"""
+        x = dataset.x
+        edge_index = dataset.edge_index
+        self.eval()
+        _, pred = self(x, edge_index, ).max(dim=1)
+        correct = float(pred[dataset.val_mask].eq(dataset.y[dataset.val_mask]).sum().item())
+        acc = correct / dataset.val_mask.sum().item()
         # print('Test Accuracy: {:.4f}'.format(acc))
         return acc
 
@@ -190,6 +214,14 @@ data_copy = data.clone()
 data_copy = data_copy.to(device)
 data_copy.edge_index = data_copy.edge_index[:, indu_mask]
 
+model2 = SGC(dataset.num_features, dataset.num_classes)
+model2.fit(edge_index=data_copy.edge_index, x=data_copy.x, y=data_copy.y, train_mask=data_copy.train_mask)
+test_acc = model2.predict(test_data)
+val_acc = model2.predict_valid(val_data)
+train_acc = model2.predict_train(data_copy)
+print("train_acc2", train_acc, "val_acc2", val_acc, "test_acc2", test_acc)
+
+
 model = SGCNet(num_features=dataset.num_features, num_classes=dataset.num_classes, K=2).to(device)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
@@ -202,17 +234,11 @@ print("Min values per feature:", data_copy.x[train_mask].min())
 
 print("train_acc", train_acc, "val_acc", val_acc, "test_acc", test_acc)
 model.fit(data_copy, num_epochs, lr, weight_decay)
-model2 = SGC(dataset.num_features, dataset.num_classes)
-model2.fit(edge_index=data_copy.edge_index, x=data_copy.x, y=data_copy.y, train_mask=data_copy.train_mask)
 test_acc = model.predict(test_data)
 val_acc = model.predict_valid(val_data)
 train_acc = model.predict_train(data_copy)
 print("train_acc", train_acc, "val_acc", val_acc, "test_acc", test_acc)
 
-test_acc = model2.predict(test_data)
-val_acc = model2.predict_valid(val_data)
-train_acc = model2.predict_train(data_copy)
-print("train_acc2", train_acc, "val_acc2", val_acc, "test_acc2", test_acc)
 
 
 # Distribution of classes in test and validation sets
