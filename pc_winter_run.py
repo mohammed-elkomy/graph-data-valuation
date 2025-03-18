@@ -777,9 +777,9 @@ if __name__ == "__main__":
     #         print('full group acc:', val_acc)
     #     print(f"Permutation: {i} finished seed {seed}")
 
-    wg_l1 = 5
-    wg_l2 = 5
-    pc_winter(wg_l1=wg_l1, wg_l2=wg_l2, max_model_retrainings=20000,verbose=True)
+    wg_l1 = 1
+    wg_l2 = 1
+    pc_winter(wg_l1=wg_l1, wg_l2=wg_l2, max_model_retrainings=20000, verbose=False)
     print("last permutation", perf_dict["perm"][-1])
     #############################################
     # Save results
