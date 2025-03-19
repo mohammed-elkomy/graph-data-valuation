@@ -191,113 +191,141 @@ def process_and_combine_files_counts(pattern, x_axis, y_axis, title_base, file_s
     analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal, bins=10000)
 
 
-process_and_combine_files_values(r"value/Cora_*_10_0_0.5_0.7_pc_value.pkl",
+process_and_combine_files_values(r"value/Cora_1_1_*_50_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",
-                                 "Combined Distribution of Cora Values",
+                                 "Combined Distribution of Cora Values 1 1",
                                  "pc_value",
                                  fit_normal=True,
-                                 num_perms=10)
+                                 num_perms=1)  # ignored normalize factor
 
-process_and_combine_files_counts(r"value/Cora_*_10_0_0.5_0.7_pc_value_count.pkl",
+process_and_combine_files_counts(r"value/Cora_1_1_*_50_0_0.5_0.7_pc_value_count.pkl",
                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
-                                 "Combined Distribution of Cora Counts",
+                                 "Combined Distribution of Cora Counts 1 1",
                                  "pc_value_count",
                                  fit_normal=False,
-                                 num_perms=10)
+                                 num_perms=1)
 
-process_and_combine_files_values(r"value/PubMed_*_10_0_0.5_0.7_pc_value.pkl",
+process_and_combine_files_values(r"value/Cora_5_10_*_50_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",
-                                 "Combined Distribution of PubMed Values",
-                                 "pc_value",
-                                 fit_normal=True,
-                                 num_perms=10)
-
-process_and_combine_files_counts(r"value/PubMed_*_10_0_0.5_0.7_pc_value_count.pkl",
-                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
-                                 "Combined Distribution of PubMed Counts",
-                                 "pc_value_count",
-                                 fit_normal=False,
-                                 num_perms=10)
-
-process_and_combine_files_values(r"value/CiteSeer_*_10_0_0.5_0.7_pc_value.pkl",
-                                 "PC Value", "Percentage of nodes",
-                                 "Combined Distribution of CiteSeer Values",
-                                 "pc_value",
-                                 fit_normal=True,
-                                 num_perms=10)
-
-process_and_combine_files_counts(r"value/CiteSeer_*_10_0_0.5_0.7_pc_value_count.pkl",
-                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
-                                 "Combined Distribution of CiteSeer Counts",
-                                 "pc_value_count",
-                                 fit_normal=False,
-                                 num_perms=10)
-
-
-
-process_and_combine_files_values_trunc_counts(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
-                                              "PC Value", "Percentage of nodes",
-                                              "Combined Distribution of WikiCS Values After Truncation",
-                                              "pc_value_truncated",
-                                              fit_normal=True,
-                                              num_perms=1)
-
-process_and_combine_files_values(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
-                                 "PC Value", "Percentage of nodes",
-                                 "Combined Distribution of WikiCS Values",
+                                 "Combined Distribution of Cora Values 5 10",
                                  "pc_value",
                                  fit_normal=True,
                                  num_perms=1)
 
-process_and_combine_files_counts(r"value/WikiCS_*_1_0_0.7_0.9_pc_value_count.pkl",
+process_and_combine_files_counts(r"value/Cora_5_10_*_50_0_0.5_0.7_pc_value_count.pkl",
                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
-                                 "Combined Distribution of WikiCS Counts",
+                                 "Combined Distribution of Cora Counts 5 10",
                                  "pc_value_count",
                                  fit_normal=False,
-                                 num_perms=1
-                                 )
-
-process_and_combine_files_values_trunc_counts(r"value/WikiCS2_*_1_0_0.7_0.9_pc_value.pkl",
-                                              "PC Value", "Percentage of nodes",
-                                              "Combined Distribution of WikiCS2 Values After Truncation",
-                                              "pc_value_truncated",
-                                              fit_normal=True,
-                                              num_perms=1)
-
-process_and_combine_files_values(r"value/WikiCS2_*_1_0_0.7_0.9_pc_value.pkl",
-                                 "PC Value", "Percentage of nodes",
-                                 "Combined Distribution of WikiCS2 Values",
-                                 "pc_value",
-                                 fit_normal=True,
                                  num_perms=1)
 
-process_and_combine_files_counts(r"value/WikiCS2_*_1_0_0.7_0.9_pc_value_count.pkl",
-                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
-                                 "Combined Distribution of WikiCS2 Counts",
-                                 "pc_value_count",
-                                 fit_normal=False,
-                                 num_perms=1
-                                 )
-
-
-process_and_combine_files_values_trunc_counts(r"value/WikiCSX_*_1_0_0.7_0.9_pc_value.pkl",
-                                              "PC Value", "Percentage of nodes",
-                                              "Combined Distribution of WikiCSX Values After Truncation",
-                                              "pc_value_truncated",
-                                              fit_normal=True,
-                                              num_perms=1)
-
-process_and_combine_files_values(r"value/WikiCSX_*_1_0_0.7_0.9_pc_value.pkl",
-                                 "PC Value", "Percentage of nodes",
-                                 "Combined Distribution of WikiCSX Values",
-                                 "pc_value",
-                                 fit_normal=True,
-                                 num_perms=1)
-
-process_and_combine_files_counts(r"value/WikiCSX_*_1_0_0.7_0.9_pc_value_count.pkl",
-                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
-                                 "Combined Distribution of WikiCSX Counts",
-                                 "pc_value_count",
-                                 fit_normal=False,
-                                 num_perms=1
-                                 )
+# process_and_combine_files_values(r"value/Cora_*_10_0_0.5_0.7_pc_value.pkl",
+#                                  "PC Value", "Percentage of nodes",
+#                                  "Combined Distribution of Cora Values",
+#                                  "pc_value",
+#                                  fit_normal=True,
+#                                  num_perms=10)
+#
+# process_and_combine_files_counts(r"value/Cora_*_10_0_0.5_0.7_pc_value_count.pkl",
+#                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
+#                                  "Combined Distribution of Cora Counts",
+#                                  "pc_value_count",
+#                                  fit_normal=False,
+#                                  num_perms=10)
+#
+# process_and_combine_files_values(r"value/PubMed_*_10_0_0.5_0.7_pc_value.pkl",
+#                                  "PC Value", "Percentage of nodes",
+#                                  "Combined Distribution of PubMed Values",
+#                                  "pc_value",
+#                                  fit_normal=True,
+#                                  num_perms=10)
+#
+# process_and_combine_files_counts(r"value/PubMed_*_10_0_0.5_0.7_pc_value_count.pkl",
+#                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
+#                                  "Combined Distribution of PubMed Counts",
+#                                  "pc_value_count",
+#                                  fit_normal=False,
+#                                  num_perms=10)
+#
+# process_and_combine_files_values(r"value/CiteSeer_*_10_0_0.5_0.7_pc_value.pkl",
+#                                  "PC Value", "Percentage of nodes",
+#                                  "Combined Distribution of CiteSeer Values",
+#                                  "pc_value",
+#                                  fit_normal=True,
+#                                  num_perms=10)
+#
+# process_and_combine_files_counts(r"value/CiteSeer_*_10_0_0.5_0.7_pc_value_count.pkl",
+#                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
+#                                  "Combined Distribution of CiteSeer Counts",
+#                                  "pc_value_count",
+#                                  fit_normal=False,
+#                                  num_perms=10)
+#
+#
+#
+# process_and_combine_files_values_trunc_counts(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
+#                                               "PC Value", "Percentage of nodes",
+#                                               "Combined Distribution of WikiCS Values After Truncation",
+#                                               "pc_value_truncated",
+#                                               fit_normal=True,
+#                                               num_perms=1)
+#
+# process_and_combine_files_values(r"value/WikiCS_*_1_0_0.7_0.9_pc_value.pkl",
+#                                  "PC Value", "Percentage of nodes",
+#                                  "Combined Distribution of WikiCS Values",
+#                                  "pc_value",
+#                                  fit_normal=True,
+#                                  num_perms=1)
+#
+# process_and_combine_files_counts(r"value/WikiCS_*_1_0_0.7_0.9_pc_value_count.pkl",
+#                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
+#                                  "Combined Distribution of WikiCS Counts",
+#                                  "pc_value_count",
+#                                  fit_normal=False,
+#                                  num_perms=1
+#                                  )
+#
+# process_and_combine_files_values_trunc_counts(r"value/WikiCS2_*_1_0_0.7_0.9_pc_value.pkl",
+#                                               "PC Value", "Percentage of nodes",
+#                                               "Combined Distribution of WikiCS2 Values After Truncation",
+#                                               "pc_value_truncated",
+#                                               fit_normal=True,
+#                                               num_perms=1)
+#
+# process_and_combine_files_values(r"value/WikiCS2_*_1_0_0.7_0.9_pc_value.pkl",
+#                                  "PC Value", "Percentage of nodes",
+#                                  "Combined Distribution of WikiCS2 Values",
+#                                  "pc_value",
+#                                  fit_normal=True,
+#                                  num_perms=1)
+#
+# process_and_combine_files_counts(r"value/WikiCS2_*_1_0_0.7_0.9_pc_value_count.pkl",
+#                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
+#                                  "Combined Distribution of WikiCS2 Counts",
+#                                  "pc_value_count",
+#                                  fit_normal=False,
+#                                  num_perms=1
+#                                  )
+#
+#
+# process_and_combine_files_values_trunc_counts(r"value/WikiCSX_*_1_0_0.7_0.9_pc_value.pkl",
+#                                               "PC Value", "Percentage of nodes",
+#                                               "Combined Distribution of WikiCSX Values After Truncation",
+#                                               "pc_value_truncated",
+#                                               fit_normal=True,
+#                                               num_perms=1)
+#
+# process_and_combine_files_values(r"value/WikiCSX_*_1_0_0.7_0.9_pc_value.pkl",
+#                                  "PC Value", "Percentage of nodes",
+#                                  "Combined Distribution of WikiCSX Values",
+#                                  "pc_value",
+#                                  fit_normal=True,
+#                                  num_perms=1)
+#
+# process_and_combine_files_counts(r"value/WikiCSX_*_1_0_0.7_0.9_pc_value_count.pkl",
+#                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
+#                                  "Combined Distribution of WikiCSX Counts",
+#                                  "pc_value_count",
+#                                  fit_normal=False,
+#                                  num_perms=1
+#                                  )

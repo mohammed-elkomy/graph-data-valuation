@@ -62,6 +62,10 @@ def parse_args():
                         help="Index for parallel execution.")
     parser.add_argument('--min_occ_perc', type=int, default=70,
                         help="Minimum occurrences (based on percentiles) for each node during the pc-winter value approximation")
+    parser.add_argument('--wg_l1', type=int, required=True,
+                        help="count for level 1 within groups")
+    parser.add_argument('--wg_l2', type=int, required=True,
+                        help="count for level 2 within groups")
 
     return parser.parse_args()
 
@@ -164,6 +168,8 @@ if __name__ == "__main__":
     num_perms = args.num_perms
     parallel_idx = args.parallel_idx
     min_occ_perc = args.min_occ_perc
+    wg_l1 = args.wg_l1
+    wg_l2 = args.wg_l2
 
     assert parallel_idx < WORKERS
 
@@ -174,7 +180,7 @@ if __name__ == "__main__":
 
     # Construct the pattern
     value_pattern = re.compile(
-        rf'^{dataset_name}_(\d+)_'
+        rf'^{dataset_name}_{wg_l1}_{wg_l2}_(\d+)_'
         rf'{num_perms}_'
         rf'{label_trunc_ratio_str}_'
         rf'{group_trunc_ratio_hop_1_str}_'
@@ -183,7 +189,7 @@ if __name__ == "__main__":
 
     # Construct the pattern
     count_pattern = re.compile(
-        rf'^{dataset_name}_(\d+)_'
+        rf'^{dataset_name}_{wg_l1}_{wg_l2}_(\d+)_'
         rf'{num_perms}_'
         rf'{label_trunc_ratio_str}_'
         rf'{group_trunc_ratio_hop_1_str}_'
@@ -249,7 +255,8 @@ if __name__ == "__main__":
 
     # Average the values
     for key, values in results.items():
-        results[key] = sum(values) / (len(values) * num_perms)  # TODO is it right to divide by num_perms?
+        # results[key] = sum(values) / (len(values) * num_perms)  # TODO is it right to divide by num_perms?
+        results[key] = sum(values) / len(values)  # num_perms is different for within group
 
     # Convert to DataFrame
     data = [{'key1': k1, 'key2': k2, 'key3': k3, 'value': v} for (k1, k2, k3), v in results.items()]
@@ -409,8 +416,8 @@ if __name__ == "__main__":
     # Save results
     path = 'res/'
     os.makedirs(path, exist_ok=True)
-    with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{dataset_name}_test.pkl'), 'wb') as file:
+    with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{wg_l1}_{wg_l2}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{dataset_name}_test.pkl'), 'wb') as file:
         pickle.dump(win_acc, file)
 
-    with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{dataset_name}_vali.pkl'), 'wb') as file:
+    with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{wg_l1}_{wg_l2}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{dataset_name}_vali.pkl'), 'wb') as file:
         pickle.dump(val_acc_list, file)
