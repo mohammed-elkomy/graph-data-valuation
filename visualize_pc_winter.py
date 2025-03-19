@@ -48,7 +48,7 @@ for file_path in sorted(glob.glob(pattern)):
     print("processing subset", file_path)
     # Extract the unique part of the filename based on the wildcard `*`
     base_name = os.path.basename(file_path)
-    dump_count = base_name.split('_')[7]  # Assuming the dump_count is after the 6th underscore
+    dump_count = base_name.split('_')[9]  # Assuming the dump_count is after the 8th underscore
 
     with open(file_path, 'rb') as file:
         data = pickle.load(file)
