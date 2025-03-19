@@ -362,6 +362,10 @@ def parse_args():
     parser.add_argument('--num_hops', type=int, default=2, help='Number of hops.')
     parser.add_argument('--seed', type=int, default=0, help='Random seed for permutation.')
     parser.add_argument('--num_perm', type=int, default=10, help='Number of permutations.')
+    parser.add_argument('--wg_l1', type=int, required=True,
+                        help="count for level 1 within groups")
+    parser.add_argument('--wg_l2', type=int, required=True,
+                        help="count for level 2 within groups")
     parser.add_argument('--label_trunc_ratio', type=float, default=0, help='Label trunc ratio')
     parser.add_argument('--group_trunc_ratio_hop_1', type=float, default=0.5, help='Hop 1 Group trunc ratio')
     parser.add_argument('--group_trunc_ratio_hop_2', type=float, default=0.7, help='Hop 2 Group trunc ratio.')
@@ -565,6 +569,8 @@ if __name__ == "__main__":
     group_trunc_ratio_hop_1 = args.group_trunc_ratio_hop_1
     group_trunc_ratio_hop_2 = args.group_trunc_ratio_hop_2
     verbose = args.verbose
+    wg_l1 = args.wg_l1
+    wg_l2 = args.wg_l2
     # print(f"logs_{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}.txt")
     # sys.stdout = open(f"logs_{dataset_name}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}.txt", "w")
     if dataset_name in dataset_params:
@@ -776,8 +782,6 @@ if __name__ == "__main__":
     #         print('full group acc:', val_acc)
     #     print(f"Permutation: {i} finished seed {seed}")
 
-    wg_l1 = 5
-    wg_l2 = 10
     pc_winter(wg_l1=wg_l1, wg_l2=wg_l2, max_model_retrainings=20000, verbose=False)
     print("last permutation", perf_dict["perm"][-1])
     #############################################
@@ -788,5 +792,3 @@ if __name__ == "__main__":
         pickle.dump(sample_counter_dict, f)
     with open(f"value/{dataset_name}_{wg_l1}_{wg_l2}_{seed}_{num_perm}_{label_trunc_ratio}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_perf.pkl", "wb") as f:
         pickle.dump(perf_dict, f)
-
-
