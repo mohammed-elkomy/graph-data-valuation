@@ -15,7 +15,10 @@ def parse_args():
     parser.add_argument('--group_trunc_ratio_hop_1', type=float, required=True, help="Truncation ratio for hop 1")
     parser.add_argument('--group_trunc_ratio_hop_2', type=float, required=True, help="Truncation ratio for hop 2")
     parser.add_argument('--permutation_count', type=int, required=True, help="Number of permutations")
-
+    parser.add_argument('--wg_l1', type=int, required=True,
+                        help="count for level 1 within groups")
+    parser.add_argument('--wg_l2', type=int, required=True,
+                        help="count for level 2 within groups")
     args = parser.parse_args()
 
     # Setting the variables based on the parsed arguments
@@ -34,7 +37,7 @@ print(f"Group Truncation Ratio Hop 2: {group_trunc_ratio_hop_2}")
 print(f"Permutation Count: {permutation_count}")
 
 img_dir = "imgs"
-pattern = f'./res/*node_drop_large_winter_value_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_*_{dataset}_test.pkl'
+pattern = f'./res/*node_drop_large_winter_value_{wg_l1}_{wg_l2}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_*_{dataset}_test.pkl'
 
 datagroups = defaultdict(list)
 files_per_dump_count = defaultdict(list)
