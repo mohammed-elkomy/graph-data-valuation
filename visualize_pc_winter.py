@@ -48,7 +48,7 @@ for file_path in sorted(glob.glob(pattern)):
     print("processing subset", file_path)
     # Extract the unique part of the filename based on the wildcard `*`
     base_name = os.path.basename(file_path)
-    dump_count = base_name.split('_')[9]  # Assuming the dump_count is after the 8th underscore
+    dump_count = base_name.split('_')[9]
 
     with open(file_path, 'rb') as file:
         data = pickle.load(file)
@@ -96,7 +96,7 @@ for dump_count, data_group in datagroups.items():
     plt.legend()
 
     # Save the figure with the unique part as the filename
-    image_path = os.path.join(img_dir, f'{dataset}-drop_up_to_{dump_count * permutation_count}.png')
+    image_path = os.path.join(img_dir, f'{dataset}-drop_up_to_{dump_count * permutation_count}_{wg_l1}_{wg_l2}.png')
     plt.savefig(image_path)
 
     # Close the plot to free memory
