@@ -26,11 +26,13 @@ def parse_args():
     group_trunc_ratio_hop_1 = args.group_trunc_ratio_hop_1
     group_trunc_ratio_hop_2 = args.group_trunc_ratio_hop_2
     permutation_count = args.permutation_count
+    wg_l1 = args.wg_l1
+    wg_l2 = args.wg_l2
 
-    return dataset, group_trunc_ratio_hop_1, group_trunc_ratio_hop_2, permutation_count
+    return dataset, group_trunc_ratio_hop_1, group_trunc_ratio_hop_2, permutation_count, wg_l1, wg_l2
 
 
-dataset, group_trunc_ratio_hop_1, group_trunc_ratio_hop_2, permutation_count = parse_args()
+dataset, group_trunc_ratio_hop_1, group_trunc_ratio_hop_2, permutation_count, wg_l1, wg_l2 = parse_args()
 print(f"Dataset: {dataset}")
 print(f"Group Truncation Ratio Hop 1: {group_trunc_ratio_hop_1}")
 print(f"Group Truncation Ratio Hop 2: {group_trunc_ratio_hop_2}")
@@ -57,7 +59,8 @@ for dump_count, matched_files in files_per_dump_count.items():
     sub = "\n".join(matched_files)
     assert len(matched_files) in [10, 1], f"failed to get parts of \n{sub}"
     if len(matched_files) == 1:
-        print("only found",sub)
+        print("only found", sub)
+
 
 # Function to calculate the simple moving average
 def moving_average(data, window_size=5):
