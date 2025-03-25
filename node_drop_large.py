@@ -141,20 +141,6 @@ class SGCNet(nn.Module):
         return acc
 
 
-# Function to process nodes (same logic as before)
-def process_nodes(nodes):
-    aggregated = collections.defaultdict(float)
-    for node in nodes:
-        unique_keys = {node['key1'], node['key2'], node['key3']}
-        for key in unique_keys:
-            aggregated[key] += node['value']
-
-    key1_ids = {node['key1'] for node in nodes}
-
-    filtered_nodes = [{'key': k, 'value': v} for k, v in aggregated.items() if k not in key1_ids]
-    return filtered_nodes
-
-
 # Function to find mismatched keys
 def find_mismatched_keys(df1, df2, delta=1e-6):
     merged_df = df1.merge(df2, on='key', suffixes=('_df1', '_df2'))
@@ -227,8 +213,17 @@ def process_and_validate_unlabeled_nodes(results, delta=1e-6):
     # unlabeled_win_df = pd.concat([win_df_1, win_df_2])
     # unlabeled_win_df = unlabeled_win_df.sort_values('value', ascending=False)
 
-    dota = pd.DataFrame(process_nodes(data))
-    mismatched_keys = find_mismatched_keys(dota, unlabeled_win_df, delta)
+    aggregated = collections.defaultdict(float)
+    for node in data:
+        unique_keys = {node['key1'], node['key2'], node['key3']}
+        for key in unique_keys:
+            aggregated[key] += node['value']
+
+    key1_ids = {node['key1'] for node in data}
+
+    unlabeled_win_df2 = pd.DataFrame([{'key': k, 'value': v} for k, v in aggregated.items() if k not in key1_ids])
+
+    mismatched_keys = find_mismatched_keys(unlabeled_win_df2, unlabeled_win_df, delta)
     assert mismatched_keys.shape[0] == 0
     print("success")
     return unlabeled_win_df
@@ -352,7 +347,7 @@ if __name__ == "__main__":
         # results[key] = sum(values) / (len(values) * num_perms)  # TODO is it right to divide by num_perms?
         results[key] = sum(values) / len(values)  # num_perms is different for within group
 
-    unlabled_win_df, mismatches = process_and_validate_unlabeled_nodes(results)
+    unlabled_win_df = process_and_validate_unlabeled_nodes(results)
 
     # count cut off
     print("before count filtration", unlabled_win_df.shape)

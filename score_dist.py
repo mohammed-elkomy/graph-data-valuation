@@ -28,14 +28,12 @@ def nested_aggregation(file_list, is_count):
             for key, sub_dict in data.items():
                 for sub_key, sub_sub_dict in sub_dict.items():
                     for sub_sub_key, value in sub_sub_dict.items():
-                        if is_count:
-                            results[key] += value
-                            results[sub_key] += value
-                            results[sub_sub_key] += value
-                        else:
-                            results[key].append(value)
-                            results[sub_key].append(value)
-                            results[sub_sub_key].append(value)
+                        unique_keys = {key, sub_key, sub_sub_key}
+                        for k in unique_keys:
+                            if is_count:
+                                results[k] += value
+                            else:
+                                results[k].append(value)
 
                             # results[(key, sub_key, sub_sub_key)].append(value)
 
