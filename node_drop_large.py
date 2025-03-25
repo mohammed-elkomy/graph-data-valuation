@@ -11,6 +11,7 @@ It includes the following main components:
 import collections
 import os
 import pickle
+import random
 import re
 import sys
 import time
@@ -140,6 +141,99 @@ class SGCNet(nn.Module):
         return acc
 
 
+# Function to process nodes (same logic as before)
+def process_nodes(nodes):
+    aggregated = collections.defaultdict(float)
+    for node in nodes:
+        unique_keys = {node['key1'], node['key2'], node['key3']}
+        for key in unique_keys:
+            aggregated[key] += node['value']
+
+    key1_ids = {node['key1'] for node in nodes}
+
+    filtered_nodes = [{'key': k, 'value': v} for k, v in aggregated.items() if k not in key1_ids]
+    return filtered_nodes
+
+
+# Function to find mismatched keys
+def find_mismatched_keys(df1, df2, delta=1e-6):
+    merged_df = df1.merge(df2, on='key', suffixes=('_df1', '_df2'))
+    mismatched_keys = merged_df[abs(merged_df['value_df1'] - merged_df['value_df2']) > delta]
+    return mismatched_keys
+
+
+def process_and_validate_unlabeled_nodes(results, delta=1e-6):
+    """
+    Processes results into DataFrames, extracts unlabeled nodes, and validates consistency.
+
+    Args:
+    - results (dict): Dictionary with keys as tuples (key1, key2, key3) and values as float.
+    - sample_size (int): Number of random samples to select from results.
+    - delta (float): Tolerance for value comparison in validation.
+
+    Returns:
+    - pd.DataFrame: The final DataFrame containing unlabeled nodes.
+    - pd.DataFrame: The mismatched keys if any.
+    """
+
+    # Convert results to list of dictionaries
+    data = [{'key1': k1, 'key2': k2, 'key3': k3, 'value': v} for (k1, k2, k3), v in results.items()]
+
+    # Select a random subset of data
+    random.seed(0)
+    # data = random.choices(data, k=100)
+    win_df = pd.DataFrame(data)
+
+    # Step 1: Identify unlabeled nodes from hop 1
+    win_df_11 = win_df[~win_df['key2'].isin(win_df['key1'])].groupby('key2').value.sum().sort_values().reset_index()
+    win_df_11.columns = ['key', 'value']
+
+    hop_1_list = win_df[~win_df['key2'].isin(win_df['key1'])]['key2'].unique()
+
+    # Step 2: Identify unlabeled nodes from hop 1 with contributions from hop 2
+    win_df_12 = win_df[(win_df['key3'] != win_df['key2']) & (win_df['key3'].isin(hop_1_list))] \
+        .groupby('key3').value.sum().sort_values().reset_index()
+    win_df_12.columns = ['key', 'value']
+
+    # Step 3: Aggregate full winter values for hop 1 nodes
+    win_df_1 = pd.concat([win_df_11, win_df_12]).groupby('key').value.sum().sort_values().reset_index()
+
+    # Step 4: Identify unlabeled nodes from hop 2 (leaf nodes with no further contribution)
+    win_df_2 = win_df[~win_df['key3'].isin(win_df['key2']) & ~win_df['key3'].isin(win_df['key1'])] \
+        .groupby('key3').value.sum().sort_values().reset_index()
+    win_df_2.columns = ['key', 'value']
+
+    # Step 5: Combine all unlabeled nodes and sort by value
+    unlabeled_win_df = pd.concat([win_df_1, win_df_2]).sort_values('value', ascending=False)
+
+    # win_df = pd.DataFrame(data)
+    # # labeled > hop 1 > hop 2
+    # # Aggregate values for different hop levels
+    # win_df_11 = pd.DataFrame(win_df[win_df['key2'].isin(win_df['key1']) == False].groupby('key2').value.sum().sort_values()).reset_index()
+    # win_df_11.columns = ['key', 'value']  # unlabelled nodes from hop 1
+    #
+    # hop_1_list = win_df[win_df['key2'].isin(win_df['key1']) == False]['key2'].unique()
+    # win_df_12 = pd.DataFrame(win_df[(win_df['key3'] != win_df['key2'])
+    #                                 & (win_df['key3'].isin(hop_1_list))]
+    #                          .groupby('key3').value.sum().sort_values()).reset_index()
+    # win_df_12.columns = ['key', 'value']  # unlabelled nodes from hop 1 with contributions coming from hop 2
+    #
+    # win_df_1 = pd.DataFrame(pd.concat([win_df_11, win_df_12]).groupby('key').value.sum().sort_values()).reset_index()  # full winter value for unlabelled nodes from hop 1
+    #
+    # win_df_2 = pd.DataFrame(win_df[(win_df['key3'].isin(win_df['key2']) == False) & (win_df['key3'].isin(win_df['key1']) == False)].groupby('key3').value.sum().sort_values()).reset_index()
+    # win_df_2.columns = ['key', 'value']  # unlabelled nodes from hop 2 (leaf nodes; no further contribution)
+    #
+    # # Combine and sort unlabeled nodes
+    # unlabeled_win_df = pd.concat([win_df_1, win_df_2])
+    # unlabeled_win_df = unlabeled_win_df.sort_values('value', ascending=False)
+
+    dota = pd.DataFrame(process_nodes(data))
+    mismatched_keys = find_mismatched_keys(dota, unlabeled_win_df, delta)
+    assert mismatched_keys.shape[0] == 0
+    print("success")
+    return unlabeled_win_df
+
+
 def get_subgraph_data(data, mask):
     """Extract subgraph data based on the given mask"""
     nodes = mask.nonzero().view(-1)
@@ -258,28 +352,11 @@ if __name__ == "__main__":
         # results[key] = sum(values) / (len(values) * num_perms)  # TODO is it right to divide by num_perms?
         results[key] = sum(values) / len(values)  # num_perms is different for within group
 
-    # Convert to DataFrame
-    data = [{'key1': k1, 'key2': k2, 'key3': k3, 'value': v} for (k1, k2, k3), v in results.items()]
-    win_df = pd.DataFrame(data)
-    # labeled > hop 1 > hop 2
-    # Aggregate values for different hop levels
-    win_df_11 = pd.DataFrame(win_df[win_df['key2'].isin(win_df['key1']) == False].groupby('key2').value.sum().sort_values()).reset_index()
-    win_df_11.columns = ['key', 'value']  # unlabelled nodes from hop 1
+    unlabled_win_df, mismatches = process_and_validate_unlabeled_nodes(results)
 
-    hop_1_list = win_df[win_df['key2'].isin(win_df['key1']) == False]['key2'].unique()
-    win_df_12 = pd.DataFrame(win_df[(win_df['key3'] != win_df['key2']) & (win_df['key3'].isin(hop_1_list))].groupby('key3').value.sum().sort_values()).reset_index()
-    win_df_12.columns = ['key', 'value']  # unlabelled nodes from hop 1 with contributions coming from hop 2
-
-    win_df_1 = pd.DataFrame(pd.concat([win_df_11, win_df_12]).groupby('key').value.sum().sort_values()).reset_index()  # full winter value for unlabelled nodes from hop 1
-
-    win_df_2 = pd.DataFrame(win_df[(win_df['key3'].isin(win_df['key2']) == False) & (win_df['key3'].isin(win_df['key1']) == False)].groupby('key3').value.sum().sort_values()).reset_index()
-    win_df_2.columns = ['key', 'value']  # unlabelled nodes from hop 2 (leaf nodes; no further contribution)
-
-    # Combine and sort unlabeled nodes
-    unlabled_win_df = pd.concat([win_df_1, win_df_2])
-    unlabled_win_df = unlabled_win_df.sort_values('value', ascending=False)
     # count cut off
     print("before count filtration", unlabled_win_df.shape)
+
     unlabled_win_df['count'] = unlabled_win_df['key'].map(counts)
     print(unlabled_win_df['count'].value_counts())
     percentile_threshold = np.percentile(unlabled_win_df['count'], min_occ_perc)

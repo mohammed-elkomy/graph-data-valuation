@@ -14,7 +14,7 @@ def parse_args():
     parser.add_argument('--dataset', type=str, required=True, help="Name of the dataset")
     parser.add_argument('--group_trunc_ratio_hop_1', type=float, required=True, help="Truncation ratio for hop 1")
     parser.add_argument('--group_trunc_ratio_hop_2', type=float, required=True, help="Truncation ratio for hop 2")
-    parser.add_argument('--permutation_count', type=int, required=True, help="Number of permutations")
+    parser.add_argument('--count', type=int, required=True, help="Number of permutations or the number of sets for figure title")
     parser.add_argument('--wg_l1', type=int, required=True,
                         help="count for level 1 within groups")
     parser.add_argument('--wg_l2', type=int, required=True,
@@ -25,18 +25,18 @@ def parse_args():
     dataset = args.dataset
     group_trunc_ratio_hop_1 = args.group_trunc_ratio_hop_1
     group_trunc_ratio_hop_2 = args.group_trunc_ratio_hop_2
-    permutation_count = args.permutation_count
+    permutation_count = args.count
     wg_l1 = args.wg_l1
     wg_l2 = args.wg_l2
 
     return dataset, group_trunc_ratio_hop_1, group_trunc_ratio_hop_2, permutation_count, wg_l1, wg_l2
 
 
-dataset, group_trunc_ratio_hop_1, group_trunc_ratio_hop_2, permutation_count, wg_l1, wg_l2 = parse_args()
+dataset, group_trunc_ratio_hop_1, group_trunc_ratio_hop_2, count, wg_l1, wg_l2 = parse_args()
 print(f"Dataset: {dataset}")
 print(f"Group Truncation Ratio Hop 1: {group_trunc_ratio_hop_1}")
 print(f"Group Truncation Ratio Hop 2: {group_trunc_ratio_hop_2}")
-print(f"Permutation Count: {permutation_count}")
+print(f"Permutation or sets Count: {count}")
 
 img_dir = "imgs"
 pattern = f'./res/*node_drop_large_winter_value_{wg_l1}_{wg_l2}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_*_{dataset}_test.pkl'
@@ -86,7 +86,7 @@ for dump_count, data_group in datagroups.items():
     # Set the x and y axis labels with increased font size
     plt.xlabel('Number of Unlabeled Nodes Removed', fontsize=16)
     plt.ylabel('Prediction Accuracy (%)', fontsize=16)
-    plt.title(f'{dataset} up to {dump_count * permutation_count}', fontsize=16)
+    plt.title(f'{dataset} up to {dump_count * count} ({wg_l1}-{wg_l2})', fontsize=16)
 
     # Increase the size of the tick labels for both axes
     plt.xticks(fontsize=16)
@@ -96,7 +96,7 @@ for dump_count, data_group in datagroups.items():
     plt.legend()
 
     # Save the figure with the unique part as the filename
-    image_path = os.path.join(img_dir, f'{dataset}-drop_up_to_{dump_count * permutation_count}_{wg_l1}_{wg_l2}.png')
+    image_path = os.path.join(img_dir, f'{dataset}-drop_up_to_{dump_count * count}_{wg_l1}_{wg_l2}.png')
     plt.savefig(image_path)
 
     # Close the plot to free memory

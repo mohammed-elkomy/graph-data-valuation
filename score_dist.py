@@ -42,7 +42,8 @@ def nested_aggregation(file_list, is_count):
     return results
 
 
-def analyze_dist(values, x_axis, y_axis, title, filename, bins, fit_normal=False):
+def analyze_dist(values, x_axis, y_axis, title, filename, bins, fit_normal=False,
+                 legend_prefix="", hist_color="red", fit_color="blue"):
     """
     Analyzes and plots the distribution of values, focusing on the range covering 97% of the data.
     Optionally fits a normal distribution to the histogram bars and shows its mean and sigma.
@@ -53,7 +54,11 @@ def analyze_dist(values, x_axis, y_axis, title, filename, bins, fit_normal=False
     - y_axis: Label for the y-axis of the plot.
     - title: Title of the plot.
     - filename: Filename to save the plot.
+    - bins: Number of bins in the histogram.
     - fit_normal: Whether to fit a normal distribution to the histogram bars and display its mean and sigma.
+    - legend_prefix: Prefix for the legend labels to differentiate multiple calls.
+    - hist_color: Color of the histogram.
+    - fit_color: Color of the normal distribution fit.
     """
     value_counts = Counter(values)
     most_common_values = value_counts.most_common(15)
@@ -72,10 +77,10 @@ def analyze_dist(values, x_axis, y_axis, title, filename, bins, fit_normal=False
 
     # Filter values within the 3rd to 97th percentile
     filtered_values = [v for v in values if lower_bound <= v <= upper_bound]
-    plt.figure(figsize=(14, 7))
 
     # Plot the histogram with filtered values
-    n, bins, patches = plt.hist(filtered_values, bins=bins, edgecolor='red', color="red", alpha=0.75)
+    n, bins, patches = plt.hist(filtered_values, bins=bins, edgecolor=hist_color, color=hist_color, alpha=0.4,
+                                label=f"{legend_prefix} Histogram")
 
     # Set y-ticks to show 10 evenly spaced ticks
     y_max = n.max()  # Maximum density value from the histogram
@@ -98,21 +103,19 @@ def analyze_dist(values, x_axis, y_axis, title, filename, bins, fit_normal=False
         x = np.linspace(lower_bound, upper_bound, 1000)
         y = stats.norm.pdf(x, mean, std)
         y = y / y.max() * y_max
-        plt.plot(x, y, 'b-', label=f'Normal Distribution\nMean = {mean:.5e}, Sigma = {std:.5e}')
-        plt.legend()
+        plt.plot(x, y, color=fit_color, linestyle='-',
+                 label=f'{legend_prefix} Normal Distribution\nMean = {mean:.5e}, Sigma = {std:.5e}')
 
+    plt.legend()
     plt.title(title)
     plt.xlabel(x_axis)
     plt.ylabel(y_axis)
     plt.grid(True)
     plt.tight_layout()
-
-    # Save the plot to a file
     plt.savefig(filename)
-    plt.close()
 
 
-def process_and_combine_files_values(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms):
+def process_and_combine_files_values(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms, legend_prefix, hist_color, fit_color):
     """
     Process and combine files when is_count is False. It handles the aggregation of values (non-count data).
 
@@ -125,15 +128,17 @@ def process_and_combine_files_values(pattern, x_axis, y_axis, title_base, file_s
     - fit_normal: Boolean indicating whether to fit a normal distribution.
     - num_perms: Number of permutations to calculate the average.
     """
+    print(legend_prefix, hist_color, fit_color)
     files = glob.glob(pattern)
     combined_data = nested_aggregation(files, is_count=False)
 
     # Calculate the average values for each key in the combined data
     combined_values = [sum(values) / (len(values) * num_perms) for values in combined_data.values()]
 
-    print(f"Loaded files: {files}")
+    print(f"XXXLoaded files: {files}")
     filename = os.path.join("imgs", f"{title_base}_{file_suffix}.png")
-    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal, bins=100)
+    title_base = "Cora within group analysis"
+    analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal, bins=100, legend_prefix=legend_prefix, hist_color=hist_color, fit_color=fit_color)
 
 
 def process_and_combine_files_values_trunc_counts(pattern, x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms):
@@ -191,33 +196,84 @@ def process_and_combine_files_counts(pattern, x_axis, y_axis, title_base, file_s
     analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal, bins=10000)
 
 
-process_and_combine_files_values(r"value/Cora_1_1_*_50_0_0.5_0.7_pc_value.pkl",
+plt.figure(figsize=(14, 7))
+
+process_and_combine_files_values(r"value/Cora_1_5_*_50_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",
-                                 "Combined Distribution of Cora Values 1 1",
+                                 "Combined Distribution of Cora Values 1 5",
                                  "pc_value",
                                  fit_normal=True,
-                                 num_perms=1)  # ignored normalize factor
+                                 num_perms=1, legend_prefix="(1-5)", hist_color="cyan", fit_color="cyan")
 
-process_and_combine_files_counts(r"value/Cora_1_1_*_50_0_0.5_0.7_pc_value_count.pkl",
-                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
-                                 "Combined Distribution of Cora Counts 1 1",
-                                 "pc_value_count",
-                                 fit_normal=False,
-                                 num_perms=1)
+process_and_combine_files_values(r"value/Cora_1_10_*_50_0_0.5_0.7_pc_value.pkl",
+                                 "PC Value", "Percentage of nodes",
+                                 "Combined Distribution of Cora Values 1 10",
+                                 "pc_value",
+                                 fit_normal=True,
+                                 num_perms=1, legend_prefix="(1-10)", hist_color="yellow", fit_color="yellow")
 
 process_and_combine_files_values(r"value/Cora_5_10_*_50_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",
                                  "Combined Distribution of Cora Values 5 10",
                                  "pc_value",
                                  fit_normal=True,
-                                 num_perms=1)
+                                 num_perms=1, legend_prefix="(5-10)", hist_color="red", fit_color="red")
 
+process_and_combine_files_values(r"value/Cora_5_1_*_50_0_0.5_0.7_pc_value.pkl",
+                                 "PC Value", "Percentage of nodes",
+                                 "Combined Distribution of Cora Values 5 1",
+                                 "pc_value",
+                                 fit_normal=True,
+                                 num_perms=1, legend_prefix="(5-1)", hist_color="green", fit_color="green")
+
+process_and_combine_files_values(r"value/Cora_10_1_*_50_0_0.5_0.7_pc_value.pkl",
+                                 "PC Value", "Percentage of nodes",
+                                 "Combined Distribution of Cora Values 10 1",
+                                 "pc_value",
+                                 fit_normal=True,
+                                 num_perms=1, legend_prefix="(10-1)", hist_color="purple", fit_color="purple")
+
+process_and_combine_files_values(r"value/Cora_1_1_*_50_0_0.5_0.7_pc_value.pkl",
+                                 "PC Value", "Percentage of nodes",
+                                 "Combined Distribution of Cora Values 1 1",
+                                 "pc_value",
+                                 fit_normal=True,
+                                 num_perms=1, legend_prefix="(1-1)", hist_color="blue", fit_color="blue")  # ignored normalize factor
+plt.close()
+
+plt.figure(figsize=(14, 7))
+process_and_combine_files_counts(r"value/Cora_1_1_*_50_0_0.5_0.7_pc_value_count.pkl",
+                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
+                                 "Combined Distribution of Cora Counts 1 1",
+                                 "pc_value_count",
+                                 fit_normal=False,
+                                 num_perms=1)
+plt.close()
+plt.figure(figsize=(14, 7))
 process_and_combine_files_counts(r"value/Cora_5_10_*_50_0_0.5_0.7_pc_value_count.pkl",
                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
                                  "Combined Distribution of Cora Counts 5 10",
                                  "pc_value_count",
                                  fit_normal=False,
                                  num_perms=1)
+plt.close()
+plt.figure(figsize=(14, 7))
+process_and_combine_files_counts(r"value/Cora_5_1_*_50_0_0.5_0.7_pc_value_count.pkl",
+                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
+                                 "Combined Distribution of Cora Counts 5 1",
+                                 "pc_value_count",
+                                 fit_normal=False,
+                                 num_perms=1)
+plt.close()
+plt.figure(figsize=(14, 7))
+process_and_combine_files_counts(r"value/Cora_10_1_*_50_0_0.5_0.7_pc_value_count.pkl",
+                                 "Node updates during pc-winter value evaluation", "Percentage of nodes",
+                                 "Combined Distribution of Cora Counts 10 1",
+                                 "pc_value_count",
+                                 fit_normal=False,
+                                 num_perms=1)
+plt.close()
+plt.figure(figsize=(14, 7))
 
 # process_and_combine_files_values(r"value/Cora_*_10_0_0.5_0.7_pc_value.pkl",
 #                                  "PC Value", "Percentage of nodes",
