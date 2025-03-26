@@ -569,7 +569,7 @@ def pc_winter(wg_l1, wg_l2, max_model_retrainings=10000, verbose=False):
 
     for i in range(num_perm):
         # np.random.shuffle(labeled_node_list)  # Randomize order of labeled nodes
-        labeled_node_list = permutations[i]
+        labeled_node_list = permutations[seed+i]
         cur_labeled_node_list = []
         pre_performance = 0
         for lab_idx, labeled_node in enumerate(labeled_node_list):
