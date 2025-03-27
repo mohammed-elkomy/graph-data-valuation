@@ -34,7 +34,7 @@ from pc_winter_run import calculate_md5_of_string, set_masks_from_indices, datas
 warnings.simplefilter(action='ignore', category=Warning)
 
 WORKERS = 10
-directory = 'value/'
+val_directory = 'value/'
 
 
 def parse_args():
@@ -67,7 +67,7 @@ def parse_args():
                         help="count for level 1 within groups")
     parser.add_argument('--wg_l2', type=int, required=True,
                         help="count for level 2 within groups")
-
+    parser.add_argument('--exp_id', type=str, required=True)
     return parser.parse_args()
 
 
@@ -259,6 +259,7 @@ if __name__ == "__main__":
     min_occ_perc = args.min_occ_perc
     wg_l1 = args.wg_l1
     wg_l2 = args.wg_l2
+    exp_id = args.exp_id
 
     assert parallel_idx < WORKERS
 
@@ -308,7 +309,7 @@ if __name__ == "__main__":
     # Find matching files for PC-Winter results
     value_matching_files = []
     count_matching_files = []
-    for filename in os.listdir(directory):
+    for filename in os.listdir(os.path.join(val_directory, exp_id)):
         if value_pattern.match(filename):
             value_matching_files.append(filename)
         if count_pattern.match(filename):
@@ -325,7 +326,7 @@ if __name__ == "__main__":
     counts = collections.defaultdict(int)
 
     for filename in value_filenames:
-        with open(os.path.join(directory, filename), 'rb') as f:
+        with open(os.path.join(val_directory, exp_id, filename), 'rb') as f:
             data = pickle.load(f)
         for key, sub_dict in data.items():
             for sub_key, sub_sub_dict in sub_dict.items():
@@ -333,7 +334,7 @@ if __name__ == "__main__":
                     results[(key, sub_key, sub_sub_key)].append(value)
 
     for filename in count_filenames:
-        with open(os.path.join(directory, filename), 'rb') as f:
+        with open(os.path.join(val_directory, exp_id, filename), 'rb') as f:
             data = pickle.load(f)
         for key, sub_dict in data.items():
             for sub_key, sub_sub_dict in sub_dict.items():
@@ -486,7 +487,7 @@ if __name__ == "__main__":
         val_acc_list += [val_acc]
 
     # Save results
-    path = 'res/'
+    path = f'res/{exp_id}'
     os.makedirs(path, exist_ok=True)
     with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{wg_l1}_{wg_l2}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{dataset_name}_test.pkl'), 'wb') as file:
         pickle.dump(win_acc, file)

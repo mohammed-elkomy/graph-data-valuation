@@ -628,7 +628,7 @@ def pc_winter(wg_l1, wg_l2, max_model_retrainings=10000, verbose=False):
                                 if verbose:
                                     print("Termination condition reached: Maximum evaluations exceeded.")
                                 return
-
+                            assert labeled_node == player_hop_1 == player_hop_2 or labeled_node != player_hop_1
                             sample_value_dict[labeled_node][player_hop_1][player_hop_2] += (val_acc - pre_performance)
                             sample_counter_dict[labeled_node][player_hop_1][player_hop_2] += 1
                             pre_performance = val_acc
