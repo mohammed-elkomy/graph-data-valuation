@@ -170,13 +170,13 @@ def process_and_validate_unlabeled_nodes(results, delta=1e-6):
     # data = random.choices(data, k=100)
     win_df = pd.DataFrame(data)
 
-    # Step 1: Identify unlabeled nodes from hop 1
+    # Step 1: Identify unlabeled nodes from hop 1 # L(W)W + L(W)U + L(W)L
     win_df_11 = win_df[~win_df['key2'].isin(win_df['key1'])].groupby('key2').value.sum().sort_values().reset_index()
     win_df_11.columns = ['key', 'value']
 
     hop_1_list = win_df[~win_df['key2'].isin(win_df['key1'])]['key2'].unique()
 
-    # Step 2: Identify unlabeled nodes from hop 1 with contributions from hop 2
+    # Step 2: Identify unlabeled nodes from hop 1 with contributions from hop 2 # LX(W)
     win_df_12 = win_df[(win_df['key3'] != win_df['key2']) & (win_df['key3'].isin(hop_1_list))] \
         .groupby('key3').value.sum().sort_values().reset_index()
     win_df_12.columns = ['key', 'value']
@@ -184,7 +184,7 @@ def process_and_validate_unlabeled_nodes(results, delta=1e-6):
     # Step 3: Aggregate full winter values for hop 1 nodes
     win_df_1 = pd.concat([win_df_11, win_df_12]).groupby('key').value.sum().sort_values().reset_index()
 
-    # Step 4: Identify unlabeled nodes from hop 2 (leaf nodes with no further contribution)
+    # Step 4: Identify unlabeled nodes from hop 2 (leaf nodes with no further contribution) # LW(U)
     win_df_2 = win_df[~win_df['key3'].isin(win_df['key2']) & ~win_df['key3'].isin(win_df['key1'])] \
         .groupby('key3').value.sum().sort_values().reset_index()
     win_df_2.columns = ['key', 'value']
@@ -217,6 +217,10 @@ def process_and_validate_unlabeled_nodes(results, delta=1e-6):
     for node in data:
         unique_keys = {node['key1'], node['key2'], node['key3']}
         for key in unique_keys:
+            # LLL -> (L)LL
+            # LWW -> (L)WW + L(W)W
+            # LWU -> (L)WU + L(W)U + LW(U) # LXU -> (L)XU + L(X)U + LX(U)
+            # LWL -> (L)WL + L(W)L
             aggregated[key] += node['value']
 
     key1_ids = {node['key1'] for node in data}
@@ -310,6 +314,7 @@ if __name__ == "__main__":
     value_matching_files = []
     count_matching_files = []
     for filename in os.listdir(os.path.join(val_directory, exp_id)):
+        print(filename)
         if value_pattern.match(filename):
             value_matching_files.append(filename)
         if count_pattern.match(filename):

@@ -272,6 +272,8 @@ def generate_maps(train_idx_list, num_hops, edge_index):
     [labeled][hop_1_node][hop_1_node] is a label' node's 1-distance neighbor;
     [labeled][hop_1_node][hop_2_node] is a label' node's 2-distance neighbor;
     Here the key index is the node index in the graph.
+
+    [labeled][labeled][hop_1_node] -> this is not possible in this mapping
     """
 
     labeled_to_player_map = {}
@@ -566,7 +568,7 @@ def pc_winter(wg_l1, wg_l2, max_model_retrainings=10000, verbose=False):
         [118, 132, 60, 33, 87, 76, 96, 29, 27, 103, 92, 116, 111, 1, 18, 134, 77, 137, 47, 41, 95, 24, 42, 45, 30, 28, 78, 44, 107, 73, 25, 51, 91, 81, 53, 26, 9, 12, 32, 100, 94, 113, 40, 123, 2, 66, 52, 36, 106, 22, 0, 70, 139, 82, 128, 64, 56, 17, 11, 57, 69, 8, 131, 99, 71, 83, 46, 84, 38, 126, 90, 97, 54, 59, 133, 43, 119, 14, 74, 15, 13, 130, 20, 121, 67, 48, 129, 136, 104, 4, 125, 117, 75, 114, 88, 138, 86, 80, 19, 93, 55, 108, 109, 85, 58, 7, 34, 21, 35, 65, 63, 124, 39, 6, 115, 110, 61, 127, 72, 112, 3, 37, 105, 135, 89, 122, 16, 79, 10, 49, 23, 31, 120, 68, 101, 50, 98, 62, 102, 5]
     ]
 
-    for i in range(seed, seed + num_perm):
+    for i in range(num_perm): # range(seed, seed + num_perm)
         # np.random.shuffle(labeled_node_list)  # Randomize order of labeled nodes
         labeled_node_list = permutations[i]
         cur_labeled_node_list = []
@@ -629,6 +631,8 @@ def pc_winter(wg_l1, wg_l2, max_model_retrainings=10000, verbose=False):
                                     print("Termination condition reached: Maximum evaluations exceeded.")
                                 return
                             assert labeled_node == player_hop_1 == player_hop_2 or labeled_node != player_hop_1
+                            if labeled_node == player_hop_2 != player_hop_1:
+                                assert val_acc - pre_performance < 1e-5, "marginal value found"
                             sample_value_dict[labeled_node][player_hop_1][player_hop_2] += (val_acc - pre_performance)
                             sample_counter_dict[labeled_node][player_hop_1][player_hop_2] += 1
                             pre_performance = val_acc

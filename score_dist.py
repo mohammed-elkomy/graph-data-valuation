@@ -9,7 +9,7 @@ import numpy as np
 from scipy import stats
 
 
-def nested_aggregation(file_list, is_count):
+def nested_aggregation(file_list, is_count, level=None):
     """
     Aggregates data from a list of files.
 
@@ -29,11 +29,12 @@ def nested_aggregation(file_list, is_count):
                 for sub_key, sub_sub_dict in sub_dict.items():
                     for sub_sub_key, value in sub_sub_dict.items():
                         unique_keys = {key, sub_key, sub_sub_key}
-                        for k in unique_keys:
-                            if is_count:
-                                results[k] += value
-                            else:
-                                results[k].append(value)
+                        if level is None or level == len(unique_keys):
+                            for k in unique_keys:
+                                if is_count:
+                                    results[k] += value
+                                else:
+                                    results[k].append(value)
 
                             # results[(key, sub_key, sub_sub_key)].append(value)
 
@@ -194,44 +195,81 @@ def process_and_combine_files_counts(pattern, x_axis, y_axis, title_base, file_s
     analyze_dist(combined_values, x_axis, y_axis, title_base, filename, fit_normal=fit_normal, bins=10000)
 
 
+def per_level_analyze_dist(pattern):
+    # x_axis, y_axis, title_base, file_suffix, fit_normal, num_perms, legend_prefix, hist_color, fit_color
+    files = glob.glob(pattern)
+    hop0 = nested_aggregation(files, is_count=False, level=1)
+    hop1 = nested_aggregation(files, is_count=False, level=2)
+    hop2 = nested_aggregation(files, is_count=False, level=3)
+    hop0_pcw_values = sum(hop0.values(), [])
+    hop1_pcw_values = sum(hop1.values(), [])
+    hop2_pcw_values = sum(hop2.values(), [])
+
+    # Compute variance
+    var1 = np.var(hop0_pcw_values)
+    var2 = np.var(hop1_pcw_values)
+    var3 = np.var(hop2_pcw_values)
+
+    # Plot histogram
+    plt.figure(figsize=(10, 6))
+    plt.hist([hop0_pcw_values, hop1_pcw_values, hop2_pcw_values], bins=200, alpha=0.7, density=True, label=[
+        f'hop 0 (Var: {var1:.5f})',
+        f'hop 1 (Var: {var2:.5f})',
+        f'hop 2 (Var: {var3:.5f})'
+    ])
+
+    # Labels and title
+    plt.xlabel('Value')
+    plt.ylabel('Density')
+    plt.title('Normalized Histogram Distribution with Variance')
+    plt.legend()
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.xlim([-.5, .5])
+
+    plt.tight_layout()
+    plt.savefig(os.path.join("imgs", "per-level.png"))
+
+
+per_level_analyze_dist(r"value/fixed-perm/*_pc_value.pkl", )
+
 plt.figure(figsize=(14, 7))
 
-process_and_combine_files_values(r"value/Cora_1_5_*_50_0_0.5_0.7_pc_value.pkl",
+process_and_combine_files_values(r"value/same model retrainings/Cora_1_5_*_50_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",
                                  "Combined Distribution of Cora Values 1 5",
                                  "pc_value",
                                  fit_normal=True,
                                  num_perms=1, legend_prefix="(1-5)", hist_color="cyan", fit_color="cyan")
 
-process_and_combine_files_values(r"value/Cora_1_10_*_50_0_0.5_0.7_pc_value.pkl",
+process_and_combine_files_values(r"value/same model retrainings/Cora_1_10_*_50_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",
                                  "Combined Distribution of Cora Values 1 10",
                                  "pc_value",
                                  fit_normal=True,
                                  num_perms=1, legend_prefix="(1-10)", hist_color="yellow", fit_color="yellow")
 
-process_and_combine_files_values(r"value/Cora_5_10_*_50_0_0.5_0.7_pc_value.pkl",
+process_and_combine_files_values(r"value/same model retrainings/Cora_5_10_*_50_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",
                                  "Combined Distribution of Cora Values 5 10",
                                  "pc_value",
                                  fit_normal=True,
                                  num_perms=1, legend_prefix="(5-10)", hist_color="red", fit_color="red")
 
-process_and_combine_files_values(r"value/Cora_5_1_*_50_0_0.5_0.7_pc_value.pkl",
+process_and_combine_files_values(r"value/same model retrainings/Cora_5_1_*_50_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",
                                  "Combined Distribution of Cora Values 5 1",
                                  "pc_value",
                                  fit_normal=True,
                                  num_perms=1, legend_prefix="(5-1)", hist_color="green", fit_color="green")
 
-process_and_combine_files_values(r"value/Cora_10_1_*_50_0_0.5_0.7_pc_value.pkl",
+process_and_combine_files_values(r"value/same model retrainings/Cora_10_1_*_50_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",
                                  "Combined Distribution of Cora Values 10 1",
                                  "pc_value",
                                  fit_normal=True,
                                  num_perms=1, legend_prefix="(10-1)", hist_color="purple", fit_color="purple")
 
-process_and_combine_files_values(r"value/Cora_1_1_*_50_0_0.5_0.7_pc_value.pkl",
+process_and_combine_files_values(r"value/same model retrainings/Cora_1_1_*_50_0_0.5_0.7_pc_value.pkl",
                                  "PC Value", "Percentage of nodes",
                                  "Combined Distribution of Cora Values 1 1",
                                  "pc_value",
@@ -240,7 +278,7 @@ process_and_combine_files_values(r"value/Cora_1_1_*_50_0_0.5_0.7_pc_value.pkl",
 plt.close()
 
 plt.figure(figsize=(14, 7))
-process_and_combine_files_counts(r"value/Cora_1_1_*_50_0_0.5_0.7_pc_value_count.pkl",
+process_and_combine_files_counts(r"value/same model retrainings/Cora_1_1_*_50_0_0.5_0.7_pc_value_count.pkl",
                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
                                  "Combined Distribution of Cora Counts 1 1",
                                  "pc_value_count",
@@ -248,7 +286,7 @@ process_and_combine_files_counts(r"value/Cora_1_1_*_50_0_0.5_0.7_pc_value_count.
                                  num_perms=1)
 plt.close()
 plt.figure(figsize=(14, 7))
-process_and_combine_files_counts(r"value/Cora_5_10_*_50_0_0.5_0.7_pc_value_count.pkl",
+process_and_combine_files_counts(r"value/same model retrainings/Cora_5_10_*_50_0_0.5_0.7_pc_value_count.pkl",
                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
                                  "Combined Distribution of Cora Counts 5 10",
                                  "pc_value_count",
@@ -256,7 +294,7 @@ process_and_combine_files_counts(r"value/Cora_5_10_*_50_0_0.5_0.7_pc_value_count
                                  num_perms=1)
 plt.close()
 plt.figure(figsize=(14, 7))
-process_and_combine_files_counts(r"value/Cora_5_1_*_50_0_0.5_0.7_pc_value_count.pkl",
+process_and_combine_files_counts(r"value/same model retrainings/Cora_5_1_*_50_0_0.5_0.7_pc_value_count.pkl",
                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
                                  "Combined Distribution of Cora Counts 5 1",
                                  "pc_value_count",
@@ -264,7 +302,7 @@ process_and_combine_files_counts(r"value/Cora_5_1_*_50_0_0.5_0.7_pc_value_count.
                                  num_perms=1)
 plt.close()
 plt.figure(figsize=(14, 7))
-process_and_combine_files_counts(r"value/Cora_10_1_*_50_0_0.5_0.7_pc_value_count.pkl",
+process_and_combine_files_counts(r"value/same model retrainings/Cora_10_1_*_50_0_0.5_0.7_pc_value_count.pkl",
                                  "Node updates during pc-winter value evaluation", "Percentage of nodes",
                                  "Combined Distribution of Cora Counts 10 1",
                                  "pc_value_count",
