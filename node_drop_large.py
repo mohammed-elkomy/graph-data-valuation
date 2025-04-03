@@ -322,6 +322,9 @@ if __name__ == "__main__":
 
     value_filenames = value_matching_files[:ratio]
     count_filenames = count_matching_files[:ratio]
+    seed = "1"
+    value_filenames = [file for file in value_filenames if file.split("_")[3] == seed]
+    count_matching_files = [file for file in count_matching_files if file.split("_")[3] == seed]
     ratio = min(len(value_filenames), ratio)  # Limit the number of files to process
     print(f"Processing the files {len(value_filenames)}: {value_filenames}\n")
     print(f"Processing the files {len(count_filenames)}: {count_filenames}\n")
@@ -494,8 +497,8 @@ if __name__ == "__main__":
     # Save results
     path = f'res/{exp_id}'
     os.makedirs(path, exist_ok=True)
-    with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{wg_l1}_{wg_l2}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{dataset_name}_test.pkl'), 'wb') as file:
+    with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{wg_l1}_{wg_l2}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{seed}_{dataset_name}_test.pkl'), 'wb') as file:
         pickle.dump(win_acc, file)
 
-    with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{wg_l1}_{wg_l2}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{dataset_name}_vali.pkl'), 'wb') as file:
+    with open(os.path.join(path, f'{parallel_idx}-node_drop_large_winter_value_{wg_l1}_{wg_l2}_{group_trunc_ratio_hop_1}_{group_trunc_ratio_hop_2}_{ratio}_{seed}_{dataset_name}_vali.pkl'), 'wb') as file:
         pickle.dump(val_acc_list, file)
